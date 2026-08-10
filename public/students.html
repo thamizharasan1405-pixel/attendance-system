@@ -21,15 +21,16 @@
 
     async function load() {
       const isAdmin = session.role === 'admin';
+      const canEdit = isAdmin || session.role === 'staff';
       const students = await apiGet('/students');
       document.getElementById('page-content').innerHTML = `
         <div class="card">
           <div class="toolbar">
             <div class="search-box"><input id="search" placeholder="Search students..." oninput="filterRows()"></div>
-            ${isAdmin ? `<button class="btn btn-primary" onclick="openForm()">+ Add Student</button>` : ''}
+            ${canEdit ? `<button class="btn btn-primary" onclick="openForm()">+ Add Student</button>` : ''}
           </div>
           <table>
-            <thead><tr><th>#</th><th>Name</th><th>Reg No</th><th>Department</th><th>Year</th><th>Status</th>${isAdmin ? '<th>Actions</th>' : ''}</tr></thead>
+            <thead><tr><th>#</th><th>Name</th><th>Reg No</th><th>Department</th><th>Year</th><th>Status</th>${canEdit ? '<th>Actions</th>' : ''}</tr></thead>
             <tbody id="rows"></tbody>
           </table>
         </div>
@@ -41,16 +42,17 @@
 
     function renderRows(list) {
       const isAdmin = session.role === 'admin';
+      const canEdit = isAdmin || session.role === 'staff';
       document.getElementById('rows').innerHTML = list.map((s, i) => `
         <tr>
           <td>${i + 1}</td><td>${s.name}</td><td>${s.regNo}</td><td>${s.department}</td><td>${s.year}</td>
           <td><span class="badge ${s.status.toLowerCase()}">${s.status}</span></td>
-          ${isAdmin ? `<td>
+          ${canEdit ? `<td>
             <button class="icon-btn" onclick="openForm(${s.id})">✏️</button>
             <button class="icon-btn danger" onclick="removeStudent(${s.id})">🗑️</button>
           </td>` : ''}
         </tr>
-      `).join('') || `<tr><td colspan="${isAdmin ? 7 : 6}" style="text-align:center;color:#94a3b8;padding:20px;">No students found</td></tr>`;
+      `).join('') || `<tr><td colspan="${canEdit ? 7 : 6}" style="text-align:center;color:#94a3b8;padding:20px;">No students found</td></tr>`;
     }
 
     function filterRows() {

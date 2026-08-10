@@ -57,7 +57,9 @@ const NAV_ITEMS = {
     { href: '/parents.html', icon: '👪', label: 'Parents' },
     { href: '/attendance-qr.html', icon: '📷', label: 'QR Attendance' },
     { href: '/attendance-manual.html', icon: '✅', label: 'Manual Attendance' },
+    { href: '/absentees.html', icon: '📋', label: 'Absentee Lists' },
     { href: '/reports.html', icon: '📈', label: 'Reports' },
+    { href: '/fees.html', icon: '💰', label: 'Fee Records' },
     { href: '/leave-notifications.html', icon: '📝', label: 'Leave / Complaints' },
     { href: '/notices.html', icon: '🔔', label: 'Notices' },
     { href: '/settings.html', icon: '⚙️', label: 'Settings' }
@@ -75,9 +77,13 @@ const NAV_ITEMS = {
     { href: '/staff-dashboard.html', icon: '📊', label: 'Dashboard' },
     { href: '/students.html', icon: '🎓', label: 'Students' },
     { href: '/attendance-manual.html', icon: '✅', label: 'Mark Attendance' },
+    { href: '/absentees.html', icon: '📋', label: 'Absentee Lists' },
+    { href: '/staff-timetable.html', icon: '🗓️', label: 'Timetable' },
     { href: '/reports.html', icon: '📈', label: 'Reports' },
+    { href: '/fees.html', icon: '💰', label: 'Fee Records' },
     { href: '/leave-notifications.html', icon: '📝', label: 'Leave / Complaints' },
     { href: '/notices.html', icon: '🔔', label: 'Notices' },
+    { href: '/staff-directory.html', icon: '👥', label: 'Staff Directory' },
     { href: '/settings.html', icon: '⚙️', label: 'Settings' }
   ],
   parent: [

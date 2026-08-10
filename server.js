@@ -179,23 +179,50 @@ async function handleApi(req, res, pathname, query) {
     let records = db.attendance;
     if (query.date) records = records.filter(r => r.date === query.date);
     if (query.regNo) records = records.filter(r => r.regNo === query.regNo);
+    if (query.period) records = records.filter(r => String(r.period) === String(query.period));
+    if (query.status) records = records.filter(r => r.status === query.status);
+    if (query.department) {
+      const deptRegNos = new Set(db.students.filter(s => s.department === query.department).map(s => s.regNo));
+      records = records.filter(r => deptRegNos.has(r.regNo));
+    }
     return sendJSON(res, 200, records);
   }
 
+  // ---- ABSENTEE LISTS (daily / weekly / date-range) ----
+  if (pathname === '/api/attendance/absentees' && method === 'GET') {
+    const db = await readDB();
+    let students = db.students;
+    if (query.department) students = students.filter(s => s.department === query.department);
+    if (query.year) students = students.filter(s => String(s.year) === String(query.year));
+    const regSet = new Set(students.map(s => s.regNo));
+    let records = db.attendance.filter(a => regSet.has(a.regNo) && a.status === 'Absent');
+    if (query.date) records = records.filter(a => a.date === query.date);
+    if (query.from && query.to) records = records.filter(a => a.date >= query.from && a.date <= query.to);
+    const result = records.map(a => {
+      const s = db.students.find(st => st.regNo === a.regNo);
+      return { ...a, name: s ? s.name : '', department: s ? s.department : '', year: s ? s.year : '' };
+    }).sort((a, b) => (a.date < b.date ? 1 : -1));
+    return sendJSON(res, 200, result);
+  }
+
   if (pathname === '/api/attendance/mark' && method === 'POST') {
-    // body: { date, records: [{ regNo, status }] }
+    // body: { date, period, subject, records: [{ regNo, status }] }  status: Present | Absent | Late
     const body = await getBody(req);
     const db = await readDB();
     const { date, records } = body;
+    const period = body.period || null; // 1-5, or null for simple (non-period) marking
+    const subject = body.subject || null;
     records.forEach(r => {
-      const existingIdx = db.attendance.findIndex(a => a.regNo === r.regNo && a.date === date);
-      const time = r.status === 'Present' ? new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) : '-';
+      const existingIdx = db.attendance.findIndex(a => a.regNo === r.regNo && a.date === date && (a.period || null) === period);
+      const time = r.status !== 'Absent' ? new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) : '-';
       if (existingIdx !== -1) {
         db.attendance[existingIdx].status = r.status;
         db.attendance[existingIdx].time = time;
         db.attendance[existingIdx].method = 'Manual';
+        db.attendance[existingIdx].period = period;
+        db.attendance[existingIdx].subject = subject;
       } else {
-        db.attendance.push({ id: db.nextId.attendance++, regNo: r.regNo, date, status: r.status, time, method: 'Manual' });
+        db.attendance.push({ id: db.nextId.attendance++, regNo: r.regNo, date, status: r.status, time, method: 'Manual', period, subject });
       }
     });
     await writeDB(db);
@@ -348,7 +375,76 @@ async function handleApi(req, res, pathname, query) {
   if (pathname === '/api/timetable' && method === 'GET') {
     const db = await readDB();
     const department = query.department;
-    return sendJSON(res, 200, db.timetable[department] || []);
+    const year = query.year;
+    const key = year ? `${department}-${year}` : department;
+    const data = db.timetable[key] || db.timetable[department] || [];
+    return sendJSON(res, 200, data);
+  }
+  // Upsert a single day's slots for a department (+ optional year). Staff use this to add/edit timetable.
+  if (pathname === '/api/timetable' && method === 'POST') {
+    const body = await getBody(req); // { department, year, day, slots: [{time, subject, staff}] }
+    const db = await readDB();
+    const key = body.year ? `${body.department}-${body.year}` : body.department;
+    if (!db.timetable[key]) db.timetable[key] = [];
+    const idx = db.timetable[key].findIndex(d => d.day === body.day);
+    if (idx !== -1) db.timetable[key][idx].slots = body.slots;
+    else db.timetable[key].push({ day: body.day, slots: body.slots });
+    await writeDB(db);
+    return sendJSON(res, 200, { success: true, timetable: db.timetable[key] });
+  }
+  if (pathname === '/api/timetable/day' && method === 'DELETE') {
+    const body = await getBody(req); // { department, year, day }
+    const db = await readDB();
+    const key = body.year ? `${body.department}-${body.year}` : body.department;
+    if (db.timetable[key]) db.timetable[key] = db.timetable[key].filter(d => d.day !== body.day);
+    await writeDB(db);
+    return sendJSON(res, 200, { success: true });
+  }
+
+  // ---- FEES ----
+  if (pathname === '/api/fees' && method === 'GET') {
+    const db = await readDB();
+    if (!db.fees) db.fees = [];
+    let list = db.fees;
+    if (query.regNo) list = list.filter(f => f.regNo === query.regNo);
+    if (query.department) {
+      const deptRegNos = new Set(db.students.filter(s => s.department === query.department).map(s => s.regNo));
+      list = list.filter(f => deptRegNos.has(f.regNo));
+    }
+    const withNames = list.map(f => {
+      const s = db.students.find(st => st.regNo === f.regNo);
+      return { ...f, name: s ? s.name : '', department: s ? s.department : '' };
+    });
+    return sendJSON(res, 200, withNames);
+  }
+  if (pathname === '/api/fees' && method === 'POST') {
+    const body = await getBody(req); // { regNo, term, amount, status }
+    const db = await readDB();
+    if (!db.fees) db.fees = [];
+    if (!db.nextId.fees) db.nextId.fees = 1;
+    const newFee = { id: db.nextId.fees++, status: 'Due', date: todayStr(), ...body };
+    db.fees.push(newFee);
+    await writeDB(db);
+    return sendJSON(res, 201, newFee);
+  }
+  if (pathname.match(/^\/api\/fees\/\d+$/) && method === 'PUT') {
+    const id = parseInt(pathname.split('/').pop());
+    const body = await getBody(req);
+    const db = await readDB();
+    if (!db.fees) db.fees = [];
+    const idx = db.fees.findIndex(f => f.id === id);
+    if (idx === -1) return sendJSON(res, 404, { message: 'Not found' });
+    db.fees[idx] = { ...db.fees[idx], ...body };
+    await writeDB(db);
+    return sendJSON(res, 200, db.fees[idx]);
+  }
+  if (pathname.match(/^\/api\/fees\/\d+$/) && method === 'DELETE') {
+    const id = parseInt(pathname.split('/').pop());
+    const db = await readDB();
+    if (!db.fees) db.fees = [];
+    db.fees = db.fees.filter(f => f.id !== id);
+    await writeDB(db);
+    return sendJSON(res, 200, { success: true });
   }
 
   // ---- ATTENDANCE REPORT EXPORT (CSV) ----

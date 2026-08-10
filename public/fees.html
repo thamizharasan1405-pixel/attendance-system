@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fee Records</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-shell" id="app-shell"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    const session = requireAnyRole(['admin', 'staff']);
+    const isStaff = session && session.role === 'staff';
+    const staffDept = isStaff ? session.data.department : null;
+    let allStudents = [];
+
+    async function init() {
+      if (!session) return;
+      renderShell({ role: session.role, activeHref: '/fees.html', title: 'Fee Records', welcomeName: session.role === 'admin' ? 'Admin' : session.data.name });
+      allStudents = await apiGet('/students');
+      let depts = [...new Set(allStudents.map(s => s.department))];
+      if (isStaff) depts = depts.filter(d => d === staffDept);
+      document.getElementById('page-content').innerHTML = `
+        <div class="card">
+          <div class="field" style="max-width:260px;"><label>Department</label>
+            <select id="dept" ${isStaff ? 'disabled' : ''} onchange="load()">${depts.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
+          </div>
+          <div id="wrap"></div>
+        </div>
+      `;
+      load();
+    }
+
+    async function load() {
+      const dept = document.getElementById('dept').value;
+      const students = allStudents.filter(s => s.department === dept);
+      const fees = await apiGet(`/fees?department=${encodeURIComponent(dept)}`);
+      const feeByReg = {};
+      fees.forEach(f => { (feeByReg[f.regNo] = feeByReg[f.regNo] || []).push(f); });
+
+      document.getElementById('wrap').innerHTML = `
+        <table style="margin-top:14px;">
+          <thead><tr><th>Name</th><th>Reg No</th><th>Term</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            ${students.map(s => {
+              const records = feeByReg[s.regNo] || [];
+              if (records.length === 0) {
+                return `<tr>
+                  <td>${s.name}</td><td>${s.regNo}</td>
+                  <td colspan="2" style="color:#94a3b8;">No fee record yet</td>
+                  <td></td>
+                  <td><button class="btn btn-outline" onclick="addFee('${s.regNo}')">+ Add Record</button></td>
+                </tr>`;
+              }
+              return records.map(f => `
+                <tr>
+                  <td>${s.name}</td><td>${s.regNo}</td><td>${f.term || '-'}</td><td>₹${f.amount || 0}</td>
+                  <td><span class="badge ${f.status === 'Paid' ? 'active' : 'pending'}">${f.status}</span></td>
+                  <td>${f.status !== 'Paid' ? `<button class="btn btn-primary" onclick="markPaid(${f.id})">Mark Paid</button>` : '-'}</td>
+                </tr>`).join('');
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    async function addFee(regNo) {
+      const term = prompt('Term (e.g. Semester 5):', 'Semester 1');
+      if (term === null) return;
+      const amount = prompt('Amount (₹):', '5000');
+      if (amount === null) return;
+      await apiPost('/fees', { regNo, term, amount: Number(amount), status: 'Due' });
+      load();
+    }
+
+    async function markPaid(id) {
+      await apiPut('/fees/' + id, { status: 'Paid' });
+      load();
+    }
+
+    if (session) init();
+  </script>
+</body>
+</html>

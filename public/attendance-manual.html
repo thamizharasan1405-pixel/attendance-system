@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Manual Attendance</title>
+<title>Mark Attendance</title>
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -12,67 +12,116 @@
   <script>
     const session = requireAnyRole(['admin', 'staff']);
     if (!session) { /* redirected */ }
-    else renderShell({ role: session.role, activeHref: '/attendance-manual.html', title: 'Manual Attendance', welcomeName: session.role === 'admin' ? 'Admin' : session.data.name });
+    else renderShell({ role: session.role, activeHref: '/attendance-manual.html', title: 'Mark Attendance', welcomeName: session.role === 'admin' ? 'Admin' : session.data.name });
 
     let allStudents = [];
     const today = new Date().toISOString().slice(0, 10);
     const isStaff = session && session.role === 'staff';
     const staffDept = isStaff ? session.data.department : null;
+    const PERIODS = [1, 2, 3, 4, 5];
 
     async function init() {
       if (!session) return;
       allStudents = await apiGet('/students');
       let depts = [...new Set(allStudents.map(s => s.department))];
       if (isStaff) depts = depts.filter(d => d === staffDept); // staff can only mark their own department
+      const years = [...new Set(allStudents.map(s => s.year))].sort();
       document.getElementById('page-content').innerHTML = `
         <div class="card">
-          <div class="form-row" style="margin-bottom:16px;">
-            <div class="field"><label>Select Department</label>
-              <select id="dept" ${isStaff ? 'disabled' : ''}>${depts.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
+          <div class="form-row" style="grid-template-columns:1fr 1fr 1fr 1fr;">
+            <div class="field"><label>Department</label>
+              <select id="dept" ${isStaff ? 'disabled' : ''} onchange="loadStudents()">${depts.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
               ${isStaff ? `<div style="font-size:11.5px;color:#94a3b8;margin-top:4px;">Locked to your department</div>` : ''}
             </div>
-            <div class="field"><label>Select Date</label><input type="date" id="date" value="${today}"></div>
+            <div class="field"><label>Year</label>
+              <select id="year" onchange="loadStudents()">
+                <option value="">All Years</option>
+                ${years.map(y => `<option value="${y}">Year ${y}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field"><label>Period</label>
+              <select id="period" onchange="loadStudents()">
+                ${PERIODS.map(p => `<option value="${p}">Period ${p}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field"><label>Date</label><input type="date" id="date" value="${today}" onchange="loadStudents()"></div>
           </div>
-          <button class="btn btn-outline" onclick="loadStudents()">Load Students</button>
+          <div class="field"><label>Subject (optional)</label><input id="subject" placeholder="e.g. Python Programming"></div>
           <div id="table-wrap" style="margin-top:16px;"></div>
         </div>
       `;
       loadStudents();
     }
 
-    function loadStudents() {
+    async function loadStudents() {
       const dept = document.getElementById('dept').value;
-      const list = allStudents.filter(s => s.department === dept);
+      const year = document.getElementById('year').value;
+      const period = document.getElementById('period').value;
+      const date = document.getElementById('date').value;
+      let list = allStudents.filter(s => s.department === dept);
+      if (year) list = list.filter(s => String(s.year) === String(year));
+      window._currentList = list;
+
+      // Load any attendance already marked for this date+period so the page shows current state on reload
+      const existing = await apiGet(`/attendance?date=${date}&period=${period}&department=${encodeURIComponent(dept)}`);
+      const statusMap = {};
+      existing.forEach(a => statusMap[a.regNo] = a.status);
+
       document.getElementById('table-wrap').innerHTML = `
+        <div style="display:flex;gap:10px;margin-bottom:14px;">
+          <button class="btn btn-primary" onclick="markAll('Present')">✅ All Present</button>
+          <button class="btn btn-outline" onclick="markAll('Absent')">❌ All Absent</button>
+        </div>
         <table>
-          <thead><tr><th>#</th><th>Name</th><th>Reg No</th><th>Status</th></tr></thead>
+          <thead><tr><th>#</th><th>Name</th><th>Reg No</th><th>Year</th><th>Status</th></tr></thead>
           <tbody>
             ${list.map((s, i) => `
               <tr>
-                <td>${i + 1}</td><td>${s.name}</td><td>${s.regNo}</td>
+                <td>${i + 1}</td><td>${s.name}</td><td>${s.regNo}</td><td>${s.year}</td>
                 <td>
-                  <select id="status-${s.regNo}" style="width:140px;">
-                    <option value="Present">Present</option>
-                    <option value="Absent">Absent</option>
-                  </select>
+                  <div class="status-toggle" id="toggle-${s.regNo}" data-reg="${s.regNo}">
+                    ${statusBtns(statusMap[s.regNo] || 'Present', s.regNo)}
+                  </div>
                 </td>
-              </tr>`).join('')}
+              </tr>`).join('') || `<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:20px;">No students found for this selection</td></tr>`}
           </tbody>
         </table>
         <button class="btn btn-primary" style="margin-top:16px;" onclick="saveAttendance()">Save Attendance</button>
         <span id="save-msg" style="margin-left:12px;font-size:13px;color:#16a34a;"></span>
       `;
-      window._currentList = list;
+    }
+
+    function statusBtns(current, regNo) {
+      const opts = [
+        { v: 'Present', label: '✅ Present', color: '#16a34a' },
+        { v: 'Absent', label: '❌ Absent', color: '#dc2626' },
+        { v: 'Late', label: '⏳ Waiting/Late', color: '#d97706' }
+      ];
+      return opts.map(o => `
+        <button type="button" class="status-btn ${current === o.v ? 'active' : ''}" style="--sc:${o.color}" onclick="setStatus('${regNo}','${o.v}')">${o.label}</button>
+      `).join('');
+    }
+
+    function setStatus(regNo, status) {
+      const el = document.getElementById('toggle-' + regNo);
+      el.dataset.status = status;
+      el.innerHTML = statusBtns(status, regNo);
+    }
+
+    function markAll(status) {
+      window._currentList.forEach(s => setStatus(s.regNo, status));
     }
 
     async function saveAttendance() {
       const date = document.getElementById('date').value;
-      const records = window._currentList.map(s => ({
-        regNo: s.regNo,
-        status: document.getElementById('status-' + s.regNo).value
-      }));
-      await apiPost('/attendance/mark', { date, records });
-      document.getElementById('save-msg').textContent = '✅ Attendance saved!';
+      const period = document.getElementById('period').value;
+      const subject = document.getElementById('subject').value;
+      const records = window._currentList.map(s => {
+        const el = document.getElementById('toggle-' + s.regNo);
+        return { regNo: s.regNo, status: el.dataset.status || 'Present' };
+      });
+      await apiPost('/attendance/mark', { date, period, subject, records });
+      document.getElementById('save-msg').textContent = '✅ Attendance saved for Period ' + period + '!';
       setTimeout(() => (document.getElementById('save-msg').textContent = ''), 3000);
     }
 

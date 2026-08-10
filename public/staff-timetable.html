@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Timetable</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-shell" id="app-shell"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    const session = requireAnyRole(['admin', 'staff']);
+    const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    let allStudents = [];
+    const isStaff = session && session.role === 'staff';
+    const staffDept = isStaff ? session.data.department : null;
+
+    async function init() {
+      if (!session) return;
+      renderShell({ role: session.role, activeHref: '/staff-timetable.html', title: 'Manage Timetable', welcomeName: session.role === 'admin' ? 'Admin' : session.data.name });
+      allStudents = await apiGet('/students');
+      let depts = [...new Set(allStudents.map(s => s.department))];
+      if (isStaff) depts = depts.filter(d => d === staffDept);
+      const years = [...new Set(allStudents.map(s => s.year))].sort();
+      document.getElementById('page-content').innerHTML = `
+        <div class="card">
+          <div class="form-row">
+            <div class="field"><label>Department</label>
+              <select id="dept" ${isStaff ? 'disabled' : ''} onchange="loadTimetable()">${depts.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
+            </div>
+            <div class="field"><label>Year</label>
+              <select id="year" onchange="loadTimetable()">${years.map(y => `<option value="${y}">Year ${y}</option>`).join('')}</select>
+            </div>
+          </div>
+          <div id="tt-wrap" style="margin-top:10px;"></div>
+        </div>
+      `;
+      loadTimetable();
+    }
+
+    async function loadTimetable() {
+      const dept = document.getElementById('dept').value;
+      const year = document.getElementById('year').value;
+      const timetable = await apiGet(`/timetable?department=${encodeURIComponent(dept)}&year=${encodeURIComponent(year)}`);
+      window._tt = {};
+      timetable.forEach(d => window._tt[d.day] = d.slots);
+      renderDays();
+    }
+
+    function renderDays() {
+      document.getElementById('tt-wrap').innerHTML = DAYS.map(day => {
+        const slots = window._tt[day] || [];
+        return `
+          <div class="card" style="background:#f8fafc;margin-top:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <strong style="color:#2563eb;">${day}</strong>
+              <button class="btn btn-outline" onclick="addSlot('${day}')">+ Add Period</button>
+            </div>
+            <table>
+              <thead><tr><th>Time</th><th>Subject</th><th>Staff</th><th></th></tr></thead>
+              <tbody id="slots-${day}">
+                ${slots.map((s, i) => `
+                  <tr>
+                    <td><input value="${s.time}" onchange="updateSlot('${day}',${i},'time',this.value)" style="width:110px;"></td>
+                    <td><input value="${s.subject}" onchange="updateSlot('${day}',${i},'subject',this.value)"></td>
+                    <td><input value="${s.staff}" onchange="updateSlot('${day}',${i},'staff',this.value)"></td>
+                    <td><button class="icon-btn danger" onclick="removeSlot('${day}',${i})">🗑️</button></td>
+                  </tr>`).join('') || `<tr><td colspan="4" style="text-align:center;color:#94a3b8;">No periods added</td></tr>`}
+              </tbody>
+            </table>
+            <button class="btn btn-primary" style="margin-top:10px;" onclick="saveDay('${day}')">Save ${day}</button>
+            <span id="msg-${day}" style="margin-left:10px;font-size:12.5px;color:#16a34a;"></span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addSlot(day) {
+      if (!window._tt[day]) window._tt[day] = [];
+      window._tt[day].push({ time: '09:00 AM', subject: '', staff: session.role === 'staff' ? session.data.name : '' });
+      renderDays();
+    }
+    function updateSlot(day, idx, field, value) {
+      window._tt[day][idx][field] = value;
+    }
+    function removeSlot(day, idx) {
+      window._tt[day].splice(idx, 1);
+      renderDays();
+    }
+
+    async function saveDay(day) {
+      const dept = document.getElementById('dept').value;
+      const year = document.getElementById('year').value;
+      await apiPost('/timetable', { department: dept, year, day, slots: window._tt[day] || [] });
+      document.getElementById('msg-' + day).textContent = '✅ Saved!';
+      setTimeout(() => (document.getElementById('msg-' + day).textContent = ''), 2500);
+    }
+
+    if (session) init();
+  </script>
+</body>
+</html>

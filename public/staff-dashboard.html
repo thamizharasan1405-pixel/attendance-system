@@ -19,11 +19,13 @@
     async function load() {
       const staffId = session.data.staffId;
       const data = await apiGet('/dashboard/staff/' + staffId);
+      const alertHtml = await buildMissedClassAlert();
       document.getElementById('page-content').innerHTML = `
         <div class="profile-head">
           <div class="avatar-lg">${data.staff.name.charAt(0)}</div>
           <div><h2>Welcome, ${data.staff.name}</h2><p>${data.staff.role} - ${data.staff.department}</p></div>
         </div>
+        ${alertHtml}
         <div class="stats-row">
           <div class="stat-card blue"><div class="label">My Students</div><div class="value">${data.totalStudents}</div></div>
           <div class="stat-card green"><div class="label">Today Present</div><div class="value">${data.todayPresent}</div></div>
@@ -34,8 +36,11 @@
             <h3>Quick Actions</h3>
             <div style="display:flex;flex-direction:column;gap:10px;">
               <a href="/attendance-manual.html" class="btn btn-outline">✅ Mark Attendance</a>
+              <a href="/absentees.html" class="btn btn-outline">📋 Absentee Lists</a>
+              <a href="/staff-timetable.html" class="btn btn-outline">🗓️ Manage Timetable</a>
               <a href="/reports.html" class="btn btn-outline">📈 View Reports</a>
               <a href="/students.html" class="btn btn-outline">🎓 Student List</a>
+              <a href="/fees.html" class="btn btn-outline">💰 Fee Records</a>
               <a href="/leave-notifications.html" class="btn btn-outline">📝 Leave Requests</a>
             </div>
           </div>
@@ -46,7 +51,30 @@
             <p style="font-size:13px;margin-bottom:8px;"><strong>Role:</strong> ${data.staff.role}</p>
             <p style="font-size:13px;margin-bottom:8px;"><strong>Phone:</strong> ${data.staff.phone || '-'}</p>
             <p style="font-size:13px;"><strong>Email:</strong> ${data.staff.email || '-'}</p>
+            ${data.staff.bio ? `<p style="font-size:13px;margin-top:8px;color:#64748b;">${data.staff.bio}</p>` : ''}
           </div>
+        </div>
+      `;
+    }
+
+    async function buildMissedClassAlert() {
+      const dept = session.data.department;
+      const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+      const today = new Date().toISOString().slice(0, 10);
+      const timetable = await apiGet('/timetable?department=' + encodeURIComponent(dept));
+      const todayEntry = timetable.find(d => d.day === todayName);
+      if (!todayEntry || !todayEntry.slots.length) return '';
+      const marked = await apiGet(`/attendance?date=${today}&department=${encodeURIComponent(dept)}`);
+      const markedPeriods = new Set(marked.map(a => String(a.period)));
+      const missed = todayEntry.slots
+        .map((s, i) => ({ ...s, period: i + 1 }))
+        .filter(s => !markedPeriods.has(String(s.period)));
+      if (missed.length === 0) return '';
+      return `
+        <div class="alert-banner">
+          ⚠️ <strong>${missed.length} class${missed.length > 1 ? 'es' : ''} today not yet marked:</strong>
+          ${missed.map(s => `Period ${s.period} (${s.subject || 'Subject'} @ ${s.time})`).join(', ')}
+          — <a href="/attendance-manual.html" style="color:#9a3412;font-weight:700;">Mark now →</a>
         </div>
       `;
     }
