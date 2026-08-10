@@ -1,0 +1,457 @@
+{
+  "admin": {
+    "username": "admin",
+    "password": "admin123"
+  },
+  "staffLogin": {
+    "username": "staff",
+    "password": "staff123"
+  },
+  "students": [
+    {
+      "id": 3,
+      "name": "Harish V",
+      "regNo": "22BCA003",
+      "department": "BCA",
+      "year": 3,
+      "status": "Active",
+      "phone": "9876543212",
+      "email": "harish22@college.com"
+    },
+    {
+      "id": 4,
+      "name": "Dinesh M",
+      "regNo": "22BCA004",
+      "department": "BCA",
+      "year": 3,
+      "status": "Active",
+      "phone": "9876543213",
+      "email": "dinesh22@college.com"
+    },
+    {
+      "id": 5,
+      "name": "Sanjay P",
+      "regNo": "22BCA005",
+      "department": "BCA",
+      "year": 3,
+      "status": "Active",
+      "phone": "9876543214",
+      "email": "sanjay22@college.com"
+    }
+  ],
+  "staff": [
+    {
+      "id": 2,
+      "name": "Mr. Kumar",
+      "staffId": "ST002",
+      "department": "BCA",
+      "role": "Lecturer",
+      "status": "Active",
+      "phone": "9865432102",
+      "email": "kumar@college.com"
+    },
+    {
+      "id": 3,
+      "name": "Ms. Divya",
+      "staffId": "ST003",
+      "department": "BCA",
+      "role": "HOD",
+      "status": "Active",
+      "phone": "9865432103",
+      "email": "divya@college.com"
+    },
+    {
+      "id": 4,
+      "name": "Mr. Rajesh",
+      "staffId": "ST004",
+      "department": "Mathematics",
+      "role": "Lecturer",
+      "status": "Active",
+      "phone": "9865432104",
+      "email": "rajesh@college.com"
+    },
+    {
+      "id": 5,
+      "name": "Mr. Aravind",
+      "staffId": "ST005",
+      "department": "English",
+      "role": "Lecturer",
+      "status": "Active",
+      "phone": "9865432105",
+      "email": "aravind@college.com"
+    },
+    {
+      "id": 6,
+      "status": "Active",
+      "name": "Anbu",
+      "staffId": "0033",
+      "department": "BCA",
+      "role": "Lecturer",
+      "phone": "0000000000",
+      "email": "xxxxx@gmail.com"
+    }
+  ],
+  "parents": [
+    {
+      "id": 1,
+      "name": "Selvam R",
+      "studentName": "Arasan S",
+      "regNo": "22BCA001",
+      "relation": "Father",
+      "phone": "9876543210",
+      "status": "Active"
+    },
+    {
+      "id": 2,
+      "name": "Latha K",
+      "studentName": "Kevin R",
+      "regNo": "22BCA002",
+      "relation": "Mother",
+      "phone": "9876543211",
+      "status": "Active"
+    },
+    {
+      "id": 3,
+      "name": "Mani V",
+      "studentName": "Harish V",
+      "regNo": "22BCA003",
+      "relation": "Father",
+      "phone": "9876543212",
+      "status": "Active"
+    },
+    {
+      "id": 4,
+      "name": "Revathi M",
+      "studentName": "Dinesh M",
+      "regNo": "22BCA004",
+      "relation": "Mother",
+      "phone": "9876543213",
+      "status": "Active"
+    },
+    {
+      "id": 5,
+      "name": "Prakash P",
+      "studentName": "Sanjay P",
+      "regNo": "22BCA005",
+      "relation": "Father",
+      "phone": "9876543214",
+      "status": "Active"
+    }
+  ],
+  "attendance": [
+    {
+      "id": 1,
+      "regNo": "22BCA001",
+      "date": "2026-07-22",
+      "status": "Present",
+      "time": "09:15 AM",
+      "method": "QR"
+    },
+    {
+      "id": 2,
+      "regNo": "22BCA002",
+      "date": "2026-07-22",
+      "status": "Present",
+      "time": "09:16 AM",
+      "method": "QR"
+    },
+    {
+      "id": 3,
+      "regNo": "22BCA003",
+      "date": "2026-07-22",
+      "status": "Present",
+      "time": "09:17 AM",
+      "method": "QR"
+    },
+    {
+      "id": 4,
+      "regNo": "22BCA004",
+      "date": "2026-07-22",
+      "status": "Present",
+      "time": "09:18 AM",
+      "method": "QR"
+    },
+    {
+      "id": 5,
+      "regNo": "22BCA005",
+      "date": "2026-07-22",
+      "status": "Present",
+      "time": "09:19 AM",
+      "method": "QR"
+    },
+    {
+      "id": 6,
+      "regNo": "22BCA001",
+      "date": "2026-07-23",
+      "status": "Present",
+      "time": "09:10 AM",
+      "method": "Manual"
+    },
+    {
+      "id": 7,
+      "regNo": "22BCA002",
+      "date": "2026-07-23",
+      "status": "Present",
+      "time": "09:10 AM",
+      "method": "Manual"
+    },
+    {
+      "id": 8,
+      "regNo": "22BCA003",
+      "date": "2026-07-23",
+      "status": "Absent",
+      "time": "-",
+      "method": "Manual"
+    },
+    {
+      "id": 9,
+      "regNo": "22BCA004",
+      "date": "2026-07-23",
+      "status": "Present",
+      "time": "09:11 AM",
+      "method": "Manual"
+    },
+    {
+      "id": 10,
+      "regNo": "22BCA005",
+      "date": "2026-07-23",
+      "status": "Present",
+      "time": "09:12 AM",
+      "method": "Manual"
+    }
+  ],
+  "leaveRequests": [
+    {
+      "id": 1,
+      "regNo": "22BCA002",
+      "studentName": "Kevin R",
+      "reason": "Medical Leave",
+      "from": "2026-07-20",
+      "to": "2026-07-22",
+      "status": "Pending"
+    },
+    {
+      "id": 2,
+      "regNo": "22BCA003",
+      "studentName": "Harish V",
+      "reason": "Family Function",
+      "from": "2026-07-18",
+      "to": "2026-07-19",
+      "status": "Approved"
+    },
+    {
+      "id": 3,
+      "regNo": "22BCA004",
+      "studentName": "Dinesh M",
+      "reason": "Personal Work",
+      "from": "2026-07-15",
+      "to": "2026-07-16",
+      "status": "Rejected"
+    },
+    {
+      "id": 4,
+      "regNo": "22BCA005",
+      "studentName": "Sanjay P",
+      "reason": "Medical Leave",
+      "from": "2026-07-10",
+      "to": "2026-07-12",
+      "status": "Approved"
+    }
+  ],
+  "complaints": [
+    {
+      "id": 1,
+      "regNo": "22BCA002",
+      "studentName": "Kevin R",
+      "subject": "Attendance not marked",
+      "date": "2026-07-20",
+      "status": "Open"
+    }
+  ],
+  "notifications": [
+    {
+      "id": 1,
+      "message": "New student registered",
+      "time": "10:30 AM"
+    },
+    {
+      "id": 2,
+      "message": "Attendance marked for CSE",
+      "time": "09:15 AM"
+    },
+    {
+      "id": 3,
+      "message": "Leave request from Kevin",
+      "time": "08:43 AM"
+    },
+    {
+      "id": 4,
+      "message": "New complaint received",
+      "time": "08:20 AM"
+    }
+  ],
+  "notices": [
+    {
+      "id": 1,
+      "title": "Mid-Semester Exams Schedule",
+      "message": "Mid-semester exams start from 10 August 2026. Timetable will be shared soon.",
+      "date": "2026-07-24",
+      "postedBy": "Admin"
+    },
+    {
+      "id": 2,
+      "title": "Holiday Notice",
+      "message": "College will remain closed on 15 August for Independence Day.",
+      "date": "2026-07-20",
+      "postedBy": "Admin"
+    },
+    {
+      "id": 3,
+      "date": "2026-07-29",
+      "postedBy": "Admin",
+      "title": "leva info",
+      "message": "due to heavy rain tommarow is leave"
+    }
+  ],
+  "subjects": {
+    "BCA": [
+      "Python Programming",
+      "Database Management",
+      "Web Development",
+      "Software Engineering",
+      "Project Guidance"
+    ],
+    "Mathematics": [
+      "Calculus",
+      "Linear Algebra",
+      "Statistics"
+    ],
+    "English": [
+      "Communication Skills",
+      "Technical Writing"
+    ],
+    "default": [
+      "Subject 1",
+      "Subject 2",
+      "Subject 3"
+    ]
+  },
+  "timetable": {
+    "BCA": [
+      {
+        "day": "Monday",
+        "slots": [
+          {
+            "time": "09:00 AM",
+            "subject": "Python Programming",
+            "staff": "Mr. Kumar"
+          },
+          {
+            "time": "11:00 AM",
+            "subject": "Database Management",
+            "staff": "Ms. Priya"
+          },
+          {
+            "time": "01:30 PM",
+            "subject": "Web Development",
+            "staff": "Mr. Aravind"
+          },
+          {
+            "time": "03:00 PM",
+            "subject": "Project Guidance",
+            "staff": "Ms. Divya"
+          }
+        ]
+      },
+      {
+        "day": "Tuesday",
+        "slots": [
+          {
+            "time": "09:00 AM",
+            "subject": "Database Management",
+            "staff": "Ms. Priya"
+          },
+          {
+            "time": "11:00 AM",
+            "subject": "Software Engineering",
+            "staff": "Ms. Divya"
+          },
+          {
+            "time": "01:30 PM",
+            "subject": "Python Programming",
+            "staff": "Mr. Kumar"
+          }
+        ]
+      },
+      {
+        "day": "Wednesday",
+        "slots": [
+          {
+            "time": "09:00 AM",
+            "subject": "Web Development",
+            "staff": "Mr. Aravind"
+          },
+          {
+            "time": "11:00 AM",
+            "subject": "Python Programming",
+            "staff": "Mr. Kumar"
+          },
+          {
+            "time": "01:30 PM",
+            "subject": "Software Engineering",
+            "staff": "Ms. Divya"
+          }
+        ]
+      },
+      {
+        "day": "Thursday",
+        "slots": [
+          {
+            "time": "09:00 AM",
+            "subject": "Software Engineering",
+            "staff": "Ms. Divya"
+          },
+          {
+            "time": "11:00 AM",
+            "subject": "Web Development",
+            "staff": "Mr. Aravind"
+          },
+          {
+            "time": "01:30 PM",
+            "subject": "Database Management",
+            "staff": "Ms. Priya"
+          }
+        ]
+      },
+      {
+        "day": "Friday",
+        "slots": [
+          {
+            "time": "09:00 AM",
+            "subject": "Project Guidance",
+            "staff": "Ms. Divya"
+          },
+          {
+            "time": "11:00 AM",
+            "subject": "Python Programming",
+            "staff": "Mr. Kumar"
+          },
+          {
+            "time": "01:30 PM",
+            "subject": "Database Management",
+            "staff": "Ms. Priya"
+          }
+        ]
+      }
+    ]
+  },
+  "nextId": {
+    "students": 6,
+    "staff": 7,
+    "parents": 6,
+    "attendance": 11,
+    "leaveRequests": 5,
+    "complaints": 2,
+    "notices": 4
+  }
+}

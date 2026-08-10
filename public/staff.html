@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff Management</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-shell" id="app-shell"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    const session = requireRole('admin');
+    if (session) {
+      renderShell({ role: 'admin', activeHref: '/staff.html', title: 'Staff Management', welcomeName: 'Admin' });
+      load();
+    }
+
+    let editingId = null;
+
+    async function load() {
+      const staff = await apiGet('/staff');
+      document.getElementById('page-content').innerHTML = `
+        <div class="card">
+          <div class="toolbar">
+            <div class="search-box"><input id="search" placeholder="Search staff..." oninput="filterRows()"></div>
+            <button class="btn btn-primary" onclick="openForm()">+ Add Staff</button>
+          </div>
+          <table>
+            <thead><tr><th>#</th><th>Name</th><th>Staff ID</th><th>Department</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <div id="form-card"></div>
+      `;
+      window._staff = staff;
+      renderRows(staff);
+    }
+
+    function renderRows(list) {
+      document.getElementById('rows').innerHTML = list.map((s, i) => `
+        <tr>
+          <td>${i + 1}</td><td>${s.name}</td><td>${s.staffId}</td><td>${s.department}</td><td>${s.role}</td>
+          <td><span class="badge ${s.status.toLowerCase()}">${s.status}</span></td>
+          <td>
+            <button class="icon-btn" onclick="openForm(${s.id})">✏️</button>
+            <button class="icon-btn danger" onclick="removeStaff(${s.id})">🗑️</button>
+          </td>
+        </tr>
+      `).join('') || '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:20px;">No staff found</td></tr>';
+    }
+
+    function filterRows() {
+      const q = document.getElementById('search').value.toLowerCase();
+      renderRows(window._staff.filter(s => s.name.toLowerCase().includes(q) || s.staffId.toLowerCase().includes(q)));
+    }
+
+    function openForm(id) {
+      editingId = id || null;
+      const s = id ? window._staff.find(x => x.id === id) : { name: '', staffId: '', department: '', role: 'Lecturer', phone: '', email: '' };
+      document.getElementById('form-card').innerHTML = `
+        <div class="card">
+          <h3>${id ? 'Edit Staff' : 'Add Staff'}</h3>
+          <div class="form-row">
+            <div class="field"><label>Name</label><input id="f-name" value="${s.name}"></div>
+            <div class="field"><label>Staff ID</label><input id="f-staffId" value="${s.staffId}"></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Department</label><input id="f-department" value="${s.department}"></div>
+            <div class="field"><label>Role</label><input id="f-role" value="${s.role}"></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Phone</label><input id="f-phone" value="${s.phone || ''}"></div>
+            <div class="field"><label>Email</label><input id="f-email" value="${s.email || ''}"></div>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-primary" onclick="saveStaff()">Save</button>
+            <button class="btn btn-outline" onclick="document.getElementById('form-card').innerHTML=''">Cancel</button>
+          </div>
+        </div>
+      `;
+    }
+
+    async function saveStaff() {
+      const body = {
+        name: document.getElementById('f-name').value,
+        staffId: document.getElementById('f-staffId').value,
+        department: document.getElementById('f-department').value,
+        role: document.getElementById('f-role').value,
+        phone: document.getElementById('f-phone').value,
+        email: document.getElementById('f-email').value
+      };
+      if (editingId) await apiPut('/staff/' + editingId, body);
+      else await apiPost('/staff', body);
+      document.getElementById('form-card').innerHTML = '';
+      load();
+    }
+
+    async function removeStaff(id) {
+      if (!confirm('Delete this staff member?')) return;
+      await apiDelete('/staff/' + id);
+      load();
+    }
+  </script>
+</body>
+</html>

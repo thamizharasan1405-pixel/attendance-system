@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subject-wise Attendance</title>
+<link rel="stylesheet" href="/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body>
+  <div class="app-shell" id="app-shell"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    const session = requireRole('student');
+    if (session) {
+      renderShell({ role: 'student', activeHref: '/subject-attendance.html', title: 'Subject-wise Attendance', welcomeName: session.data.name });
+      load();
+    }
+
+    async function load() {
+      const subjects = await apiGet('/subjects?department=' + encodeURIComponent(session.data.department) + '&regNo=' + encodeURIComponent(session.data.regNo));
+      document.getElementById('page-content').innerHTML = `
+        <div class="grid-2">
+          <div class="card">
+            <h3>Subject-wise Attendance %</h3>
+            <canvas id="subjChart" height="220"></canvas>
+          </div>
+          <div class="card">
+            <h3>Details</h3>
+            <table>
+              <thead><tr><th>Subject</th><th>Attendance</th></tr></thead>
+              <tbody>
+                ${subjects.map(s => `
+                  <tr>
+                    <td>${s.subject}</td>
+                    <td><span class="badge ${s.percent >= 75 ? 'present' : 'absent'}">${s.percent}%</span></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            <p style="font-size:11.5px;color:#94a3b8;margin-top:12px;">Below 75% is shown in red — check with your department if you're short on any subject.</p>
+          </div>
+        </div>
+      `;
+      new Chart(document.getElementById('subjChart'), {
+        type: 'bar',
+        data: {
+          labels: subjects.map(s => s.subject),
+          datasets: [{ label: 'Attendance %', data: subjects.map(s => s.percent), backgroundColor: subjects.map(s => s.percent >= 75 ? '#2563eb' : '#dc2626') }]
+        },
+        options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { max: 100 } } }
+      });
+    }
+  </script>
+</body>
+</html>

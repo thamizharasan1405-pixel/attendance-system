@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff Dashboard</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-shell" id="app-shell"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    const session = requireRole('staff');
+    if (session) {
+      renderShell({ role: 'staff', activeHref: '/staff-dashboard.html', title: 'Staff Dashboard', welcomeName: session.data.name });
+      load();
+    }
+
+    async function load() {
+      const staffId = session.data.staffId;
+      const data = await apiGet('/dashboard/staff/' + staffId);
+      document.getElementById('page-content').innerHTML = `
+        <div class="profile-head">
+          <div class="avatar-lg">${data.staff.name.charAt(0)}</div>
+          <div><h2>Welcome, ${data.staff.name}</h2><p>${data.staff.role} - ${data.staff.department}</p></div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card blue"><div class="label">My Students</div><div class="value">${data.totalStudents}</div></div>
+          <div class="stat-card green"><div class="label">Today Present</div><div class="value">${data.todayPresent}</div></div>
+          <div class="stat-card red"><div class="label">Today Absent</div><div class="value">${data.todayAbsent}</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Quick Actions</h3>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <a href="/attendance-manual.html" class="btn btn-outline">✅ Mark Attendance</a>
+              <a href="/reports.html" class="btn btn-outline">📈 View Reports</a>
+              <a href="/students.html" class="btn btn-outline">🎓 Student List</a>
+              <a href="/leave-notifications.html" class="btn btn-outline">📝 Leave Requests</a>
+            </div>
+          </div>
+          <div class="card">
+            <h3>My Profile</h3>
+            <p style="font-size:13px;margin-bottom:8px;"><strong>Staff ID:</strong> ${data.staff.staffId}</p>
+            <p style="font-size:13px;margin-bottom:8px;"><strong>Department:</strong> ${data.staff.department}</p>
+            <p style="font-size:13px;margin-bottom:8px;"><strong>Role:</strong> ${data.staff.role}</p>
+            <p style="font-size:13px;margin-bottom:8px;"><strong>Phone:</strong> ${data.staff.phone || '-'}</p>
+            <p style="font-size:13px;"><strong>Email:</strong> ${data.staff.email || '-'}</p>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

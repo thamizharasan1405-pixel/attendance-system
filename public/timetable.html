@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timetable</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-shell" id="app-shell"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    const session = requireRole('student');
+    if (session) {
+      renderShell({ role: 'student', activeHref: '/timetable.html', title: 'My Timetable', welcomeName: session.data.name });
+      load();
+    }
+
+    async function load() {
+      const timetable = await apiGet('/timetable?department=' + encodeURIComponent(session.data.department));
+      document.getElementById('page-content').innerHTML = `
+        <div class="card">
+          <h3>${session.data.department} - Weekly Timetable</h3>
+          ${timetable.length === 0 ? '<p style="text-align:center;color:#94a3b8;padding:20px;">No timetable published yet</p>' : ''}
+          ${timetable.map(day => `
+            <div style="margin-bottom:18px;">
+              <div style="font-weight:700;font-size:13.5px;color:#2563eb;margin-bottom:8px;">${day.day}</div>
+              <table>
+                <thead><tr><th>Time</th><th>Subject</th><th>Staff</th></tr></thead>
+                <tbody>
+                  ${day.slots.map(s => `<tr><td>${s.time}</td><td>${s.subject}</td><td>${s.staff}</td></tr>`).join('')}
+                </tbody>
+              </table>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

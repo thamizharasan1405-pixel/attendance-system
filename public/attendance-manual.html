@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual Attendance</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-shell" id="app-shell"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    const session = requireAnyRole(['admin', 'staff']);
+    if (!session) { /* redirected */ }
+    else renderShell({ role: session.role, activeHref: '/attendance-manual.html', title: 'Manual Attendance', welcomeName: session.role === 'admin' ? 'Admin' : session.data.name });
+
+    let allStudents = [];
+    const today = new Date().toISOString().slice(0, 10);
+    const isStaff = session && session.role === 'staff';
+    const staffDept = isStaff ? session.data.department : null;
+
+    async function init() {
+      if (!session) return;
+      allStudents = await apiGet('/students');
+      let depts = [...new Set(allStudents.map(s => s.department))];
+      if (isStaff) depts = depts.filter(d => d === staffDept); // staff can only mark their own department
+      document.getElementById('page-content').innerHTML = `
+        <div class="card">
+          <div class="form-row" style="margin-bottom:16px;">
+            <div class="field"><label>Select Department</label>
+              <select id="dept" ${isStaff ? 'disabled' : ''}>${depts.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
+              ${isStaff ? `<div style="font-size:11.5px;color:#94a3b8;margin-top:4px;">Locked to your department</div>` : ''}
+            </div>
+            <div class="field"><label>Select Date</label><input type="date" id="date" value="${today}"></div>
+          </div>
+          <button class="btn btn-outline" onclick="loadStudents()">Load Students</button>
+          <div id="table-wrap" style="margin-top:16px;"></div>
+        </div>
+      `;
+      loadStudents();
+    }
+
+    function loadStudents() {
+      const dept = document.getElementById('dept').value;
+      const list = allStudents.filter(s => s.department === dept);
+      document.getElementById('table-wrap').innerHTML = `
+        <table>
+          <thead><tr><th>#</th><th>Name</th><th>Reg No</th><th>Status</th></tr></thead>
+          <tbody>
+            ${list.map((s, i) => `
+              <tr>
+                <td>${i + 1}</td><td>${s.name}</td><td>${s.regNo}</td>
+                <td>
+                  <select id="status-${s.regNo}" style="width:140px;">
+                    <option value="Present">Present</option>
+                    <option value="Absent">Absent</option>
+                  </select>
+                </td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+        <button class="btn btn-primary" style="margin-top:16px;" onclick="saveAttendance()">Save Attendance</button>
+        <span id="save-msg" style="margin-left:12px;font-size:13px;color:#16a34a;"></span>
+      `;
+      window._currentList = list;
+    }
+
+    async function saveAttendance() {
+      const date = document.getElementById('date').value;
+      const records = window._currentList.map(s => ({
+        regNo: s.regNo,
+        status: document.getElementById('status-' + s.regNo).value
+      }));
+      await apiPost('/attendance/mark', { date, records });
+      document.getElementById('save-msg').textContent = '✅ Attendance saved!';
+      setTimeout(() => (document.getElementById('save-msg').textContent = ''), 3000);
+    }
+
+    if (session) init();
+  </script>
+</body>
+</html>

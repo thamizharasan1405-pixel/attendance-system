@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Management</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-shell" id="app-shell"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    const session = requireAnyRole(['admin', 'staff']);
+    if (session) {
+      const isAdmin = session.role === 'admin';
+      renderShell({ role: session.role, activeHref: '/students.html', title: 'Student Management', welcomeName: isAdmin ? 'Admin' : session.data.name });
+      load();
+    }
+
+    let editingId = null;
+
+    async function load() {
+      const isAdmin = session.role === 'admin';
+      const students = await apiGet('/students');
+      document.getElementById('page-content').innerHTML = `
+        <div class="card">
+          <div class="toolbar">
+            <div class="search-box"><input id="search" placeholder="Search students..." oninput="filterRows()"></div>
+            ${isAdmin ? `<button class="btn btn-primary" onclick="openForm()">+ Add Student</button>` : ''}
+          </div>
+          <table>
+            <thead><tr><th>#</th><th>Name</th><th>Reg No</th><th>Department</th><th>Year</th><th>Status</th>${isAdmin ? '<th>Actions</th>' : ''}</tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <div id="form-card"></div>
+      `;
+      window._students = students;
+      renderRows(students);
+    }
+
+    function renderRows(list) {
+      const isAdmin = session.role === 'admin';
+      document.getElementById('rows').innerHTML = list.map((s, i) => `
+        <tr>
+          <td>${i + 1}</td><td>${s.name}</td><td>${s.regNo}</td><td>${s.department}</td><td>${s.year}</td>
+          <td><span class="badge ${s.status.toLowerCase()}">${s.status}</span></td>
+          ${isAdmin ? `<td>
+            <button class="icon-btn" onclick="openForm(${s.id})">✏️</button>
+            <button class="icon-btn danger" onclick="removeStudent(${s.id})">🗑️</button>
+          </td>` : ''}
+        </tr>
+      `).join('') || `<tr><td colspan="${isAdmin ? 7 : 6}" style="text-align:center;color:#94a3b8;padding:20px;">No students found</td></tr>`;
+    }
+
+    function filterRows() {
+      const q = document.getElementById('search').value.toLowerCase();
+      renderRows(window._students.filter(s => s.name.toLowerCase().includes(q) || s.regNo.toLowerCase().includes(q)));
+    }
+
+    function openForm(id) {
+      editingId = id || null;
+      const s = id ? window._students.find(x => x.id === id) : { name: '', regNo: '', department: '', year: '', phone: '', email: '', status: 'Active' };
+      document.getElementById('form-card').innerHTML = `
+        <div class="card">
+          <h3>${id ? 'Edit Student' : 'Add Student'}</h3>
+          <div class="form-row">
+            <div class="field"><label>Name</label><input id="f-name" value="${s.name}"></div>
+            <div class="field"><label>Register Number</label><input id="f-regNo" value="${s.regNo}"></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Department</label><input id="f-department" value="${s.department}"></div>
+            <div class="field"><label>Year</label><input id="f-year" value="${s.year}"></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Phone</label><input id="f-phone" value="${s.phone || ''}"></div>
+            <div class="field"><label>Email</label><input id="f-email" value="${s.email || ''}"></div>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-primary" onclick="saveStudent()">Save</button>
+            <button class="btn btn-outline" onclick="document.getElementById('form-card').innerHTML=''">Cancel</button>
+          </div>
+        </div>
+      `;
+    }
+
+    async function saveStudent() {
+      const body = {
+        name: document.getElementById('f-name').value,
+        regNo: document.getElementById('f-regNo').value,
+        department: document.getElementById('f-department').value,
+        year: document.getElementById('f-year').value,
+        phone: document.getElementById('f-phone').value,
+        email: document.getElementById('f-email').value
+      };
+      if (editingId) await apiPut('/students/' + editingId, body);
+      else await apiPost('/students', body);
+      document.getElementById('form-card').innerHTML = '';
+      load();
+    }
+
+    async function removeStudent(id) {
+      if (!confirm('Delete this student?')) return;
+      await apiDelete('/students/' + id);
+      load();
+    }
+  </script>
+</body>
+</html>
