@@ -39,8 +39,7 @@ function redirectToOwnDashboard(role) {
   const map = {
     admin: '/admin-dashboard.html',
     staff: '/staff-dashboard.html',
-    student: '/student-dashboard.html',
-    parent: '/parent-dashboard.html'
+    student: '/student-dashboard.html'
   };
   window.location.href = map[role] || '/login.html';
 }
@@ -54,7 +53,6 @@ const NAV_ITEMS = {
     { href: '/admin-dashboard.html', icon: '📊', label: 'Dashboard' },
     { href: '/students.html', icon: '🎓', label: 'Students' },
     { href: '/staff.html', icon: '👨‍🏫', label: 'Staff' },
-    { href: '/parents.html', icon: '👪', label: 'Parents' },
     { href: '/attendance-qr.html', icon: '📷', label: 'QR Attendance' },
     { href: '/attendance-manual.html', icon: '✅', label: 'Manual Attendance' },
     { href: '/absentees.html', icon: '📋', label: 'Absentee Lists' },
@@ -84,11 +82,6 @@ const NAV_ITEMS = {
     { href: '/leave-notifications.html', icon: '📝', label: 'Leave / Complaints' },
     { href: '/notices.html', icon: '🔔', label: 'Notices' },
     { href: '/staff-directory.html', icon: '👥', label: 'Staff Directory' },
-    { href: '/settings.html', icon: '⚙️', label: 'Settings' }
-  ],
-  parent: [
-    { href: '/parent-dashboard.html', icon: '📊', label: 'Dashboard' },
-    { href: '/notices.html', icon: '🔔', label: 'Notices' },
     { href: '/settings.html', icon: '⚙️', label: 'Settings' }
   ]
 };

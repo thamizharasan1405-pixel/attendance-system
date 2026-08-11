@@ -91,53 +91,6 @@
       "email": "xxxxx@gmail.com"
     }
   ],
-  "parents": [
-    {
-      "id": 1,
-      "name": "Selvam R",
-      "studentName": "Arasan S",
-      "regNo": "22BCA001",
-      "relation": "Father",
-      "phone": "9876543210",
-      "status": "Active"
-    },
-    {
-      "id": 2,
-      "name": "Latha K",
-      "studentName": "Kevin R",
-      "regNo": "22BCA002",
-      "relation": "Mother",
-      "phone": "9876543211",
-      "status": "Active"
-    },
-    {
-      "id": 3,
-      "name": "Mani V",
-      "studentName": "Harish V",
-      "regNo": "22BCA003",
-      "relation": "Father",
-      "phone": "9876543212",
-      "status": "Active"
-    },
-    {
-      "id": 4,
-      "name": "Revathi M",
-      "studentName": "Dinesh M",
-      "regNo": "22BCA004",
-      "relation": "Mother",
-      "phone": "9876543213",
-      "status": "Active"
-    },
-    {
-      "id": 5,
-      "name": "Prakash P",
-      "studentName": "Sanjay P",
-      "regNo": "22BCA005",
-      "relation": "Father",
-      "phone": "9876543214",
-      "status": "Active"
-    }
-  ],
   "attendance": [
     {
       "id": 1,
@@ -448,7 +401,6 @@
   "nextId": {
     "students": 6,
     "staff": 7,
-    "parents": 6,
     "attendance": 12,
     "leaveRequests": 6,
     "complaints": 2,

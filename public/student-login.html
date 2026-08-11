@@ -32,9 +32,6 @@
   }
   .glass-card h2 { text-align: center; font-size: 21px; color: #0b1f4d; margin-bottom: 4px; }
   .glass-card .sub { text-align: center; color: #64748b; font-size: 13px; margin-bottom: 26px; }
-  .role-tabs { display: flex; background: #f1f5f9; border-radius: 10px; padding: 4px; margin-bottom: 22px; }
-  .role-tab { flex: 1; text-align: center; padding: 9px; border-radius: 8px; font-size: 13.5px; font-weight: 600; color: #64748b; cursor: pointer; }
-  .role-tab.active { background: #fff; color: #2563eb; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
   .glass-field { margin-bottom: 16px; }
   .glass-field label { display: block; font-size: 12.5px; font-weight: 600; color: #475569; margin-bottom: 6px; }
   .glass-field input {
@@ -56,17 +53,12 @@
   <div class="auth-bg">
     <div class="glass-card">
       <a href="/login.html" class="back-link">← Back to portal selection</a>
-      <div class="glass-icon" id="role-icon">🧑‍🎓</div>
-      <h2 id="role-title">Student Login</h2>
+      <div class="glass-icon">🧑‍🎓</div>
+      <h2>Student Login</h2>
       <p class="sub">View your attendance, timetable &amp; notices</p>
 
-      <div class="role-tabs">
-        <div class="role-tab active" id="tab-student" onclick="switchRole('student')">Student</div>
-        <div class="role-tab" id="tab-parent" onclick="switchRole('parent')">Parent</div>
-      </div>
-
       <div class="glass-field">
-        <label id="uname-label">Register Number</label>
+        <label>Register Number</label>
         <input id="username" placeholder="e.g. 22BCA001">
       </div>
       <div class="glass-field">
@@ -75,22 +67,12 @@
       </div>
       <button class="glass-btn" onclick="doLogin()">Login</button>
       <div class="glass-error" id="err"></div>
-      <p class="glass-hint">Students: use your Register Number (e.g. 22BCA001), any password.<br>Parents: use your child's Register Number, any password.</p>
+      <p class="glass-hint">Use your Register Number (e.g. 22BCA001) — any password works for this demo.</p>
     </div>
   </div>
 
   <script src="/js/common.js"></script>
   <script>
-    let currentRole = 'student';
-    function switchRole(role) {
-      currentRole = role;
-      document.getElementById('tab-student').classList.toggle('active', role === 'student');
-      document.getElementById('tab-parent').classList.toggle('active', role === 'parent');
-      document.getElementById('role-icon').textContent = role === 'student' ? '🧑‍🎓' : '👨‍👩‍👧';
-      document.getElementById('role-title').textContent = role === 'student' ? 'Student Login' : 'Parent Login';
-      document.getElementById('uname-label').textContent = role === 'student' ? 'Register Number' : "Child's Register Number";
-    }
-
     async function doLogin() {
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
@@ -102,12 +84,12 @@
           err.textContent = result.message || 'Invalid Register Number';
           return;
         }
-        if (result.role !== 'student' && result.role !== 'parent') {
+        if (result.role !== 'student') {
           err.textContent = 'This looks like a staff/admin account — use the Staff & Admin portal.';
           return;
         }
         sessionStorage.setItem('session', JSON.stringify(result));
-        window.location.href = result.role === 'student' ? '/student-dashboard.html' : '/parent-dashboard.html';
+        window.location.href = '/student-dashboard.html';
       } catch (e) {
         err.textContent = 'Server error. Is the server running?';
       }

@@ -83,10 +83,6 @@ async function handleApi(req, res, pathname, query) {
     const student = db.students.find(s => s.regNo === body.username);
     if (student) return sendJSON(res, 200, { success: true, role: 'student', data: student });
 
-    // Parent: login with their child's Register Number, any password
-    const parent = db.parents.find(p => p.regNo === body.username);
-    if (parent) return sendJSON(res, 200, { success: true, role: 'parent', data: parent });
-
     return sendJSON(res, 401, { success: false, message: 'Invalid credentials' });
   }
 
@@ -148,27 +144,6 @@ async function handleApi(req, res, pathname, query) {
     const id = parseInt(pathname.split('/').pop());
     const db = await readDB();
     db.staff = db.staff.filter(s => s.id !== id);
-    await writeDB(db);
-    return sendJSON(res, 200, { success: true });
-  }
-
-  // ---- PARENTS CRUD ----
-  if (pathname === '/api/parents' && method === 'GET') {
-    const db = await readDB();
-    return sendJSON(res, 200, db.parents);
-  }
-  if (pathname === '/api/parents' && method === 'POST') {
-    const body = await getBody(req);
-    const db = await readDB();
-    const newParent = { id: db.nextId.parents++, status: 'Active', ...body };
-    db.parents.push(newParent);
-    await writeDB(db);
-    return sendJSON(res, 201, newParent);
-  }
-  if (pathname.match(/^\/api\/parents\/\d+$/) && method === 'DELETE') {
-    const id = parseInt(pathname.split('/').pop());
-    const db = await readDB();
-    db.parents = db.parents.filter(s => s.id !== id);
     await writeDB(db);
     return sendJSON(res, 200, { success: true });
   }
@@ -531,16 +506,7 @@ async function handleApi(req, res, pathname, query) {
     const todayAbsent = db.attendance.filter(a => a.date === today && a.status === 'Absent' && deptStudents.some(s => s.regNo === a.regNo)).length;
     return sendJSON(res, 200, { staff, totalStudents: deptStudents.length, todayPresent, todayAbsent });
   }
-  if (pathname.match(/^\/api\/dashboard\/parent\/.+$/) && method === 'GET') {
-    const regNo = decodeURIComponent(pathname.split('/').pop());
-    const db = await readDB();
-    const parent = db.parents.find(p => p.regNo === regNo);
-    const student = db.students.find(s => s.regNo === regNo);
-    if (!parent || !student) return sendJSON(res, 404, { message: 'Not found' });
-    const stats = calcAttendancePercent(db, regNo);
-    const recent = db.attendance.filter(a => a.regNo === regNo).slice(-10).reverse();
-    return sendJSON(res, 200, { parent, student, stats, recent });
-  }
+
 
   return sendJSON(res, 404, { message: 'API route not found' });
 }
