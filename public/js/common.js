@@ -105,7 +105,10 @@ function renderShell({ role, activeHref, title, welcomeName }) {
         </div>
         <div class="right">
           <span class="welcome">Welcome, ${welcomeName}</span>
-          <div class="avatar">${welcomeName.charAt(0)}</div>
+          <div class="avatar-wrap">
+            <div class="avatar">${welcomeName.charAt(0)}</div>
+            <span class="online-dot"></span>
+          </div>
         </div>
       </div>
       <div class="content" id="page-content"></div>
