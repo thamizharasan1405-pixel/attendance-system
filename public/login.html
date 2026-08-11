@@ -3,124 +3,94 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login - Cloud Attendance System</title>
+<title>Cloud Attendance System - Login Portal</title>
 <link rel="stylesheet" href="/css/style.css">
+<style>
+  .portal-bg {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 20% 20%, #1e3a8a 0%, #0b1f4d 45%, #081633 100%);
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .portal-bg::before, .portal-bg::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.35;
+  }
+  .portal-bg::before {
+    width: 420px; height: 420px;
+    background: #2563eb;
+    top: -120px; left: -120px;
+  }
+  .portal-bg::after {
+    width: 380px; height: 380px;
+    background: #7c3aed;
+    bottom: -100px; right: -80px;
+  }
+  .portal-wrap { position: relative; z-index: 2; text-align: center; max-width: 900px; width: 100%; }
+  .portal-wrap h1 { color: #fff; font-size: 30px; margin-bottom: 8px; }
+  .portal-wrap .tagline { color: #a5b4d9; font-size: 14.5px; margin-bottom: 40px; }
+  .portal-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 640px) { .portal-cards { grid-template-columns: 1fr; } }
+  .portal-card {
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 18px;
+    padding: 40px 28px;
+    color: #fff;
+    text-align: center;
+    transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+    cursor: pointer;
+    display: block;
+  }
+  .portal-card:hover {
+    transform: translateY(-6px);
+    background: rgba(255,255,255,0.11);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+  }
+  .portal-icon {
+    width: 74px; height: 74px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; margin: 0 auto 18px;
+  }
+  .portal-card.student .portal-icon { background: linear-gradient(135deg, #2563eb, #7c3aed); }
+  .portal-card.staff .portal-icon { background: linear-gradient(135deg, #f59e0b, #dc2626); }
+  .portal-card h2 { font-size: 19px; margin-bottom: 8px; }
+  .portal-card p { font-size: 13px; color: #cbd5e1; line-height: 1.5; margin-bottom: 18px; }
+  .portal-card .go-btn {
+    display: inline-block; padding: 10px 26px; border-radius: 8px;
+    font-size: 13.5px; font-weight: 600; color: #0b1f4d;
+    background: #fff;
+  }
+  .portal-footer { margin-top: 34px; color: #7d8bb5; font-size: 12px; }
+</style>
 </head>
 <body>
-  <div class="auth-shell">
-    <div class="auth-card">
-      <div class="logo">🎓</div>
-      <h2>Welcome Back!</h2>
-      <p class="sub">Login to manage the system</p>
-
-      <div class="field">
-        <label>Role</label>
-        <select id="role">
-          <option value="admin">Admin</option>
-          <option value="staff">Staff</option>
-          <option value="student">Student</option>
-          <option value="parent">Parent</option>
-        </select>
+  <div class="portal-bg">
+    <div class="portal-wrap">
+      <h1>🎓 Cloud Attendance System</h1>
+      <p class="tagline">Choose your portal to continue</p>
+      <div class="portal-cards">
+        <a href="/student-login.html" class="portal-card student">
+          <div class="portal-icon">🧑‍🎓</div>
+          <h2>Student &amp; Parent Portal</h2>
+          <p>View attendance, timetable, notices, and manage leave requests.</p>
+          <span class="go-btn">Continue →</span>
+        </a>
+        <a href="/staff-login.html" class="portal-card staff">
+          <div class="portal-icon">🏫</div>
+          <h2>Staff &amp; Admin Portal</h2>
+          <p>Mark attendance, manage students, timetable, fees, and reports.</p>
+          <span class="go-btn">Continue →</span>
+        </a>
       </div>
-      <div class="field">
-        <label id="uname-label">Username</label>
-        <input id="username" placeholder="admin" value="admin">
-      </div>
-      <div class="field">
-        <label>Password</label>
-        <div style="position:relative;">
-          <input id="password" type="password" placeholder="••••••" value="admin123" style="padding-right:40px;">
-          <button type="button" onclick="togglePassword()" style="position:absolute;right:2px;top:2px;bottom:2px;width:38px;background:none;border:none;font-size:16px;color:#64748b;">👁️</button>
-        </div>
-      </div>
-      <div class="field" id="staff-select-field" style="display:none;">
-        <label>Select Your Name</label>
-        <select id="staff-select"></select>
-      </div>
-      <button class="btn btn-primary btn-block" onclick="doLogin()" id="login-btn">Login</button>
-      <div class="error-msg" id="err"></div>
-      <p class="auth-hint">Try: admin/admin123 (Admin), staff/staff123 (Staff), Reg No 22BCA001 (student, any password), 22BCA001 (parent, any password).</p>
+      <p class="portal-footer">Cloud Based Smart Attendance Management System</p>
     </div>
   </div>
-
-  <script src="/js/common.js"></script>
-  <script>
-    function togglePassword() {
-      const input = document.getElementById('password');
-      const btn = event.target;
-      if (input.type === 'password') {
-        input.type = 'text';
-        btn.textContent = '🙈';
-      } else {
-        input.type = 'password';
-        btn.textContent = '👁️';
-      }
-    }
-
-    document.getElementById('role').addEventListener('change', (e) => {
-      const label = document.getElementById('uname-label');
-      const input = document.getElementById('username');
-      const pwd = document.getElementById('password');
-      document.getElementById('staff-select-field').style.display = 'none';
-      const map = {
-        admin: ['Username', 'admin', 'admin123'],
-        staff: ['Username', 'staff', 'staff123'],
-        student: ['Register Number', '22BCA001', ''],
-        parent: ['Student Reg No', '22BCA001', '']
-      };
-      const [lbl, ph, pwPh] = map[e.target.value];
-      label.textContent = lbl;
-      input.placeholder = ph;
-      input.value = ph;
-      pwd.value = pwPh;
-    });
-
-    async function doLogin() {
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value;
-      const role = document.getElementById('role').value;
-      const err = document.getElementById('err');
-      err.textContent = '';
-      try {
-        const result = await apiPost('/login', { username, password });
-        if (!result.success) {
-          err.textContent = result.message || 'Invalid credentials';
-          return;
-        }
-        if (result.needsSelection) {
-          // Common staff login succeeded - now let them pick who they are
-          const sel = document.getElementById('staff-select');
-          sel.innerHTML = result.staffList.map(s => `<option value="${s.staffId}">${s.name} (${s.department})</option>`).join('');
-          document.getElementById('staff-select-field').style.display = 'block';
-          document.getElementById('login-btn').textContent = 'Continue';
-          document.getElementById('login-btn').onclick = finishStaffLogin;
-          return;
-        }
-        finishLogin(result);
-      } catch (e) {
-        err.textContent = 'Server error. Is the server running?';
-      }
-    }
-
-    async function finishStaffLogin() {
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value;
-      const staffId = document.getElementById('staff-select').value;
-      const result = await apiPost('/login', { username, password, staffId });
-      if (!result.success) {
-        document.getElementById('err').textContent = result.message || 'Invalid selection';
-        return;
-      }
-      finishLogin(result);
-    }
-
-    function finishLogin(result) {
-      sessionStorage.setItem('session', JSON.stringify(result));
-      if (result.role === 'admin') window.location.href = '/admin-dashboard.html';
-      else if (result.role === 'staff') window.location.href = '/staff-dashboard.html';
-      else if (result.role === 'student') window.location.href = '/student-dashboard.html';
-      else if (result.role === 'parent') window.location.href = '/parent-dashboard.html';
-    }
-  </script>
 </body>
 </html>

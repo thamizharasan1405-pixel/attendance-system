@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Login - Cloud Attendance System</title>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  .auth-bg {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #7c3aed 100%);
+    padding: 24px; position: relative; overflow: hidden;
+  }
+  .auth-bg::before {
+    content: ''; position: absolute; width: 500px; height: 500px; border-radius: 50%;
+    background: rgba(255,255,255,0.08); top: -180px; right: -180px;
+  }
+  .glass-card {
+    position: relative; z-index: 2;
+    background: rgba(255,255,255,0.96);
+    border-radius: 20px;
+    padding: 42px 36px;
+    max-width: 420px; width: 100%;
+    box-shadow: 0 30px 60px rgba(11,31,77,0.35);
+  }
+  .back-link { display: inline-block; margin-bottom: 18px; font-size: 13px; color: #64748b; }
+  .glass-icon {
+    width: 62px; height: 62px; border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; margin: 0 auto 16px; color: #fff;
+  }
+  .glass-card h2 { text-align: center; font-size: 21px; color: #0b1f4d; margin-bottom: 4px; }
+  .glass-card .sub { text-align: center; color: #64748b; font-size: 13px; margin-bottom: 26px; }
+  .role-tabs { display: flex; background: #f1f5f9; border-radius: 10px; padding: 4px; margin-bottom: 22px; }
+  .role-tab { flex: 1; text-align: center; padding: 9px; border-radius: 8px; font-size: 13.5px; font-weight: 600; color: #64748b; cursor: pointer; }
+  .role-tab.active { background: #fff; color: #2563eb; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+  .glass-field { margin-bottom: 16px; }
+  .glass-field label { display: block; font-size: 12.5px; font-weight: 600; color: #475569; margin-bottom: 6px; }
+  .glass-field input {
+    width: 100%; padding: 11px 14px; border-radius: 10px; border: 1.5px solid #e2e8f0;
+    font-size: 14px; outline: none; transition: border 0.2s;
+  }
+  .glass-field input:focus { border-color: #2563eb; }
+  .glass-btn {
+    width: 100%; padding: 12px; border-radius: 10px; border: none;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    color: #fff; font-weight: 700; font-size: 14.5px; margin-top: 6px;
+    box-shadow: 0 10px 20px rgba(37,99,235,0.3);
+  }
+  .glass-hint { text-align: center; font-size: 11.5px; color: #94a3b8; margin-top: 18px; line-height: 1.6; }
+  .glass-error { text-align: center; font-size: 12.5px; color: #dc2626; margin-top: 10px; min-height: 16px; }
+</style>
+</head>
+<body>
+  <div class="auth-bg">
+    <div class="glass-card">
+      <a href="/login.html" class="back-link">← Back to portal selection</a>
+      <div class="glass-icon" id="role-icon">🧑‍🎓</div>
+      <h2 id="role-title">Student Login</h2>
+      <p class="sub">View your attendance, timetable &amp; notices</p>
+
+      <div class="role-tabs">
+        <div class="role-tab active" id="tab-student" onclick="switchRole('student')">Student</div>
+        <div class="role-tab" id="tab-parent" onclick="switchRole('parent')">Parent</div>
+      </div>
+
+      <div class="glass-field">
+        <label id="uname-label">Register Number</label>
+        <input id="username" placeholder="e.g. 22BCA001">
+      </div>
+      <div class="glass-field">
+        <label>Password</label>
+        <input id="password" type="password" placeholder="Any password works for demo">
+      </div>
+      <button class="glass-btn" onclick="doLogin()">Login</button>
+      <div class="glass-error" id="err"></div>
+      <p class="glass-hint">Students: use your Register Number (e.g. 22BCA001), any password.<br>Parents: use your child's Register Number, any password.</p>
+    </div>
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script>
+    let currentRole = 'student';
+    function switchRole(role) {
+      currentRole = role;
+      document.getElementById('tab-student').classList.toggle('active', role === 'student');
+      document.getElementById('tab-parent').classList.toggle('active', role === 'parent');
+      document.getElementById('role-icon').textContent = role === 'student' ? '🧑‍🎓' : '👨‍👩‍👧';
+      document.getElementById('role-title').textContent = role === 'student' ? 'Student Login' : 'Parent Login';
+      document.getElementById('uname-label').textContent = role === 'student' ? 'Register Number' : "Child's Register Number";
+    }
+
+    async function doLogin() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const err = document.getElementById('err');
+      err.textContent = '';
+      try {
+        const result = await apiPost('/login', { username, password });
+        if (!result.success) {
+          err.textContent = result.message || 'Invalid Register Number';
+          return;
+        }
+        if (result.role !== 'student' && result.role !== 'parent') {
+          err.textContent = 'This looks like a staff/admin account — use the Staff & Admin portal.';
+          return;
+        }
+        sessionStorage.setItem('session', JSON.stringify(result));
+        window.location.href = result.role === 'student' ? '/student-dashboard.html' : '/parent-dashboard.html';
+      } catch (e) {
+        err.textContent = 'Server error. Is the server running?';
+      }
+    }
+
+    document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  </script>
+</body>
+</html>
