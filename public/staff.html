@@ -57,8 +57,8 @@
 
     function openForm(id) {
       editingId = id || null;
-      const s = id ? window._staff.find(x => x.id === id) : { name: '', staffId: '', department: '', role: 'Lecturer', year: '', phone: '', email: '' };
-      const ROLES = ['Lecturer', 'HOD', 'Class Teacher', 'Lab Assistant'];
+      const s = id ? window._staff.find(x => x.id === id) : { name: '', staffId: '', department: '', role: 'Subject Lecturer', year: '', phone: '', email: '' };
+      const ROLES = ['Subject Lecturer', 'Class Teacher', 'HOD'];
       document.getElementById('form-card').innerHTML = `
         <div class="card">
           <h3>${id ? 'Edit Staff' : 'Add Staff'}</h3>

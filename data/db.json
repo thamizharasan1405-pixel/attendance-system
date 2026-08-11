@@ -45,7 +45,7 @@
       "name": "Mr. Kumar",
       "staffId": "ST002",
       "department": "BCA",
-      "role": "Lecturer",
+      "role": "Subject Lecturer",
       "status": "Active",
       "phone": "9865432102",
       "email": "kumar@college.com"
@@ -65,7 +65,7 @@
       "name": "Mr. Rajesh",
       "staffId": "ST004",
       "department": "Mathematics",
-      "role": "Lecturer",
+      "role": "Subject Lecturer",
       "status": "Active",
       "phone": "9865432104",
       "email": "rajesh@college.com"
@@ -75,7 +75,7 @@
       "name": "Mr. Aravind",
       "staffId": "ST005",
       "department": "English",
-      "role": "Lecturer",
+      "role": "Subject Lecturer",
       "status": "Active",
       "phone": "9865432105",
       "email": "aravind@college.com"
@@ -86,7 +86,7 @@
       "name": "Anbu",
       "staffId": "0033",
       "department": "BCA",
-      "role": "Lecturer",
+      "role": "Subject Lecturer",
       "phone": "0000000000",
       "email": "xxxxx@gmail.com"
     }
