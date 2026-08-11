@@ -20,9 +20,9 @@
       if (!session) return;
       renderShell({ role: session.role, activeHref: '/staff-timetable.html', title: 'Manage Timetable', welcomeName: session.role === 'admin' ? 'Admin' : session.data.name });
       allStudents = await apiGet('/students');
-      let depts = [...new Set(allStudents.map(s => s.department))];
+      let depts = ALL_DEPARTMENTS.slice();
       if (isStaff) depts = depts.filter(d => d === staffDept);
-      const years = [...new Set(allStudents.map(s => s.year))].sort();
+      const years = ALL_YEARS.slice();
       document.getElementById('page-content').innerHTML = `
         <div class="card">
           <div class="form-row">

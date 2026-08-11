@@ -123,3 +123,13 @@ function renderShell({ role, activeHref, title, welcomeName }) {
 function fmtDate(d) {
   return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }).split('/').reverse().join('-');
 }
+
+// Standard department & year lists — always shown in full regardless of existing student data
+const ALL_DEPARTMENTS = ['BCA', 'CS', 'IT'];
+const ALL_YEARS = [1, 2, 3];
+
+// Converts any-case input to proper Title Case for consistent display (e.g. "dhanush" / "KISHOR" -> "Dhanush" / "Kishor")
+function titleCase(str) {
+  if (!str) return str;
+  return String(str).toLowerCase().replace(/(^|\s|['-])\S/g, c => c.toUpperCase());
+}

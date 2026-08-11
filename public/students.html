@@ -45,7 +45,7 @@
       const canEdit = isAdmin || session.role === 'staff';
       document.getElementById('rows').innerHTML = list.map((s, i) => `
         <tr>
-          <td>${i + 1}</td><td>${s.name}</td><td>${s.regNo}</td><td>${s.department}</td><td>${s.year}</td>
+          <td>${i + 1}</td><td>${titleCase(s.name)}</td><td>${s.regNo}</td><td>${s.department}</td><td>${s.year}</td>
           <td><span class="badge ${s.status.toLowerCase()}">${s.status}</span></td>
           ${canEdit ? `<td>
             <button class="icon-btn" onclick="openForm(${s.id})">✏️</button>
@@ -71,8 +71,12 @@
             <div class="field"><label>Register Number</label><input id="f-regNo" value="${s.regNo}"></div>
           </div>
           <div class="form-row">
-            <div class="field"><label>Department</label><input id="f-department" value="${s.department}"></div>
-            <div class="field"><label>Year</label><input id="f-year" value="${s.year}"></div>
+            <div class="field"><label>Department</label>
+              <select id="f-department">${ALL_DEPARTMENTS.map(d => `<option value="${d}" ${s.department === d ? 'selected' : ''}>${d}</option>`).join('')}</select>
+            </div>
+            <div class="field"><label>Year</label>
+              <select id="f-year">${ALL_YEARS.map(y => `<option value="${y}" ${String(s.year) === String(y) ? 'selected' : ''}>Year ${y}</option>`).join('')}</select>
+            </div>
           </div>
           <div class="form-row">
             <div class="field"><label>Phone</label><input id="f-phone" value="${s.phone || ''}"></div>
@@ -88,8 +92,8 @@
 
     async function saveStudent() {
       const body = {
-        name: document.getElementById('f-name').value,
-        regNo: document.getElementById('f-regNo').value,
+        name: titleCase(document.getElementById('f-name').value.trim()),
+        regNo: document.getElementById('f-regNo').value.trim().toUpperCase(),
         department: document.getElementById('f-department').value,
         year: document.getElementById('f-year').value,
         phone: document.getElementById('f-phone').value,

@@ -19,7 +19,7 @@
       if (!session) return;
       renderShell({ role: session.role, activeHref: '/fees.html', title: 'Fee Records', welcomeName: session.role === 'admin' ? 'Admin' : session.data.name });
       allStudents = await apiGet('/students');
-      let depts = [...new Set(allStudents.map(s => s.department))];
+      let depts = ALL_DEPARTMENTS.slice();
       if (isStaff) depts = depts.filter(d => d === staffDept);
       document.getElementById('page-content').innerHTML = `
         <div class="card">
@@ -47,7 +47,7 @@
               const records = feeByReg[s.regNo] || [];
               if (records.length === 0) {
                 return `<tr>
-                  <td>${s.name}</td><td>${s.regNo}</td>
+                  <td>${titleCase(s.name)}</td><td>${s.regNo}</td>
                   <td colspan="2" style="color:#94a3b8;">No fee record yet</td>
                   <td></td>
                   <td><button class="btn btn-outline" onclick="addFee('${s.regNo}')">+ Add Record</button></td>
@@ -55,7 +55,7 @@
               }
               return records.map(f => `
                 <tr>
-                  <td>${s.name}</td><td>${s.regNo}</td><td>${f.term || '-'}</td><td>₹${f.amount || 0}</td>
+                  <td>${titleCase(s.name)}</td><td>${s.regNo}</td><td>${f.term || '-'}</td><td>₹${f.amount || 0}</td>
                   <td><span class="badge ${f.status === 'Paid' ? 'active' : 'pending'}">${f.status}</span></td>
                   <td>${f.status !== 'Paid' ? `<button class="btn btn-primary" onclick="markPaid(${f.id})">Mark Paid</button>` : '-'}</td>
                 </tr>`).join('');

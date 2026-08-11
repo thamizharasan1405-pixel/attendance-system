@@ -23,9 +23,9 @@
     async function init() {
       if (!session) return;
       allStudents = await apiGet('/students');
-      let depts = [...new Set(allStudents.map(s => s.department))];
+      let depts = ALL_DEPARTMENTS.slice();
       if (isStaff) depts = depts.filter(d => d === staffDept); // staff can only mark their own department
-      const years = [...new Set(allStudents.map(s => s.year))].sort();
+      const years = ALL_YEARS.slice();
       document.getElementById('page-content').innerHTML = `
         <div class="card">
           <div class="form-row" style="grid-template-columns:1fr 1fr 1fr 1fr;">
@@ -77,7 +77,7 @@
           <tbody>
             ${list.map((s, i) => `
               <tr>
-                <td>${i + 1}</td><td>${s.name}</td><td>${s.regNo}</td><td>${s.year}</td>
+                <td>${i + 1}</td><td>${titleCase(s.name)}</td><td>${s.regNo}</td><td>${s.year}</td>
                 <td>
                   <div class="status-toggle" id="toggle-${s.regNo}" data-reg="${s.regNo}">
                     ${statusBtns(statusMap[s.regNo] || 'Present', s.regNo)}

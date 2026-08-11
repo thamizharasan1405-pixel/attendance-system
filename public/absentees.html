@@ -24,7 +24,7 @@
       if (!session) return;
       renderShell({ role: session.role, activeHref: '/absentees.html', title: 'Absentee Lists', welcomeName: session.role === 'admin' ? 'Admin' : session.data.name });
       allStudents = await apiGet('/students');
-      let depts = [...new Set(allStudents.map(s => s.department))];
+      let depts = ALL_DEPARTMENTS.slice();
       if (isStaff) depts = depts.filter(d => d === staffDept);
       document.getElementById('page-content').innerHTML = `
         <div class="card">
@@ -61,7 +61,7 @@
           <tbody>
             ${list.map(a => `
               <tr>
-                <td>${a.date}</td><td>${a.name}</td><td>${a.regNo}</td><td>${a.year}</td>
+                <td>${a.date}</td><td>${titleCase(a.name)}</td><td>${a.regNo}</td><td>${a.year}</td>
                 <td>${a.period ? 'Period ' + a.period : '-'}</td>
               </tr>`).join('') || `<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:20px;">🎉 No absentees</td></tr>`}
           </tbody>
