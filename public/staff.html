@@ -57,7 +57,8 @@
 
     function openForm(id) {
       editingId = id || null;
-      const s = id ? window._staff.find(x => x.id === id) : { name: '', staffId: '', department: '', role: 'Lecturer', phone: '', email: '' };
+      const s = id ? window._staff.find(x => x.id === id) : { name: '', staffId: '', department: '', role: 'Lecturer', year: '', phone: '', email: '' };
+      const ROLES = ['Lecturer', 'HOD', 'Class Teacher', 'Lab Assistant'];
       document.getElementById('form-card').innerHTML = `
         <div class="card">
           <h3>${id ? 'Edit Staff' : 'Add Staff'}</h3>
@@ -67,7 +68,14 @@
           </div>
           <div class="form-row">
             <div class="field"><label>Department</label><select id="f-department">${ALL_DEPARTMENTS.map(d => `<option value="${d}" ${s.department === d ? 'selected' : ''}>${d}</option>`).join('')}</select></div>
-            <div class="field"><label>Role</label><input id="f-role" value="${s.role}"></div>
+            <div class="field"><label>Role</label>
+              <select id="f-role" onchange="toggleYearField()">${ROLES.map(r => `<option value="${r}" ${s.role === r ? 'selected' : ''}>${r}</option>`).join('')}</select>
+            </div>
+          </div>
+          <div class="field" id="year-field" style="display:${s.role === 'Class Teacher' ? '' : 'none'};">
+            <label>Class Teacher for Year</label>
+            <select id="f-year">${ALL_YEARS.map(y => `<option value="${y}" ${String(s.year) === String(y) ? 'selected' : ''}>Year ${y}</option>`).join('')}</select>
+            <div style="font-size:11.5px;color:#94a3b8;margin-top:4px;">This staff will only see their assigned department + year (e.g. attendance, timetable, fees)</div>
           </div>
           <div class="form-row">
             <div class="field"><label>Phone</label><input id="f-phone" value="${s.phone || ''}"></div>
@@ -81,12 +89,19 @@
       `;
     }
 
+    function toggleYearField() {
+      const role = document.getElementById('f-role').value;
+      document.getElementById('year-field').style.display = role === 'Class Teacher' ? '' : 'none';
+    }
+
     async function saveStaff() {
+      const role = document.getElementById('f-role').value;
       const body = {
         name: titleCase(document.getElementById('f-name').value.trim()),
         staffId: document.getElementById('f-staffId').value,
         department: document.getElementById('f-department').value,
-        role: document.getElementById('f-role').value,
+        role: role,
+        year: role === 'Class Teacher' ? document.getElementById('f-year').value : '',
         phone: document.getElementById('f-phone').value,
         email: document.getElementById('f-email').value
       };

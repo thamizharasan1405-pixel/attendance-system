@@ -14,6 +14,7 @@
     const isStaff = session && session.role === 'staff';
     const staffDept = isStaff ? session.data.department : null;
     let allStudents = [];
+    let pendingBillPhoto = null;
 
     async function init() {
       if (!session) return;
@@ -21,43 +22,60 @@
       allStudents = await apiGet('/students');
       let depts = ALL_DEPARTMENTS.slice();
       if (isStaff) depts = depts.filter(d => d === staffDept);
+      const isClassTeacher = isStaff && session.data.role === 'Class Teacher' && session.data.year;
       document.getElementById('page-content').innerHTML = `
         <div class="card">
-          <div class="field" style="max-width:260px;"><label>Department</label>
-            <select id="dept" ${isStaff ? 'disabled' : ''} onchange="load()">${depts.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
+          <div class="form-row" style="grid-template-columns:1fr 1fr;max-width:520px;">
+            <div class="field"><label>Department</label>
+              <select id="dept" ${isStaff ? 'disabled' : ''} onchange="load()">${depts.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
+            </div>
+            <div class="field"><label>Year</label>
+              <select id="year" ${isClassTeacher ? 'disabled' : ''} onchange="load()">
+                ${isClassTeacher ? '' : '<option value="">All Years</option>'}
+                ${ALL_YEARS.map(y => `<option value="${y}" ${isClassTeacher && String(session.data.year) === String(y) ? 'selected' : ''}>Year ${y}</option>`).join('')}
+              </select>
+            </div>
           </div>
           <div id="wrap"></div>
         </div>
+        <div id="fee-form"></div>
       `;
       load();
     }
 
     async function load() {
       const dept = document.getElementById('dept').value;
-      const students = allStudents.filter(s => s.department === dept);
+      const year = document.getElementById('year').value;
+      let students = allStudents.filter(s => s.department === dept);
+      if (year) students = students.filter(s => String(s.year) === String(year));
       const fees = await apiGet(`/fees?department=${encodeURIComponent(dept)}`);
-      const feeByReg = {};
-      fees.forEach(f => { (feeByReg[f.regNo] = feeByReg[f.regNo] || []).push(f); });
+      window._feesByReg = {};
+      fees.forEach(f => { (window._feesByReg[f.regNo] = window._feesByReg[f.regNo] || []).push(f); });
+      window._students = students;
 
       document.getElementById('wrap').innerHTML = `
         <table style="margin-top:14px;">
-          <thead><tr><th>Name</th><th>Reg No</th><th>Term</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+          <thead><tr><th>Name</th><th>Reg No</th><th>Term</th><th>Amount</th><th>Bill</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody>
             ${students.map(s => {
-              const records = feeByReg[s.regNo] || [];
+              const records = window._feesByReg[s.regNo] || [];
               if (records.length === 0) {
                 return `<tr>
                   <td>${titleCase(s.name)}</td><td>${s.regNo}</td>
-                  <td colspan="2" style="color:#94a3b8;">No fee record yet</td>
+                  <td colspan="3" style="color:#94a3b8;">No fee record yet</td>
                   <td></td>
-                  <td><button class="btn btn-outline" onclick="addFee('${s.regNo}')">+ Add Record</button></td>
+                  <td><button class="btn btn-outline" onclick="openFeeForm('${s.regNo}')">+ Add Record</button></td>
                 </tr>`;
               }
               return records.map(f => `
                 <tr>
                   <td>${titleCase(s.name)}</td><td>${s.regNo}</td><td>${f.term || '-'}</td><td>₹${f.amount || 0}</td>
+                  <td>${f.photo ? `<a href="${f.photo}" target="_blank">📄 View</a>` : '-'}</td>
                   <td><span class="badge ${f.status === 'Paid' ? 'active' : 'pending'}">${f.status}</span></td>
-                  <td>${f.status !== 'Paid' ? `<button class="btn btn-primary" onclick="markPaid(${f.id})">Mark Paid</button>` : '-'}</td>
+                  <td>
+                    ${f.status !== 'Paid' ? `<button class="btn btn-primary" onclick="markPaid(${f.id})">Mark Paid</button>` : ''}
+                    <button class="icon-btn" onclick="openFeeForm('${s.regNo}', ${f.id})">✏️</button>
+                  </td>
                 </tr>`).join('');
             }).join('')}
           </tbody>
@@ -65,12 +83,51 @@
       `;
     }
 
-    async function addFee(regNo) {
-      const term = prompt('Term (e.g. Semester 5):', 'Semester 1');
-      if (term === null) return;
-      const amount = prompt('Amount (₹):', '5000');
-      if (amount === null) return;
-      await apiPost('/fees', { regNo, term, amount: Number(amount), status: 'Due' });
+    function openFeeForm(regNo, feeId) {
+      const existing = feeId ? (window._feesByReg[regNo] || []).find(f => f.id === feeId) : null;
+      pendingBillPhoto = existing ? existing.photo : null;
+      document.getElementById('fee-form').innerHTML = `
+        <div class="card" style="margin-top:14px;background:#f8fafc;">
+          <h3>${feeId ? 'Edit' : 'Add'} Fee Record</h3>
+          <div class="form-row">
+            <div class="field"><label>Term</label><input id="ff-term" value="${existing ? existing.term || '' : ''}" placeholder="e.g. Semester 5"></div>
+            <div class="field"><label>Amount (₹)</label><input id="ff-amount" type="number" value="${existing ? existing.amount || '' : ''}" placeholder="5000"></div>
+          </div>
+          <div class="field"><label>Status</label>
+            <select id="ff-status">
+              <option value="Due" ${existing && existing.status === 'Due' ? 'selected' : ''}>Due</option>
+              <option value="Paid" ${existing && existing.status === 'Paid' ? 'selected' : ''}>Paid</option>
+            </select>
+          </div>
+          <div class="field"><label>Bill / Receipt Photo</label>
+            <input type="file" id="ff-photo" accept="image/*,.pdf" onchange="onBillPhoto(event)">
+            ${existing && existing.photo ? `<div style="margin-top:8px;font-size:12px;color:#16a34a;">✅ Photo already attached — choose a new file to replace it</div>` : ''}
+          </div>
+          <button class="btn btn-primary" onclick="saveFee('${regNo}', ${feeId || 'null'})">Save</button>
+          <button class="btn btn-outline" onclick="document.getElementById('fee-form').innerHTML=''">Cancel</button>
+        </div>
+      `;
+    }
+
+    function onBillPhoto(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => { pendingBillPhoto = reader.result; };
+      reader.readAsDataURL(file);
+    }
+
+    async function saveFee(regNo, feeId) {
+      const body = {
+        term: document.getElementById('ff-term').value,
+        amount: Number(document.getElementById('ff-amount').value) || 0,
+        status: document.getElementById('ff-status').value
+      };
+      if (pendingBillPhoto) body.photo = pendingBillPhoto;
+      if (feeId) await apiPut('/fees/' + feeId, body);
+      else await apiPost('/fees', { regNo, ...body });
+      document.getElementById('fee-form').innerHTML = '';
+      pendingBillPhoto = null;
       load();
     }
 

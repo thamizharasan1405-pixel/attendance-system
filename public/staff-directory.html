@@ -23,7 +23,7 @@
                 ${s.photo ? `<img src="${s.photo}" class="profile-photo-preview" style="width:52px;height:52px;margin:0;">` : `<div class="avatar-lg">${s.name.charAt(0)}</div>`}
                 <div>
                   <strong>${titleCase(s.name)}</strong>
-                  <div style="font-size:12px;color:#94a3b8;">${s.role} · ${s.department}</div>
+                  <div style="font-size:12px;color:#94a3b8;">${s.role}${s.role === 'Class Teacher' && s.year ? ' · Year ' + s.year : ''} · ${s.department}</div>
                 </div>
               </div>
               <p style="font-size:12.5px;margin-bottom:4px;"><strong>Staff ID:</strong> ${s.staffId}</p>

@@ -22,6 +22,7 @@
       allStudents = await apiGet('/students');
       let depts = ALL_DEPARTMENTS.slice();
       if (isStaff) depts = depts.filter(d => d === staffDept);
+      const isClassTeacher = isStaff && session.data.role === 'Class Teacher' && session.data.year;
       const years = ALL_YEARS.slice();
       document.getElementById('page-content').innerHTML = `
         <div class="card">
@@ -30,7 +31,8 @@
               <select id="dept" ${isStaff ? 'disabled' : ''} onchange="loadTimetable()">${depts.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
             </div>
             <div class="field"><label>Year</label>
-              <select id="year" onchange="loadTimetable()">${years.map(y => `<option value="${y}">Year ${y}</option>`).join('')}</select>
+              <select id="year" ${isClassTeacher ? 'disabled' : ''} onchange="loadTimetable()">${years.map(y => `<option value="${y}" ${isClassTeacher && String(session.data.year) === String(y) ? 'selected' : ''}>Year ${y}</option>`).join('')}</select>
+              ${isClassTeacher ? `<div style="font-size:11.5px;color:#94a3b8;margin-top:4px;">Locked — you're Class Teacher for Year ${session.data.year}</div>` : ''}
             </div>
           </div>
           <div id="tt-wrap" style="margin-top:10px;"></div>

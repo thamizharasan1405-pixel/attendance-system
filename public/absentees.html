@@ -26,11 +26,18 @@
       allStudents = await apiGet('/students');
       let depts = ALL_DEPARTMENTS.slice();
       if (isStaff) depts = depts.filter(d => d === staffDept);
+      const isClassTeacher = isStaff && session.data.role === 'Class Teacher' && session.data.year;
       document.getElementById('page-content').innerHTML = `
         <div class="card">
           <div class="form-row" style="grid-template-columns:1fr 1fr 1fr 1fr;">
             <div class="field"><label>Department</label>
               <select id="dept" ${isStaff ? 'disabled' : ''} onchange="load()">${depts.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
+            </div>
+            <div class="field"><label>Year</label>
+              <select id="year" ${isClassTeacher ? 'disabled' : ''} onchange="load()">
+                ${isClassTeacher ? '' : '<option value="">All Years</option>'}
+                ${ALL_YEARS.map(y => `<option value="${y}" ${isClassTeacher && String(session.data.year) === String(y) ? 'selected' : ''}>Year ${y}</option>`).join('')}
+              </select>
             </div>
             <div class="field"><label>View</label>
               <select id="view" onchange="load()">
@@ -39,7 +46,6 @@
               </select>
             </div>
             <div class="field" id="date-field"><label>Date</label><input type="date" id="date" value="${today}" onchange="load()"></div>
-            <div class="field"></div>
           </div>
           <div id="wrap"></div>
         </div>
@@ -49,9 +55,11 @@
 
     async function load() {
       const dept = document.getElementById('dept').value;
+      const year = document.getElementById('year').value;
       const view = document.getElementById('view').value;
       document.getElementById('date-field').style.display = view === 'daily' ? '' : 'none';
       let url = `/attendance/absentees?department=${encodeURIComponent(dept)}`;
+      if (year) url += `&year=${encodeURIComponent(year)}`;
       if (view === 'daily') url += `&date=${document.getElementById('date').value}`;
       else url += `&from=${weekAgo()}&to=${today}`;
       const list = await apiGet(url);

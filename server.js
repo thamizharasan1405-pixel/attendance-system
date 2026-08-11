@@ -281,6 +281,7 @@ async function handleApi(req, res, pathname, query) {
     const db = await readDB();
     let list = db.leaveRequests;
     if (query.regNo) list = list.filter(l => l.regNo === query.regNo);
+    if (query.staffId) list = list.filter(l => l.staffId === query.staffId);
     return sendJSON(res, 200, list);
   }
   if (pathname === '/api/leave-requests' && method === 'POST') {
@@ -297,7 +298,8 @@ async function handleApi(req, res, pathname, query) {
     const db = await readDB();
     const idx = db.leaveRequests.findIndex(l => l.id === id);
     if (idx === -1) return sendJSON(res, 404, { message: 'Not found' });
-    db.leaveRequests[idx].status = body.status;
+    if (body.status !== undefined) db.leaveRequests[idx].status = body.status;
+    if (body.reply !== undefined) db.leaveRequests[idx].reply = body.reply;
     await writeDB(db);
     return sendJSON(res, 200, db.leaveRequests[idx]);
   }
