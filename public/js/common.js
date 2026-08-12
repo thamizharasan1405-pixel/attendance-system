@@ -53,7 +53,6 @@ const NAV_ITEMS = {
     { href: '/admin-dashboard.html', icon: '📊', label: 'Dashboard' },
     { href: '/students.html', icon: '🎓', label: 'Students' },
     { href: '/staff.html', icon: '👨‍🏫', label: 'Staff' },
-    { href: '/attendance-qr.html', icon: '📷', label: 'QR Attendance' },
     { href: '/attendance-manual.html', icon: '✅', label: 'Manual Attendance' },
     { href: '/absentees.html', icon: '📋', label: 'Absentee Lists' },
     { href: '/reports.html', icon: '📈', label: 'Reports' },
@@ -64,7 +63,6 @@ const NAV_ITEMS = {
   ],
   student: [
     { href: '/student-dashboard.html', icon: '📊', label: 'Dashboard' },
-    { href: '/attendance-qr.html?self=1', icon: '📷', label: 'My QR Code' },
     { href: '/timetable.html', icon: '🗓️', label: 'Timetable' },
     { href: '/subject-attendance.html', icon: '📚', label: 'Subject Attendance' },
     { href: '/leave-notifications.html?role=student', icon: '📝', label: 'Leave / Complaints' },

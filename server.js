@@ -52,6 +52,14 @@ function calcAttendancePercent(db, regNo) {
   return { percent: Math.round((present / records.length) * 100), present, absent, total: records.length };
 }
 
+function calcMonthlyPercent(db, regNo, monthPrefix) {
+  const records = db.attendance.filter(a => a.regNo === regNo && a.date.startsWith(monthPrefix));
+  if (records.length === 0) return { percent: 0, present: 0, absent: 0, total: 0 };
+  const present = records.filter(r => r.status === 'Present').length;
+  const absent = records.length - present;
+  return { percent: Math.round((present / records.length) * 100), present, absent, total: records.length };
+}
+
 // ---------- Route Handlers ----------
 
 async function handleApi(req, res, pathname, query) {
@@ -189,7 +197,7 @@ async function handleApi(req, res, pathname, query) {
   }
 
   if (pathname === '/api/attendance/mark' && method === 'POST') {
-    // body: { date, period, subject, records: [{ regNo, status }] }  status: Present | Absent | Late
+    // body: { date, period, subject, markedBy, records: [{ regNo, status }] }  status: Present | Absent | Late
     const body = await getBody(req);
     const db = await readDB();
     const { date, records } = body;
@@ -208,6 +216,15 @@ async function handleApi(req, res, pathname, query) {
         db.attendance.push({ id: db.nextId.attendance++, regNo: r.regNo, date, status: r.status, time, method: 'Manual', period, subject });
       }
     });
+    if (!db.notifications) db.notifications = [];
+    const absentCount = records.filter(r => r.status === 'Absent').length;
+    const markedBy = body.markedBy || 'Staff';
+    db.notifications.unshift({
+      id: Date.now(),
+      message: `${markedBy} marked ${records.length} student(s)${period ? ' — Period ' + period : ''}${subject ? ' (' + subject + ')' : ''}${absentCount ? ', ' + absentCount + ' absent' : ''}`,
+      time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
+    });
+    db.notifications = db.notifications.slice(0, 30);
     await writeDB(db);
     return sendJSON(res, 200, { success: true });
   }
@@ -440,13 +457,24 @@ async function handleApi(req, res, pathname, query) {
       const deptRegNos = db.students.filter(s => s.department === query.department).map(s => s.regNo);
       records = records.filter(r => deptRegNos.includes(r.regNo));
     }
-    if (query.month) {
+    if (query.year) {
+      const yearRegNos = db.students.filter(s => String(s.year) === String(query.year)).map(s => s.regNo);
+      records = records.filter(r => yearRegNos.includes(r.regNo));
+    }
+    if (query.range === 'daily' && query.date) {
+      records = records.filter(r => r.date === query.date);
+    } else if (query.range === 'weekly' && query.date) {
+      const end = new Date(query.date);
+      const start = new Date(end); start.setDate(start.getDate() - 6);
+      const startStr = start.toISOString().slice(0, 10);
+      records = records.filter(r => r.date >= startStr && r.date <= query.date);
+    } else if (query.month) {
       records = records.filter(r => r.date.startsWith(query.month));
     }
-    const rows = ['Reg No,Name,Date,Status,Time,Method'];
+    const rows = ['Reg No,Name,Department,Year,Date,Period,Subject,Status,Time,Method'];
     records.forEach(r => {
       const student = db.students.find(s => s.regNo === r.regNo);
-      rows.push(`${r.regNo},${student ? student.name : ''},${r.date},${r.status},${r.time},${r.method}`);
+      rows.push(`${r.regNo},${student ? student.name : ''},${student ? student.department : ''},${student ? student.year : ''},${r.date},${r.period || ''},${r.subject || ''},${r.status},${r.time},${r.method}`);
     });
     const csv = rows.join('\n');
     res.writeHead(200, {
@@ -508,8 +536,12 @@ async function handleApi(req, res, pathname, query) {
     const student = db.students.find(s => s.regNo === regNo);
     if (!student) return sendJSON(res, 404, { message: 'Not found' });
     const stats = calcAttendancePercent(db, regNo);
+    const monthPrefix = todayStr().slice(0, 7);
+    const monthStats = calcMonthlyPercent(db, regNo, monthPrefix);
     const recent = db.attendance.filter(a => a.regNo === regNo).slice(-10).reverse();
-    return sendJSON(res, 200, { student, stats, recent });
+    const today = todayStr();
+    const todayAbsences = db.attendance.filter(a => a.regNo === regNo && a.date === today && a.status === 'Absent');
+    return sendJSON(res, 200, { student, stats, monthStats, recent, todayAbsences });
   }
   if (pathname.match(/^\/api\/dashboard\/staff\/.+$/) && method === 'GET') {
     const staffId = decodeURIComponent(pathname.split('/').pop());

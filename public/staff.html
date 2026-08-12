@@ -17,7 +17,11 @@
     }
 
     let editingId = null;
-    const ROLES = ['Subject Lecturer', 'Class Teacher', 'HOD'];
+    const ROLES = ['Subject Lecturer', 'HOD'];
+
+    function generateStaffId() {
+      return String(Math.floor(10000000 + Math.random() * 90000000)); // 8-digit numeric ID e.g. 12345678
+    }
 
     async function load() {
       const staff = await apiGet('/staff');
@@ -67,7 +71,7 @@
     function openForm(id) {
       editingId = id || null;
       const s = id ? window._staff.find(x => x.id === id)
-        : { name: '', staffId: '', username: '', password: '', subject: '', role: 'Subject Lecturer', assignments: [], phone: '', email: '', status: 'Active' };
+        : { name: '', staffId: generateStaffId(), username: '', password: '', subject: '', role: 'Subject Lecturer', assignments: [], phone: '', email: '', status: 'Active' };
       const assignSet = new Set((s.assignments || []).map(a => `${a.department}|${a.year}`));
 
       document.getElementById('form-card').innerHTML = `
@@ -91,21 +95,19 @@
           </div>
 
           <div class="field" id="assign-field" style="display:${s.role === 'HOD' ? 'none' : ''};">
-            <label id="assign-label">${s.role === 'Class Teacher' ? 'Class Teacher for (pick exactly one)' : 'Teaches this subject in (pick all that apply)'}</label>
+            <label>Teaches this subject in (pick all that apply)</label>
             <div id="assign-grid" style="display:flex;flex-wrap:wrap;gap:8px;padding:12px;background:#f8fafc;border-radius:10px;">
               ${ALL_DEPARTMENTS.map(d => ALL_YEARS.map(y => {
                 const key = `${d}|${y}`;
                 const checked = assignSet.has(key);
-                const inputType = s.role === 'Class Teacher' ? 'radio' : 'checkbox';
-                const inputName = s.role === 'Class Teacher' ? 'assign-radio' : '';
                 return `<label style="display:flex;align-items:center;gap:5px;font-size:12.5px;background:#fff;border:1px solid #e2e8f0;padding:6px 10px;border-radius:8px;cursor:pointer;">
-                  <input type="${inputType}" name="${inputName}" class="assign-chk" value="${key}" ${checked ? 'checked' : ''}> ${d} · Year ${y}
+                  <input type="checkbox" class="assign-chk" value="${key}" ${checked ? 'checked' : ''}> ${d} · Year ${y}
                 </label>`;
               }).join('')).join('')}
             </div>
             <div style="font-size:11.5px;color:#94a3b8;margin-top:6px;">e.g. a Tamil teacher can be assigned CS Year 2, CS Year 3, IT Year 2, IT Year 3 all at once.</div>
           </div>
-          <div id="hod-note" style="display:${s.role === 'HOD' ? '' : 'none'};font-size:12px;color:#94a3b8;margin-bottom:16px;">HOD automatically gets access to all departments and all years — no need to pick.</div>
+          <div id="hod-note" style="display:${s.role === 'HOD' ? '' : 'none'};font-size:12px;color:#94a3b8;margin-bottom:16px;">HOD automatically gets access to all departments and all years — no need to pick. HOD also reviews staff leave requests.</div>
 
           <div class="form-row">
             <div class="field"><label>Phone</label><input id="f-phone" value="${s.phone || ''}"></div>
@@ -123,11 +125,6 @@
       const role = document.getElementById('f-role').value;
       document.getElementById('assign-field').style.display = role === 'HOD' ? 'none' : '';
       document.getElementById('hod-note').style.display = role === 'HOD' ? '' : 'none';
-      document.getElementById('assign-label').textContent = role === 'Class Teacher' ? 'Class Teacher for (pick exactly one)' : 'Teaches this subject in (pick all that apply)';
-      document.querySelectorAll('.assign-chk').forEach(el => {
-        el.type = role === 'Class Teacher' ? 'radio' : 'checkbox';
-        el.name = role === 'Class Teacher' ? 'assign-radio' : '';
-      });
     }
 
     async function saveStaff() {

@@ -139,7 +139,7 @@
         const el = document.getElementById('toggle-' + s.regNo);
         return { regNo: s.regNo, status: el.dataset.status || 'Present' };
       });
-      await apiPost('/attendance/mark', { date, period, subject, records });
+      await apiPost('/attendance/mark', { date, period, subject, records, markedBy: isStaff ? session.data.name : 'Admin' });
       document.getElementById('save-msg').textContent = '✅ Attendance saved for Period ' + period + '!';
       setTimeout(() => (document.getElementById('save-msg').textContent = ''), 3000);
     }

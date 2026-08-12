@@ -31,18 +31,36 @@
       document.getElementById('page-content').innerHTML = `
         <div class="card">
           <div class="toolbar">
-            <div class="form-row" style="flex:1;">
-              <div class="field"><label>Select Department</label>
-                <select id="dept" onchange="loadReport()" ${isStaff && !isHOD ? '' : ''}>
-                  ${!isStaff || isHOD ? '<option value="">All</option>' : ''}
+            <div class="form-row" style="flex:1;grid-template-columns:1fr 1fr 1fr 1fr;">
+              <div class="field"><label>Department</label>
+                <select id="dept" onchange="loadReport()">
+                  ${!isStaff || isHOD ? '<option value="">All Departments</option>' : ''}
                   ${depts.map(d => `<option value="${d}">${d}</option>`).join('')}
                 </select>
               </div>
-              <div class="field"><label>Select Month</label><input type="month" id="month" value="${new Date().toISOString().slice(0,7)}" onchange="loadReport()"></div>
+              <div class="field"><label>Year</label>
+                <select id="repYear" onchange="loadReport()">
+                  <option value="">All Years</option>
+                  ${ALL_YEARS.map(y => `<option value="${y}">Year ${y}</option>`).join('')}
+                </select>
+              </div>
+              <div class="field"><label>Export Range</label>
+                <select id="range" onchange="toggleRangeInput()">
+                  <option value="monthly">Monthly</option>
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly (last 7 days)</option>
+                </select>
+              </div>
+              <div class="field" id="range-input-field"><label>Select Month</label><input type="month" id="month" value="${new Date().toISOString().slice(0,7)}"></div>
             </div>
             <button class="btn btn-outline" onclick="exportCsv()" style="white-space:nowrap;height:fit-content;">⬇ Export CSV</button>
           </div>
         </div>
+        <div class="card">
+          <p style="font-size:12px;color:#94a3b8;margin:0;">Export pulls attendance across all selected departments &amp; years — daily, weekly, or monthly — as a downloadable CSV document.</p>
+        </div>
+      `;
+      document.getElementById('page-content').innerHTML += `
         <div class="grid-2">
           <div class="card">
             <h3>Attendance Statistics</h3>
@@ -57,12 +75,31 @@
       loadReport();
     }
 
+    function toggleRangeInput() {
+      const range = document.getElementById('range').value;
+      const field = document.getElementById('range-input-field');
+      if (range === 'monthly') {
+        field.innerHTML = `<label>Select Month</label><input type="month" id="month" value="${new Date().toISOString().slice(0,7)}">`;
+      } else {
+        field.innerHTML = `<label>Select Date</label><input type="date" id="rangeDate" value="${new Date().toISOString().slice(0,10)}">`;
+      }
+    }
+
     function exportCsv() {
       const dept = document.getElementById('dept').value;
-      const month = document.getElementById('month').value;
+      const year = document.getElementById('repYear').value;
+      const range = document.getElementById('range').value;
       const params = new URLSearchParams();
       if (dept) params.set('department', dept);
-      if (month) params.set('month', month);
+      if (year) params.set('year', year);
+      if (range === 'monthly') {
+        const month = document.getElementById('month').value;
+        if (month) params.set('month', month);
+      } else {
+        params.set('range', range);
+        const dateEl = document.getElementById('rangeDate');
+        if (dateEl && dateEl.value) params.set('date', dateEl.value);
+      }
       window.location.href = '/api/reports/export?' + params.toString();
     }
 

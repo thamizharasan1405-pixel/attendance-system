@@ -44,15 +44,21 @@
       const isStudent = session.role === 'student';
       const isStaff = session.role === 'staff';
       const isAdmin = session.role === 'admin';
+      const isHOD = isStaff && session.data.role === 'HOD';
       let query = '';
       if (isStudent) query = '?regNo=' + session.data.regNo;
-      if (isStaff) query = '?staffId=' + session.data.staffId;
-      const list = await apiGet('/leave-requests' + query);
+      if (isStaff && !isHOD) query = '?staffId=' + session.data.staffId;
+      let list = await apiGet('/leave-requests' + query);
+      // Admin only reviews STUDENT leave requests. HOD reviews STAFF leave requests.
+      if (isAdmin) list = list.filter(l => !l.staffId);
+      if (isHOD) list = list.filter(l => !!l.staffId);
+      const canApprove = isAdmin || isHOD;
       const body = document.getElementById('tab-body');
       body.innerHTML = `
-        ${isStudent || isStaff ? `<button class="btn btn-primary" style="margin-bottom:14px;" onclick="openLeaveForm()">+ Request Leave</button>` : ''}
+        ${isStudent || (isStaff && !isHOD) ? `<button class="btn btn-primary" style="margin-bottom:14px;" onclick="openLeaveForm()">+ Request Leave</button>` : ''}
+        ${isHOD ? `<p style="font-size:12.5px;color:#94a3b8;margin-bottom:14px;">As HOD, you review leave requests from all staff.</p>` : ''}
         <table>
-          <thead><tr><th>#</th><th>Name</th><th>Type</th><th>Topic</th><th>Reason</th><th>From</th><th>To</th><th>Status</th><th>Admin Reply</th>${isAdmin ? '<th>Actions</th>' : ''}</tr></thead>
+          <thead><tr><th>#</th><th>Name</th><th>Type</th><th>Topic</th><th>Reason</th><th>From</th><th>To</th><th>Status</th><th>Reply</th>${canApprove ? '<th>Actions</th>' : ''}</tr></thead>
           <tbody>
             ${list.map((l, i) => `
               <tr>
@@ -62,7 +68,7 @@
                 <td>${l.reason}</td><td>${l.from}</td><td>${l.to}</td>
                 <td><span class="badge ${l.status.toLowerCase()}">${l.status}</span></td>
                 <td style="max-width:180px;font-size:12.5px;color:#64748b;">${l.reply || '-'}</td>
-                ${isAdmin ? `<td>
+                ${canApprove ? `<td>
                   ${l.status === 'Pending' ? `
                     <button class="icon-btn" onclick="setLeaveStatus(${l.id}, 'Approved')">✅</button>
                     <button class="icon-btn danger" onclick="setLeaveStatus(${l.id}, 'Rejected')">❌</button>` : ''}
