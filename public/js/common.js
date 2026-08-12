@@ -84,25 +84,36 @@ const NAV_ITEMS = {
   ]
 };
 
+function greetingPhrase() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
+  return 'Good evening';
+}
+
 function renderShell({ role, activeHref, title, welcomeName }) {
   const items = NAV_ITEMS[role] || [];
   const navHtml = items.map(i =>
-    `<a href="${i.href}" class="${i.href.split('?')[0] === activeHref ? 'active' : ''}"><span>${i.icon}</span><span>${i.label}</span></a>`
-  ).join('') + `<a href="#" onclick="logout()"><span>🚪</span><span>Logout</span></a>`;
+    `<a href="${i.href}" class="${i.href.split('?')[0] === activeHref ? 'active' : ''}" data-tip="${i.label}"><span>${i.icon}</span></a>`
+  ).join('') + `<a href="#" onclick="logout()" data-tip="Logout"><span>🚪</span></a>`;
 
   document.getElementById('app-shell').innerHTML = `
     <div class="sidebar" id="sidebar">
-      <div class="brand"><span class="icon">🎓</span> Cloud Attendance</div>
+      <div class="brand"><span class="icon">🎓</span></div>
       <nav>${navHtml}</nav>
     </div>
     <div class="main">
       <div class="topbar">
-        <div style="display:flex;align-items:center;gap:10px;">
+        <div style="display:flex;align-items:center;gap:12px;">
           <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
-          <strong>${title}</strong>
+          <div>
+            <strong>${greetingPhrase()}, ${welcomeName.split(' ')[0]}</strong>
+            <div class="page-subtitle">${title}</div>
+          </div>
         </div>
         <div class="right">
-          <span class="welcome">Welcome, ${welcomeName}</span>
+          <button class="topbar-icon-btn" title="Notifications">🔔</button>
+          <button class="topbar-icon-btn" title="Messages">✉️</button>
           <div class="avatar-wrap">
             <div class="avatar">${welcomeName.charAt(0)}</div>
             <span class="online-dot"></span>
