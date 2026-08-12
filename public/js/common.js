@@ -91,29 +91,44 @@ function greetingPhrase() {
   return 'Good evening';
 }
 
+const NAV_BADGE_COLORS = ['blue', 'green', 'orange', 'purple', 'teal', 'rose', 'amber', 'sky', 'indigo', 'lime'];
+
 function renderShell({ role, activeHref, title, welcomeName }) {
   const items = NAV_ITEMS[role] || [];
-  const navHtml = items.map(i =>
-    `<a href="${i.href}" class="${i.href.split('?')[0] === activeHref ? 'active' : ''}" data-tip="${i.label}"><span>${i.icon}</span></a>`
-  ).join('') + `<a href="#" onclick="logout()" data-tip="Logout"><span>🚪</span></a>`;
+  const navHtml = items.map((i, idx) =>
+    `<a href="${i.href}" class="${i.href.split('?')[0] === activeHref ? 'active' : ''}">
+      <span class="nav-badge c-${NAV_BADGE_COLORS[idx % NAV_BADGE_COLORS.length]}">${i.icon}</span>
+      <span class="nav-label">${i.label}</span>
+    </a>`
+  ).join('');
 
   document.getElementById('app-shell').innerHTML = `
     <div class="sidebar" id="sidebar">
-      <div class="brand"><span class="icon">🎓</span></div>
+      <div class="workspace-header">
+        <span class="workspace-icon">🎓</span>
+        <div>
+          <strong>Cloud Attendance</strong>
+          <div class="workspace-sub">${role.charAt(0).toUpperCase() + role.slice(1)} Workspace</div>
+        </div>
+      </div>
+      <div class="menu-heading">Menu</div>
       <nav>${navHtml}</nav>
+      <div class="sidebar-footer">
+        <a href="#" onclick="logout()" class="logout-row"><span class="nav-badge c-rose">🚪</span><span class="nav-label">Logout</span></a>
+      </div>
     </div>
     <div class="main">
       <div class="topbar">
-        <div style="display:flex;align-items:center;gap:12px;">
+        <div style="display:flex;align-items:center;gap:14px;">
           <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
-          <div>
-            <strong>${greetingPhrase()}, ${welcomeName.split(' ')[0]}</strong>
-            <div class="page-subtitle">${title}</div>
-          </div>
+          <div class="topbar-search"><span>🔍</span><input placeholder="Search..." disabled></div>
         </div>
         <div class="right">
-          <button class="topbar-icon-btn" title="Notifications">🔔</button>
-          <button class="topbar-icon-btn" title="Messages">✉️</button>
+          <div>
+            <strong style="font-size:14px;">${greetingPhrase()}, ${welcomeName.split(' ')[0]}</strong>
+            <div class="page-subtitle" style="text-align:right;">${title}</div>
+          </div>
+          <button class="topbar-icon-btn" title="Notifications">🔔<span class="notif-dot"></span></button>
           <div class="avatar-wrap">
             <div class="avatar">${welcomeName.charAt(0)}</div>
             <span class="online-dot"></span>
