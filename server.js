@@ -60,6 +60,18 @@ function calcMonthlyPercent(db, regNo, monthPrefix) {
   return { percent: Math.round((present / records.length) * 100), present, absent, total: records.length };
 }
 
+function calcWeeklyPercent(db, regNo) {
+  const end = new Date();
+  const start = new Date(end); start.setDate(start.getDate() - 6);
+  const startStr = start.toISOString().slice(0, 10);
+  const endStr = end.toISOString().slice(0, 10);
+  const records = db.attendance.filter(a => a.regNo === regNo && a.date >= startStr && a.date <= endStr);
+  if (records.length === 0) return { percent: 0, present: 0, absent: 0, total: 0 };
+  const present = records.filter(r => r.status === 'Present').length;
+  const absent = records.length - present;
+  return { percent: Math.round((present / records.length) * 100), present, absent, total: records.length };
+}
+
 // ---------- Route Handlers ----------
 
 async function handleApi(req, res, pathname, query) {
@@ -72,16 +84,27 @@ async function handleApi(req, res, pathname, query) {
 
     // Admin: fixed single account
     if (body.username === db.admin.username && body.password === db.admin.password) {
+      db.admin.lastLogin = new Date().toISOString();
+      await writeDB(db);
       return sendJSON(res, 200, { success: true, role: 'admin', name: db.admin.name || 'Admin' });
     }
 
     // Staff: each staff member has their own username + password (set by admin).
-    const staff = db.staff.find(s => s.username === body.username && s.password === body.password);
-    if (staff) return sendJSON(res, 200, { success: true, role: 'staff', data: staff });
+    const staffIdx = db.staff.findIndex(s => s.username === body.username && s.password === body.password);
+    if (staffIdx !== -1) {
+      db.staff[staffIdx].lastLogin = new Date().toISOString();
+      await writeDB(db);
+      return sendJSON(res, 200, { success: true, role: 'staff', data: db.staff[staffIdx] });
+    }
 
-    // Student: login with Register Number, any password
+    // Student: login with Register Number + Department + Date of Birth (no free-text password)
     const student = db.students.find(s => s.regNo === body.username);
-    if (student) return sendJSON(res, 200, { success: true, role: 'student', data: student });
+    if (student) {
+      if (student.department === body.department && student.dob === body.dob) {
+        return sendJSON(res, 200, { success: true, role: 'student', data: student });
+      }
+      return sendJSON(res, 401, { success: false, message: 'Register Number, Department or Date of Birth is incorrect' });
+    }
 
     return sendJSON(res, 401, { success: false, message: 'Invalid credentials' });
   }
@@ -538,10 +561,11 @@ async function handleApi(req, res, pathname, query) {
     const stats = calcAttendancePercent(db, regNo);
     const monthPrefix = todayStr().slice(0, 7);
     const monthStats = calcMonthlyPercent(db, regNo, monthPrefix);
+    const weekStats = calcWeeklyPercent(db, regNo);
     const recent = db.attendance.filter(a => a.regNo === regNo).slice(-10).reverse();
     const today = todayStr();
     const todayAbsences = db.attendance.filter(a => a.regNo === regNo && a.date === today && a.status === 'Absent');
-    return sendJSON(res, 200, { student, stats, monthStats, recent, todayAbsences });
+    return sendJSON(res, 200, { student, stats, monthStats, weekStats, recent, todayAbsences });
   }
   if (pathname.match(/^\/api\/dashboard\/staff\/.+$/) && method === 'GET') {
     const staffId = decodeURIComponent(pathname.split('/').pop());

@@ -86,7 +86,10 @@
                 <tr>
                   <td>${titleCase(s.name)}</td><td>${s.regNo}</td><td>${f.term || '-'}</td><td>₹${f.amount || 0}</td>
                   <td>${f.photo ? `<a href="${f.photo}" target="_blank">📄 View</a>` : '-'}</td>
-                  <td><span class="badge ${f.status === 'Paid' ? 'active' : 'pending'}">${f.status}</span></td>
+                  <td>
+                    <span class="badge ${f.status === 'Paid' ? 'active' : 'pending'}">${f.status}</span>
+                    ${f.reportedBy === 'Student' ? `<div style="font-size:10.5px;color:#94a3b8;margin-top:3px;">📌 Reported by student${f.note ? ': ' + f.note : ''}</div>` : ''}
+                  </td>
                   <td>
                     ${f.status !== 'Paid' ? `<button class="btn btn-primary" onclick="markPaid(${f.id})">Mark Paid</button>` : ''}
                     <button class="icon-btn" onclick="openFeeForm('${s.regNo}', ${f.id})">✏️</button>
@@ -111,6 +114,7 @@
           <div class="field"><label>Status</label>
             <select id="ff-status">
               <option value="Due" ${existing && existing.status === 'Due' ? 'selected' : ''}>Due</option>
+              <option value="Reported" ${existing && existing.status === 'Reported' ? 'selected' : ''}>Reported (awaiting verification)</option>
               <option value="Paid" ${existing && existing.status === 'Paid' ? 'selected' : ''}>Paid</option>
             </select>
           </div>

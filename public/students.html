@@ -62,7 +62,7 @@
 
     function openForm(id) {
       editingId = id || null;
-      const s = id ? window._students.find(x => x.id === id) : { name: '', regNo: '', department: '', year: '', phone: '', email: '', status: 'Active' };
+      const s = id ? window._students.find(x => x.id === id) : { name: '', regNo: '', department: '', year: '', dob: '', phone: '', email: '', status: 'Active' };
       document.getElementById('form-card').innerHTML = `
         <div class="card">
           <h3>${id ? 'Edit Student' : 'Add Student'}</h3>
@@ -78,6 +78,8 @@
               <select id="f-year">${ALL_YEARS.map(y => `<option value="${y}" ${String(s.year) === String(y) ? 'selected' : ''}>Year ${y}</option>`).join('')}</select>
             </div>
           </div>
+          <div class="field"><label>Date of Birth</label><input id="f-dob" type="date" value="${s.dob || ''}"></div>
+          <div style="font-size:11.5px;color:#94a3b8;margin:-8px 0 16px;">Student uses Register Number + Department + this Date of Birth to log in.</div>
           <div class="form-row">
             <div class="field"><label>Phone</label><input id="f-phone" value="${s.phone || ''}"></div>
             <div class="field"><label>Email</label><input id="f-email" value="${s.email || ''}"></div>
@@ -96,6 +98,7 @@
         regNo: document.getElementById('f-regNo').value.trim().toUpperCase(),
         department: document.getElementById('f-department').value,
         year: document.getElementById('f-year').value,
+        dob: document.getElementById('f-dob').value,
         phone: document.getElementById('f-phone').value,
         email: document.getElementById('f-email').value
       };

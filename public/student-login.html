@@ -34,11 +34,11 @@
   .glass-card .sub { text-align: center; color: #64748b; font-size: 13px; margin-bottom: 26px; }
   .glass-field { margin-bottom: 16px; }
   .glass-field label { display: block; font-size: 12.5px; font-weight: 600; color: #475569; margin-bottom: 6px; }
-  .glass-field input {
+  .glass-field input, .glass-field select {
     width: 100%; padding: 11px 14px; border-radius: 10px; border: 1.5px solid #e2e8f0;
     font-size: 14px; outline: none; transition: border 0.2s;
   }
-  .glass-field input:focus { border-color: #2563eb; }
+  .glass-field input:focus, .glass-field select:focus { border-color: #2563eb; }
   .glass-btn {
     width: 100%; padding: 12px; border-radius: 10px; border: none;
     background: linear-gradient(135deg, #2563eb, #7c3aed);
@@ -62,12 +62,20 @@
         <input id="username" placeholder="e.g. 22BCA001">
       </div>
       <div class="glass-field">
-        <label>Password</label>
-        <input id="password" type="password" placeholder="Any password works for demo">
+        <label>Department</label>
+        <select id="department">
+          <option value="BCA">BCA</option>
+          <option value="CS">CS</option>
+          <option value="IT">IT</option>
+        </select>
+      </div>
+      <div class="glass-field">
+        <label>Date of Birth</label>
+        <input id="dob" type="date">
       </div>
       <button class="glass-btn" onclick="doLogin()">Login</button>
       <div class="glass-error" id="err"></div>
-      <p class="glass-hint">Use your Register Number (e.g. 22BCA001) — any password works for this demo.</p>
+      <p class="glass-hint">Use your Register Number, Department, and Date of Birth as saved by your Admin.</p>
     </div>
   </div>
 
@@ -75,11 +83,13 @@
   <script>
     async function doLogin() {
       const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value;
+      const department = document.getElementById('department').value;
+      const dob = document.getElementById('dob').value;
       const err = document.getElementById('err');
       err.textContent = '';
+      if (!username || !dob) { err.textContent = 'Please fill in your Register Number and Date of Birth.'; return; }
       try {
-        const result = await apiPost('/login', { username, password });
+        const result = await apiPost('/login', { username, department, dob });
         if (!result.success) {
           err.textContent = result.message || 'Invalid Register Number';
           return;
@@ -94,8 +104,6 @@
         err.textContent = 'Server error. Is the server running?';
       }
     }
-
-    document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
   </script>
 </body>
 </html>

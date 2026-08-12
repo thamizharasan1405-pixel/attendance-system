@@ -10,10 +10,10 @@
   <div class="app-shell" id="app-shell"></div>
   <script src="/js/common.js"></script>
   <script>
-    const session = requireRole('staff');
+    const session = requireRole('admin');
     async function init() {
       if (!session) return;
-      renderShell({ role: 'staff', activeHref: '/staff-directory.html', title: 'Staff Directory', welcomeName: session.data.name });
+      renderShell({ role: 'admin', activeHref: '/staff-directory.html', title: 'Staff Directory', welcomeName: 'Admin' });
       const staff = await apiGet('/staff');
       document.getElementById('page-content').innerHTML = `
         <div class="grid-3" style="gap:16px;">
@@ -30,6 +30,7 @@
               <p style="font-size:12.5px;margin-bottom:4px;"><strong>Assigned To:</strong> ${s.role === 'HOD' ? 'All departments · All years' : (s.assignments || []).map(a => a.department + '-Y' + a.year).join(', ') || '-'}</p>
               <p style="font-size:12.5px;margin-bottom:4px;"><strong>Phone:</strong> ${s.phone || '-'}</p>
               <p style="font-size:12.5px;margin-bottom:4px;"><strong>Email:</strong> ${s.email || '-'}</p>
+              <p style="font-size:12.5px;margin-bottom:4px;"><strong>Last Login:</strong> ${formatLastLogin(s.lastLogin)}</p>
               <span class="badge ${(s.status || 'Active').toLowerCase()}">${s.status || 'Active'}</span>
               ${s.bio ? `<p style="font-size:12px;color:#64748b;margin-top:8px;">${s.bio}</p>` : ''}
             </div>
@@ -37,6 +38,13 @@
         </div>
       `;
     }
+
+    function formatLastLogin(iso) {
+      if (!iso) return 'Never logged in';
+      const d = new Date(iso);
+      return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' at ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+    }
+
     if (session) init();
   </script>
 </body>
