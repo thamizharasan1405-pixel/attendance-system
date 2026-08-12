@@ -12,7 +12,6 @@
   <script>
     const session = requireAnyRole(['admin', 'staff']);
     const isStaff = session && session.role === 'staff';
-    const staffDept = isStaff ? session.data.department : null;
     let allStudents = [];
     let pendingBillPhoto = null;
 
@@ -21,26 +20,41 @@
       renderShell({ role: session.role, activeHref: '/fees.html', title: 'Fee Records', welcomeName: session.role === 'admin' ? 'Admin' : session.data.name });
       allStudents = await apiGet('/students');
       const isHOD = isStaff && session.data.role === 'HOD';
-      let depts = ALL_DEPARTMENTS.slice();
-      if (isStaff && !isHOD) depts = depts.filter(d => d === staffDept);
-      const isClassTeacher = isStaff && session.data.role === 'Class Teacher' && session.data.year;
+      const assignments = isStaff ? (session.data.assignments || []) : [];
+      const depts = isHOD || !isStaff ? ALL_DEPARTMENTS.slice() : [...new Set(assignments.map(a => a.department))];
+      window._assignments = assignments;
+      window._isLocked = isStaff && !isHOD;
       document.getElementById('page-content').innerHTML = `
         <div class="card">
           <div class="form-row" style="grid-template-columns:1fr 1fr;max-width:520px;">
             <div class="field"><label>Department</label>
-              <select id="dept" ${isStaff && !isHOD ? 'disabled' : ''} onchange="load()">${depts.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
+              <select id="dept" onchange="onDeptChange()">${depts.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
             </div>
             <div class="field"><label>Year</label>
-              <select id="year" ${isClassTeacher ? 'disabled' : ''} onchange="load()">
-                ${isClassTeacher ? '' : '<option value="">All Years</option>'}
-                ${ALL_YEARS.map(y => `<option value="${y}" ${isClassTeacher && String(session.data.year) === String(y) ? 'selected' : ''}>Year ${y}</option>`).join('')}
-              </select>
+              <select id="year" onchange="load()"></select>
             </div>
           </div>
           <div id="wrap"></div>
         </div>
         <div id="fee-form"></div>
       `;
+      populateYears();
+      load();
+    }
+
+    function populateYears() {
+      const dept = document.getElementById('dept').value;
+      const yearSel = document.getElementById('year');
+      if (window._isLocked) {
+        const years = window._assignments.filter(a => a.department === dept).map(a => a.year);
+        yearSel.innerHTML = `<option value="">All my years</option>` + years.map(y => `<option value="${y}">Year ${y}</option>`).join('');
+      } else {
+        yearSel.innerHTML = `<option value="">All Years</option>` + ALL_YEARS.map(y => `<option value="${y}">Year ${y}</option>`).join('');
+      }
+    }
+
+    function onDeptChange() {
+      populateYears();
       load();
     }
 

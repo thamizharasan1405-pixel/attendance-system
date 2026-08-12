@@ -14,31 +14,46 @@
     const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     let allStudents = [];
     const isStaff = session && session.role === 'staff';
-    const staffDept = isStaff ? session.data.department : null;
 
     async function init() {
       if (!session) return;
       renderShell({ role: session.role, activeHref: '/staff-timetable.html', title: 'Manage Timetable', welcomeName: session.role === 'admin' ? 'Admin' : session.data.name });
       allStudents = await apiGet('/students');
       const isHOD = isStaff && session.data.role === 'HOD';
-      let depts = ALL_DEPARTMENTS.slice();
-      if (isStaff && !isHOD) depts = depts.filter(d => d === staffDept);
-      const isClassTeacher = isStaff && session.data.role === 'Class Teacher' && session.data.year;
-      const years = ALL_YEARS.slice();
+      const assignments = isStaff ? (session.data.assignments || []) : [];
+      const depts = isHOD || !isStaff ? ALL_DEPARTMENTS.slice() : [...new Set(assignments.map(a => a.department))];
+      window._assignments = assignments;
+      window._isLocked = isStaff && !isHOD;
       document.getElementById('page-content').innerHTML = `
         <div class="card">
           <div class="form-row">
             <div class="field"><label>Department</label>
-              <select id="dept" ${isStaff && !isHOD ? 'disabled' : ''} onchange="loadTimetable()">${depts.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
+              <select id="dept" onchange="onDeptChange()">${depts.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
             </div>
             <div class="field"><label>Year</label>
-              <select id="year" ${isClassTeacher ? 'disabled' : ''} onchange="loadTimetable()">${years.map(y => `<option value="${y}" ${isClassTeacher && String(session.data.year) === String(y) ? 'selected' : ''}>Year ${y}</option>`).join('')}</select>
-              ${isClassTeacher ? `<div style="font-size:11.5px;color:#94a3b8;margin-top:4px;">Locked — you're Class Teacher for Year ${session.data.year}</div>` : ''}
+              <select id="year" onchange="loadTimetable()"></select>
             </div>
           </div>
           <div id="tt-wrap" style="margin-top:10px;"></div>
         </div>
       `;
+      populateYears();
+      loadTimetable();
+    }
+
+    function populateYears() {
+      const dept = document.getElementById('dept').value;
+      const yearSel = document.getElementById('year');
+      if (window._isLocked) {
+        const years = window._assignments.filter(a => a.department === dept).map(a => a.year);
+        yearSel.innerHTML = years.map(y => `<option value="${y}">Year ${y}</option>`).join('');
+      } else {
+        yearSel.innerHTML = ALL_YEARS.map(y => `<option value="${y}">Year ${y}</option>`).join('');
+      }
+    }
+
+    function onDeptChange() {
+      populateYears();
       loadTimetable();
     }
 

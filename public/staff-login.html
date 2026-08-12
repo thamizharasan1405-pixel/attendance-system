@@ -69,22 +69,18 @@
 
       <div class="glass-field">
         <label id="uname-label">Username</label>
-        <input id="username" value="staff">
+        <input id="username" placeholder="Your username">
       </div>
       <div class="glass-field">
         <label>Password</label>
         <div class="pwd-wrap">
-          <input id="password" type="password" value="staff123" style="padding-right:40px;">
+          <input id="password" type="password" placeholder="Your password" style="padding-right:40px;">
           <button type="button" class="eye" onclick="togglePwd()">👁️</button>
         </div>
       </div>
-      <div class="glass-field" id="staff-select-field" style="display:none;">
-        <label>Select Your Name</label>
-        <select id="staff-select"></select>
-      </div>
       <button class="glass-btn" onclick="doLogin()" id="login-btn">Login</button>
       <div class="glass-error" id="err"></div>
-      <p class="glass-hint" id="hint">Staff: staff / staff123, then pick your name.<br>Admin: admin / admin123.</p>
+      <p class="glass-hint" id="hint">Use the username &amp; password given to you by the Admin.<br>Demo Admin: admin / admin123</p>
     </div>
   </div>
 
@@ -102,17 +98,14 @@
       document.getElementById('tab-admin').classList.toggle('active', role === 'admin');
       document.getElementById('role-icon').textContent = role === 'staff' ? '🏫' : '🛡️';
       document.getElementById('role-title').textContent = role === 'staff' ? 'Staff Login' : 'Admin Login';
-      document.getElementById('staff-select-field').style.display = 'none';
-      document.getElementById('login-btn').textContent = 'Login';
-      document.getElementById('login-btn').onclick = doLogin;
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
       if (role === 'staff') {
-        document.getElementById('username').value = 'staff';
-        document.getElementById('password').value = 'staff123';
-        document.getElementById('hint').innerHTML = 'Staff: staff / staff123, then pick your name.';
+        document.getElementById('hint').innerHTML = 'Use the username &amp; password given to you by the Admin.';
       } else {
+        document.getElementById('hint').innerHTML = 'Demo Admin: admin / admin123';
         document.getElementById('username').value = 'admin';
         document.getElementById('password').value = 'admin123';
-        document.getElementById('hint').innerHTML = 'Admin: admin / admin123.';
       }
     }
 
@@ -124,43 +117,21 @@
       try {
         const result = await apiPost('/login', { username, password });
         if (!result.success) {
-          err.textContent = result.message || 'Invalid credentials';
+          err.textContent = result.message || 'Invalid username or password';
           return;
         }
         if (result.role !== 'staff' && result.role !== 'admin') {
           err.textContent = 'This looks like a student account — use the Student portal.';
           return;
         }
-        if (result.needsSelection) {
-          const sel = document.getElementById('staff-select');
-          sel.innerHTML = result.staffList.map(s => `<option value="${s.staffId}">${s.name} (${s.department})</option>`).join('');
-          document.getElementById('staff-select-field').style.display = 'block';
-          document.getElementById('login-btn').textContent = 'Continue';
-          document.getElementById('login-btn').onclick = finishStaffLogin;
-          return;
-        }
-        finishLogin(result);
+        sessionStorage.setItem('session', JSON.stringify(result));
+        window.location.href = result.role === 'admin' ? '/admin-dashboard.html' : '/staff-dashboard.html';
       } catch (e) {
         err.textContent = 'Server error. Is the server running?';
       }
     }
 
-    async function finishStaffLogin() {
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value;
-      const staffId = document.getElementById('staff-select').value;
-      const result = await apiPost('/login', { username, password, staffId });
-      if (!result.success) {
-        document.getElementById('err').textContent = result.message || 'Invalid selection';
-        return;
-      }
-      finishLogin(result);
-    }
-
-    function finishLogin(result) {
-      sessionStorage.setItem('session', JSON.stringify(result));
-      window.location.href = result.role === 'admin' ? '/admin-dashboard.html' : '/staff-dashboard.html';
-    }
+    document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
   </script>
 </body>
 </html>

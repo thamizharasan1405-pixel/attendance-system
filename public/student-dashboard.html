@@ -58,7 +58,26 @@
             <a href="/leave-notifications.html?role=student" class="btn btn-outline">📝 Leave / Complaints</a>
           </div>
         </div>
+        <div class="card" style="margin-top:20px;" id="admin-card"></div>
       `;
+      loadAdminCard();
+    }
+
+    async function loadAdminCard() {
+      try {
+        const admin = await apiGet('/admin/profile');
+        if (!admin.bio && !admin.link) { document.getElementById('admin-card').remove(); return; }
+        document.getElementById('admin-card').innerHTML = `
+          <h3>🏫 College Administration</h3>
+          <div style="display:flex;gap:14px;align-items:center;">
+            ${admin.photo ? `<img src="${admin.photo}" style="width:52px;height:52px;border-radius:16px;object-fit:cover;">` : `<div class="avatar-lg" style="width:52px;height:52px;font-size:18px;">${(admin.name || 'A').charAt(0)}</div>`}
+            <div>
+              <p style="font-size:13px;color:#475569;">${admin.bio || ''}</p>
+              ${admin.link ? `<a href="${admin.link}" target="_blank" style="font-size:12.5px;color:#6366f1;font-weight:600;">🔗 ${admin.link}</a>` : ''}
+            </div>
+          </div>
+        `;
+      } catch (e) { document.getElementById('admin-card')?.remove(); }
     }
 
     function downloadReport() {

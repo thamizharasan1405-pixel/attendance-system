@@ -23,14 +23,18 @@
       const students = await apiGet('/students');
       let depts = [...new Set(students.map(s => s.department))];
       const isStaff = session.role === 'staff';
-      if (isStaff) depts = depts.filter(d => d === session.data.department);
+      const isHOD = isStaff && session.data.role === 'HOD';
+      if (isStaff && !isHOD) {
+        const myDepts = new Set((session.data.assignments || []).map(a => a.department));
+        depts = depts.filter(d => myDepts.has(d));
+      }
       document.getElementById('page-content').innerHTML = `
         <div class="card">
           <div class="toolbar">
             <div class="form-row" style="flex:1;">
               <div class="field"><label>Select Department</label>
-                <select id="dept" onchange="loadReport()" ${isStaff ? 'disabled' : ''}>
-                  ${!isStaff ? '<option value="">All</option>' : ''}
+                <select id="dept" onchange="loadReport()" ${isStaff && !isHOD ? '' : ''}>
+                  ${!isStaff || isHOD ? '<option value="">All</option>' : ''}
                   ${depts.map(d => `<option value="${d}">${d}</option>`).join('')}
                 </select>
               </div>

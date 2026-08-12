@@ -1,11 +1,13 @@
 {
   "admin": {
     "username": "admin",
-    "password": "admin123"
-  },
-  "staffLogin": {
-    "username": "staff",
-    "password": "staff123"
+    "password": "admin123",
+    "name": "Admin",
+    "email": "admin@college.com",
+    "phone": "9876543210",
+    "bio": "",
+    "link": "",
+    "photo": ""
   },
   "students": [
     {
@@ -48,37 +50,92 @@
       "role": "Subject Lecturer",
       "status": "Active",
       "phone": "9865432102",
-      "email": "kumar@college.com"
+      "email": "kumar@college.com",
+      "username": "kumar",
+      "password": "staff123",
+      "subject": "Python Programming",
+      "assignments": [
+        {
+          "department": "BCA",
+          "year": "3"
+        }
+      ]
     },
     {
       "id": 3,
       "name": "Ms. Divya",
       "staffId": "ST003",
-      "department": "BCA",
+      "department": "",
       "role": "HOD",
       "status": "Active",
       "phone": "9865432103",
-      "email": "divya@college.com"
+      "email": "divya@college.com",
+      "username": "divya",
+      "password": "staff123",
+      "subject": "Administration",
+      "assignments": []
     },
     {
       "id": 4,
       "name": "Mr. Rajesh",
       "staffId": "ST004",
-      "department": "Mathematics",
+      "department": "BCA",
       "role": "Subject Lecturer",
       "status": "Active",
       "phone": "9865432104",
-      "email": "rajesh@college.com"
+      "email": "rajesh@college.com",
+      "username": "rajesh",
+      "password": "staff123",
+      "subject": "Mathematics",
+      "assignments": [
+        {
+          "department": "BCA",
+          "year": "2"
+        },
+        {
+          "department": "BCA",
+          "year": "3"
+        },
+        {
+          "department": "CS",
+          "year": "2"
+        },
+        {
+          "department": "CS",
+          "year": "3"
+        }
+      ]
     },
     {
       "id": 5,
       "name": "Mr. Aravind",
       "staffId": "ST005",
-      "department": "English",
+      "department": "BCA",
       "role": "Subject Lecturer",
       "status": "Active",
       "phone": "9865432105",
-      "email": "aravind@college.com"
+      "email": "aravind@college.com",
+      "username": "aravind",
+      "password": "staff123",
+      "subject": "English",
+      "assignments": [
+        {
+          "department": "BCA",
+          "year": "2"
+        },
+        {
+          "department": "BCA",
+          "year": "3"
+        },
+        {
+          "department": "IT",
+          "year": "2"
+        },
+        {
+          "department": "IT",
+          "year": "3"
+        }
+      ]
     },
     {
       "id": 6,
@@ -88,7 +145,32 @@
       "department": "BCA",
       "role": "Subject Lecturer",
       "phone": "0000000000",
-      "email": "xxxxx@gmail.com"
+      "email": "xxxxx@gmail.com",
+      "username": "anbu",
+      "password": "staff123",
+      "subject": "Tamil",
+      "assignments": [
+        {
+          "department": "BCA",
+          "year": "3"
+        },
+        {
+          "department": "CS",
+          "year": "2"
+        },
+        {
+          "department": "CS",
+          "year": "3"
+        },
+        {
+          "department": "IT",
+          "year": "2"
+        },
+        {
+          "department": "IT",
+          "year": "3"
+        }
+      ]
     }
   ],
   "attendance": [
@@ -404,7 +486,7 @@
     "attendance": 12,
     "leaveRequests": 6,
     "complaints": 2,
-    "notices": 4,
+    "notices": 5,
     "fees": 1
   },
   "fees": []

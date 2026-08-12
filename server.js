@@ -64,26 +64,33 @@ async function handleApi(req, res, pathname, query) {
 
     // Admin: fixed single account
     if (body.username === db.admin.username && body.password === db.admin.password) {
-      return sendJSON(res, 200, { success: true, role: 'admin', name: 'Admin' });
+      return sendJSON(res, 200, { success: true, role: 'admin', name: db.admin.name || 'Admin' });
     }
 
-    // Staff: ONE shared username/password for every staff member.
-    // After this succeeds, the frontend shows a "select your name" step
-    // and calls /api/login again with staffId set to attach the right profile.
-    if (body.username === db.staffLogin.username && body.password === db.staffLogin.password) {
-      if (body.staffId) {
-        const staff = db.staff.find(s => s.staffId === body.staffId);
-        if (!staff) return sendJSON(res, 401, { success: false, message: 'Staff not found' });
-        return sendJSON(res, 200, { success: true, role: 'staff', data: staff });
-      }
-      return sendJSON(res, 200, { success: true, role: 'staff', needsSelection: true, staffList: db.staff });
-    }
+    // Staff: each staff member has their own username + password (set by admin).
+    const staff = db.staff.find(s => s.username === body.username && s.password === body.password);
+    if (staff) return sendJSON(res, 200, { success: true, role: 'staff', data: staff });
 
     // Student: login with Register Number, any password
     const student = db.students.find(s => s.regNo === body.username);
     if (student) return sendJSON(res, 200, { success: true, role: 'student', data: student });
 
     return sendJSON(res, 401, { success: false, message: 'Invalid credentials' });
+  }
+
+  // ---- ADMIN PROFILE ----
+  if (pathname === '/api/admin/profile' && method === 'GET') {
+    const db = await readDB();
+    const { password, ...safe } = db.admin;
+    return sendJSON(res, 200, safe);
+  }
+  if (pathname === '/api/admin/profile' && method === 'PUT') {
+    const body = await getBody(req);
+    const db = await readDB();
+    db.admin = { ...db.admin, ...body };
+    await writeDB(db);
+    const { password, ...safe } = db.admin;
+    return sendJSON(res, 200, safe);
   }
 
   // ---- STUDENTS CRUD ----
@@ -170,7 +177,8 @@ async function handleApi(req, res, pathname, query) {
     if (query.department) students = students.filter(s => s.department === query.department);
     if (query.year) students = students.filter(s => String(s.year) === String(query.year));
     const regSet = new Set(students.map(s => s.regNo));
-    let records = db.attendance.filter(a => regSet.has(a.regNo) && a.status === 'Absent');
+    const statusFilter = query.status || 'Absent'; // Absent | Present
+    let records = db.attendance.filter(a => regSet.has(a.regNo) && a.status === statusFilter);
     if (query.date) records = records.filter(a => a.date === query.date);
     if (query.from && query.to) records = records.filter(a => a.date >= query.from && a.date <= query.to);
     const result = records.map(a => {
@@ -478,12 +486,20 @@ async function handleApi(req, res, pathname, query) {
     const todayRecords = db.attendance.filter(a => a.date === today);
     const presentToday = todayRecords.filter(r => r.status === 'Present').length;
     const absentToday = todayRecords.filter(r => r.status === 'Absent').length;
+    const recentStudentActivity = db.attendance
+      .slice(-8).reverse()
+      .map(a => {
+        const s = db.students.find(st => st.regNo === a.regNo);
+        return { ...a, name: s ? s.name : a.regNo };
+      });
     return sendJSON(res, 200, {
       totalStudents: db.students.length,
       totalStaff: db.staff.length,
       presentToday,
       absentToday,
-      recentActivities: db.notifications.slice(0, 5)
+      recentActivities: db.notifications.slice(0, 5),
+      staffOverview: db.staff.map(s => ({ name: s.name, department: s.department, role: s.role, status: s.status })),
+      recentStudentActivity
     });
   }
   if (pathname.match(/^\/api\/dashboard\/student\/.+$/) && method === 'GET') {
@@ -500,7 +516,13 @@ async function handleApi(req, res, pathname, query) {
     const db = await readDB();
     const staff = db.staff.find(s => s.staffId === staffId);
     if (!staff) return sendJSON(res, 404, { message: 'Not found' });
-    const deptStudents = db.students.filter(s => s.department === staff.department);
+    let deptStudents;
+    if (staff.role === 'HOD') {
+      deptStudents = db.students; // HOD sees everyone
+    } else {
+      const assignments = staff.assignments || [];
+      deptStudents = db.students.filter(s => assignments.some(a => a.department === s.department && String(a.year) === String(s.year)));
+    }
     const today = todayStr();
     const todayPresent = db.attendance.filter(a => a.date === today && a.status === 'Present' && deptStudents.some(s => s.regNo === a.regNo)).length;
     const todayAbsent = db.attendance.filter(a => a.date === today && a.status === 'Absent' && deptStudents.some(s => s.regNo === a.regNo)).length;

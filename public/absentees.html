@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Absentee Lists</title>
+<title>Attendance Lists</title>
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -12,7 +12,6 @@
   <script>
     const session = requireAnyRole(['admin', 'staff']);
     const isStaff = session && session.role === 'staff';
-    const staffDept = isStaff ? session.data.department : null;
     const today = new Date().toISOString().slice(0, 10);
     function weekAgo() {
       const d = new Date(); d.setDate(d.getDate() - 6);
@@ -22,22 +21,28 @@
 
     async function init() {
       if (!session) return;
-      renderShell({ role: session.role, activeHref: '/absentees.html', title: 'Absentee Lists', welcomeName: session.role === 'admin' ? 'Admin' : session.data.name });
+      renderShell({ role: session.role, activeHref: '/absentees.html', title: 'Daily Attendance Lists', welcomeName: session.role === 'admin' ? 'Admin' : session.data.name });
       allStudents = await apiGet('/students');
       const isHOD = isStaff && session.data.role === 'HOD';
-      let depts = ALL_DEPARTMENTS.slice();
-      if (isStaff && !isHOD) depts = depts.filter(d => d === staffDept);
-      const isClassTeacher = isStaff && session.data.role === 'Class Teacher' && session.data.year;
+      const assignments = isStaff ? (session.data.assignments || []) : [];
+      const depts = isHOD || !isStaff ? ALL_DEPARTMENTS.slice() : [...new Set(assignments.map(a => a.department))];
+      const isLocked = isStaff && !isHOD;
+      window._assignments = assignments;
+      window._isLocked = isLocked;
+
       document.getElementById('page-content').innerHTML = `
         <div class="card">
-          <div class="form-row" style="grid-template-columns:1fr 1fr 1fr 1fr;">
+          <div class="form-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;">
             <div class="field"><label>Department</label>
-              <select id="dept" ${isStaff && !isHOD ? 'disabled' : ''} onchange="load()">${depts.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
+              <select id="dept" onchange="onDeptChange()">${depts.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
             </div>
             <div class="field"><label>Year</label>
-              <select id="year" ${isClassTeacher ? 'disabled' : ''} onchange="load()">
-                ${isClassTeacher ? '' : '<option value="">All Years</option>'}
-                ${ALL_YEARS.map(y => `<option value="${y}" ${isClassTeacher && String(session.data.year) === String(y) ? 'selected' : ''}>Year ${y}</option>`).join('')}
+              <select id="year" onchange="load()"></select>
+            </div>
+            <div class="field"><label>Status</label>
+              <select id="status" onchange="load()">
+                <option value="Absent">Absent</option>
+                <option value="Present">Present</option>
               </select>
             </div>
             <div class="field"><label>View</label>
@@ -51,28 +56,46 @@
           <div id="wrap"></div>
         </div>
       `;
+      populateYears();
+      load();
+    }
+
+    function populateYears() {
+      const dept = document.getElementById('dept').value;
+      const yearSel = document.getElementById('year');
+      if (window._isLocked) {
+        const years = window._assignments.filter(a => a.department === dept).map(a => a.year);
+        yearSel.innerHTML = `<option value="">All my years</option>` + years.map(y => `<option value="${y}">Year ${y}</option>`).join('');
+      } else {
+        yearSel.innerHTML = `<option value="">All Years</option>` + ALL_YEARS.map(y => `<option value="${y}">Year ${y}</option>`).join('');
+      }
+    }
+
+    function onDeptChange() {
+      populateYears();
       load();
     }
 
     async function load() {
       const dept = document.getElementById('dept').value;
       const year = document.getElementById('year').value;
+      const status = document.getElementById('status').value;
       const view = document.getElementById('view').value;
       document.getElementById('date-field').style.display = view === 'daily' ? '' : 'none';
-      let url = `/attendance/absentees?department=${encodeURIComponent(dept)}`;
+      let url = `/attendance/absentees?department=${encodeURIComponent(dept)}&status=${encodeURIComponent(status)}`;
       if (year) url += `&year=${encodeURIComponent(year)}`;
       if (view === 'daily') url += `&date=${document.getElementById('date').value}`;
       else url += `&from=${weekAgo()}&to=${today}`;
       const list = await apiGet(url);
       document.getElementById('wrap').innerHTML = `
         <table style="margin-top:14px;">
-          <thead><tr><th>Date</th><th>Name</th><th>Reg No</th><th>Year</th><th>Period</th></tr></thead>
+          <thead><tr><th>Date</th><th>Name</th><th>Reg No</th><th>Department</th><th>Year</th><th>Period</th></tr></thead>
           <tbody>
             ${list.map(a => `
               <tr>
-                <td>${a.date}</td><td>${titleCase(a.name)}</td><td>${a.regNo}</td><td>${a.year}</td>
+                <td>${a.date}</td><td>${titleCase(a.name)}</td><td>${a.regNo}</td><td>${a.department}</td><td>${a.year}</td>
                 <td>${a.period ? 'Period ' + a.period : '-'}</td>
-              </tr>`).join('') || `<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:20px;">🎉 No absentees</td></tr>`}
+              </tr>`).join('') || `<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:20px;">No records found</td></tr>`}
           </tbody>
         </table>
       `;

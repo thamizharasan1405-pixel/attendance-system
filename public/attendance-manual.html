@@ -17,30 +17,25 @@
     let allStudents = [];
     const today = new Date().toISOString().slice(0, 10);
     const isStaff = session && session.role === 'staff';
-    const staffDept = isStaff ? session.data.department : null;
     const PERIODS = [1, 2, 3, 4, 5];
 
     async function init() {
       if (!session) return;
       allStudents = await apiGet('/students');
       const isHOD = isStaff && session.data.role === 'HOD';
-      let depts = ALL_DEPARTMENTS.slice();
-      if (isStaff && !isHOD) depts = depts.filter(d => d === staffDept); // Subject Lecturer / Class Teacher: locked to own department
-      const isClassTeacher = isStaff && session.data.role === 'Class Teacher' && session.data.year;
-      const years = ALL_YEARS.slice();
+      const assignments = isStaff ? (session.data.assignments || []) : [];
+      const depts = isHOD || !isStaff ? ALL_DEPARTMENTS.slice() : [...new Set(assignments.map(a => a.department))];
+      const isLocked = isStaff && !isHOD; // staff (non-HOD) can only pick from their assigned combos
       document.getElementById('page-content').innerHTML = `
         <div class="card">
           <div class="form-row" style="grid-template-columns:1fr 1fr 1fr 1fr;">
             <div class="field"><label>Department</label>
-              <select id="dept" ${isStaff && !isHOD ? 'disabled' : ''} onchange="loadStudents()">${depts.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
-              ${isStaff && !isHOD ? `<div style="font-size:11.5px;color:#94a3b8;margin-top:4px;">Locked to your department</div>` : ''}
+              <select id="dept" onchange="onDeptChange()">${depts.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
+              ${isLocked ? `<div style="font-size:11.5px;color:#94a3b8;margin-top:4px;">Only your assigned departments</div>` : ''}
             </div>
             <div class="field"><label>Year</label>
-              <select id="year" ${isClassTeacher ? 'disabled' : ''} onchange="loadStudents()">
-                ${isClassTeacher ? '' : '<option value="">All Years</option>'}
-                ${years.map(y => `<option value="${y}" ${isClassTeacher && String(session.data.year) === String(y) ? 'selected' : ''}>Year ${y}</option>`).join('')}
-              </select>
-              ${isClassTeacher ? `<div style="font-size:11.5px;color:#94a3b8;margin-top:4px;">Locked — you're Class Teacher for Year ${session.data.year}</div>` : ''}
+              <select id="year" onchange="loadStudents()"></select>
+              ${isLocked ? `<div style="font-size:11.5px;color:#94a3b8;margin-top:4px;">Only your assigned years</div>` : ''}
             </div>
             <div class="field"><label>Period</label>
               <select id="period" onchange="loadStudents()">
@@ -49,10 +44,31 @@
             </div>
             <div class="field"><label>Date</label><input type="date" id="date" value="${today}" onchange="loadStudents()"></div>
           </div>
-          <div class="field"><label>Subject (optional)</label><input id="subject" placeholder="e.g. Python Programming"></div>
+          <div class="field"><label>Subject (optional)</label><input id="subject" value="${isStaff && !isHOD ? (session.data.subject || '') : ''}" placeholder="e.g. Python Programming"></div>
           <div id="table-wrap" style="margin-top:16px;"></div>
         </div>
       `;
+      window._assignments = assignments;
+      window._isLocked = isLocked;
+      populateYears();
+      loadStudents();
+    }
+
+    function populateYears() {
+      const dept = document.getElementById('dept').value;
+      const yearSel = document.getElementById('year');
+      let years;
+      if (window._isLocked) {
+        years = window._assignments.filter(a => a.department === dept).map(a => a.year);
+        yearSel.innerHTML = years.map(y => `<option value="${y}">Year ${y}</option>`).join('');
+      } else {
+        years = ALL_YEARS.slice();
+        yearSel.innerHTML = `<option value="">All Years</option>` + years.map(y => `<option value="${y}">Year ${y}</option>`).join('');
+      }
+    }
+
+    function onDeptChange() {
+      populateYears();
       loadStudents();
     }
 
