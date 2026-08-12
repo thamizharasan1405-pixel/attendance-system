@@ -8,50 +8,51 @@
 <style>
   .auth-bg {
     min-height: 100vh; display: flex; align-items: center; justify-content: center;
-    background: linear-gradient(135deg, #0b1f4d 0%, #1e293b 50%, #7c2d12 130%);
+    background: linear-gradient(135deg, #062418 0%, #1c1917 55%, #78350f 130%);
     padding: 24px; position: relative; overflow: hidden;
   }
   .auth-bg::before {
     content: ''; position: absolute; width: 480px; height: 480px; border-radius: 50%;
-    background: rgba(245,158,11,0.12); bottom: -180px; left: -160px;
+    background: rgba(217,119,6,0.13); bottom: -180px; left: -160px;
   }
   .glass-card {
     position: relative; z-index: 2;
     background: rgba(255,255,255,0.97);
-    border-radius: 20px;
+    border-radius: 22px;
     padding: 42px 36px;
     max-width: 420px; width: 100%;
     box-shadow: 0 30px 60px rgba(0,0,0,0.4);
   }
-  .back-link { display: inline-block; margin-bottom: 18px; font-size: 13px; color: #64748b; }
+  .back-link { display: inline-block; margin-bottom: 18px; font-size: 13px; color: #766f5f; }
   .glass-icon {
-    width: 62px; height: 62px; border-radius: 50%;
-    background: linear-gradient(135deg, #f59e0b, #dc2626);
+    width: 64px; height: 64px; border-radius: 20px;
+    background: linear-gradient(135deg, #d97706, #f59e0b);
     display: flex; align-items: center; justify-content: center;
     font-size: 26px; margin: 0 auto 16px; color: #fff;
+    box-shadow: 0 10px 22px rgba(217,119,6,0.35);
   }
-  .glass-card h2 { text-align: center; font-size: 21px; color: #0b1f4d; margin-bottom: 4px; }
-  .glass-card .sub { text-align: center; color: #64748b; font-size: 13px; margin-bottom: 26px; }
-  .role-tabs { display: flex; background: #f1f5f9; border-radius: 10px; padding: 4px; margin-bottom: 22px; }
-  .role-tab { flex: 1; text-align: center; padding: 9px; border-radius: 8px; font-size: 13.5px; font-weight: 600; color: #64748b; cursor: pointer; }
-  .role-tab.active { background: #fff; color: #d97706; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+  .glass-card h2 { text-align: center; font-size: 21px; color: #062418; margin-bottom: 4px; }
+  .glass-card .sub { text-align: center; color: #766f5f; font-size: 13px; margin-bottom: 26px; }
+  .role-tabs { display: flex; background: #f7f3ea; border-radius: 11px; padding: 4px; margin-bottom: 22px; }
+  .role-tab { flex: 1; text-align: center; padding: 9px; border-radius: 9px; font-size: 13.5px; font-weight: 700; color: #a39c8a; cursor: pointer; }
+  .role-tab.active { background: #fff; color: #b45309; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
   .glass-field { margin-bottom: 16px; }
-  .glass-field label { display: block; font-size: 12.5px; font-weight: 600; color: #475569; margin-bottom: 6px; }
+  .glass-field label { display: block; font-size: 12.5px; font-weight: 700; color: #4b4636; margin-bottom: 6px; }
   .glass-field input, .glass-field select {
-    width: 100%; padding: 11px 14px; border-radius: 10px; border: 1.5px solid #e2e8f0;
+    width: 100%; padding: 11px 14px; border-radius: 11px; border: 1.5px solid #eae4d6;
     font-size: 14px; outline: none; transition: border 0.2s;
   }
-  .glass-field input:focus { border-color: #f59e0b; }
+  .glass-field input:focus { border-color: #d97706; }
   .pwd-wrap { position: relative; }
-  .pwd-wrap .eye { position: absolute; right: 4px; top: 4px; bottom: 4px; width: 38px; background: none; border: none; font-size: 16px; color: #64748b; }
+  .pwd-wrap .eye { position: absolute; right: 4px; top: 4px; bottom: 4px; width: 38px; background: none; border: none; font-size: 16px; color: #a39c8a; }
   .glass-btn {
-    width: 100%; padding: 12px; border-radius: 10px; border: none;
-    background: linear-gradient(135deg, #f59e0b, #dc2626);
+    width: 100%; padding: 12px; border-radius: 11px; border: none;
+    background: linear-gradient(135deg, #d97706, #b45309);
     color: #fff; font-weight: 700; font-size: 14.5px; margin-top: 6px;
-    box-shadow: 0 10px 20px rgba(220,38,38,0.25);
+    box-shadow: 0 10px 22px rgba(217,119,6,0.28);
   }
-  .glass-hint { text-align: center; font-size: 11.5px; color: #94a3b8; margin-top: 18px; line-height: 1.6; }
-  .glass-error { text-align: center; font-size: 12.5px; color: #dc2626; margin-top: 10px; min-height: 16px; }
+  .glass-hint { text-align: center; font-size: 11.5px; color: #a39c8a; margin-top: 18px; line-height: 1.6; }
+  .glass-error { text-align: center; font-size: 12.5px; color: #e11d48; margin-top: 10px; min-height: 16px; }
 </style>
 </head>
 <body>
