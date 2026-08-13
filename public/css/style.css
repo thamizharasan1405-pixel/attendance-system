@@ -294,3 +294,42 @@ label { font-size: 12.5px; color: var(--gray); font-weight: 700; display: block;
 
 /* Profile bio/photo */
 .profile-photo-preview { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; margin: 20px auto; display: block; border: 3px solid var(--border); }
+
+/* ---------- Footer ---------- */
+.app-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 6px 4px; font-size: 11.5px; color: var(--gray-light); font-weight: 600;
+  flex-wrap: wrap; gap: 8px;
+}
+
+/* ---------- Notification dropdown ---------- */
+.notif-dropdown {
+  position: absolute; width: 300px; max-height: 360px; overflow-y: auto;
+  background: var(--white); border: 1px solid var(--border); border-radius: 16px;
+  box-shadow: var(--shadow-lg); z-index: 200;
+}
+.notif-header { font-size: 12.5px; font-weight: 800; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.notif-item { display: flex; gap: 10px; padding: 12px 16px; border-bottom: 1px solid #f4f4fa; }
+.notif-item:last-child { border-bottom: none; }
+.notif-dot-sm { width: 7px; height: 7px; border-radius: 50%; background: var(--indigo); margin-top: 5px; flex-shrink: 0; }
+.notif-text { font-size: 12.5px; font-weight: 600; line-height: 1.4; }
+.notif-time { font-size: 10.8px; color: var(--gray-light); margin-top: 3px; }
+.notif-empty, .notif-loading { padding: 26px 16px; text-align: center; font-size: 12.5px; color: var(--gray-light); }
+
+/* ---------- Modal / Popup ---------- */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(22,22,40,0.5); backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center; z-index: 300; padding: 20px;
+}
+.modal-box {
+  background: var(--white); border-radius: 22px; padding: 30px 28px; max-width: 460px; width: 100%;
+  box-shadow: var(--shadow-lg); max-height: 88vh; overflow-y: auto;
+  animation: modalPop 0.18s ease;
+}
+@keyframes modalPop { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* ---------- Empty state ---------- */
+.empty-state { text-align: center; padding: 46px 20px; color: var(--gray-light); }
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state .title { font-size: 14px; font-weight: 700; color: var(--gray); margin-bottom: 4px; }
+.empty-state .sub { font-size: 12.5px; }

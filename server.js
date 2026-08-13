@@ -601,8 +601,12 @@ function serveStatic(req, res, pathname) {
 
   fs.readFile(filePath, (err, data) => {
     if (err) {
-      res.writeHead(404, { 'Content-Type': 'text/html' });
-      return res.end('<h1>404 - Page Not Found</h1><a href="/">Go Home</a>');
+      fs.readFile(path.join(PUBLIC_DIR, '404.html'), (err2, notFoundData) => {
+        res.writeHead(404, { 'Content-Type': 'text/html' });
+        if (err2) return res.end('<h1>404 - Page Not Found</h1><a href="/">Go Home</a>');
+        return res.end(notFoundData);
+      });
+      return;
     }
     const ext = path.extname(filePath);
     res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });

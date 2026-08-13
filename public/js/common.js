@@ -128,7 +128,7 @@ function renderShell({ role, activeHref, title, welcomeName }) {
             <strong style="font-size:14px;">${greetingPhrase()}, ${welcomeName.split(' ')[0]}</strong>
             <div class="page-subtitle" style="text-align:right;">${title}</div>
           </div>
-          <button class="topbar-icon-btn" title="Notifications">🔔<span class="notif-dot"></span></button>
+          <button class="topbar-icon-btn" id="notif-bell" onclick="toggleNotifDropdown(event)" title="Notifications">🔔<span class="notif-dot"></span></button>
           <div class="avatar-wrap">
             <div class="avatar">${welcomeName.charAt(0)}</div>
             <span class="online-dot"></span>
@@ -136,8 +136,73 @@ function renderShell({ role, activeHref, title, welcomeName }) {
         </div>
       </div>
       <div class="content" id="page-content"></div>
+      <div class="app-footer">
+        <span>© ${new Date().getFullYear()} Cloud Attendance Management System</span>
+        <span>Final Year Project · Built with care</span>
+      </div>
+    </div>
+    <div id="notif-dropdown" class="notif-dropdown" style="display:none;"></div>
+    <div id="modal-root"></div>
+  `;
+  document.addEventListener('click', (e) => {
+    const dd = document.getElementById('notif-dropdown');
+    const bell = document.getElementById('notif-bell');
+    if (dd && dd.style.display !== 'none' && !dd.contains(e.target) && e.target !== bell) dd.style.display = 'none';
+  });
+}
+
+async function toggleNotifDropdown(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('notif-dropdown');
+  if (dd.style.display !== 'none') { dd.style.display = 'none'; return; }
+  const rect = document.getElementById('notif-bell').getBoundingClientRect();
+  dd.style.top = (rect.bottom + window.scrollY + 8) + 'px';
+  dd.style.left = (rect.right - 300 + window.scrollX) + 'px';
+  dd.innerHTML = `<div class="notif-header">Notifications</div><div class="notif-loading">Loading...</div>`;
+  dd.style.display = 'block';
+  try {
+    const session = getSession();
+    let items = [];
+    if (session && session.role === 'admin') {
+      const data = await apiGet('/dashboard/admin');
+      items = (data.recentActivities || []).map(a => ({ text: a.message, time: a.time }));
+    }
+    dd.innerHTML = `<div class="notif-header">Notifications</div>` + (
+      items.length
+        ? items.map(n => `<div class="notif-item"><span class="notif-dot-sm"></span><div><div class="notif-text">${n.text}</div><div class="notif-time">${n.time}</div></div></div>`).join('')
+        : `<div class="notif-empty">🔕 No new notifications</div>`
+    );
+  } catch (err) {
+    dd.innerHTML = `<div class="notif-header">Notifications</div><div class="notif-empty">🔕 Nothing to show</div>`;
+  }
+}
+
+// ---------- Modal helper ----------
+function openModal(innerHtml) {
+  const root = document.getElementById('modal-root');
+  root.innerHTML = `
+    <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this) closeModal()">
+      <div class="modal-box">${innerHtml}</div>
     </div>
   `;
+}
+function closeModal() {
+  const root = document.getElementById('modal-root');
+  if (root) root.innerHTML = '';
+}
+function confirmModal(message, onConfirm) {
+  openModal(`
+    <div style="text-align:center;">
+      <div style="font-size:34px;margin-bottom:10px;">⚠️</div>
+      <h3 style="margin-bottom:10px;">Are you sure?</h3>
+      <p style="font-size:13.5px;color:var(--gray);margin-bottom:22px;">${message}</p>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" style="background:var(--rose);box-shadow:none;" id="confirm-yes-btn">Yes, Delete</button>
+      </div>
+    </div>
+  `);
+  document.getElementById('confirm-yes-btn').onclick = () => { closeModal(); onConfirm(); };
 }
 
 function fmtDate(d) {

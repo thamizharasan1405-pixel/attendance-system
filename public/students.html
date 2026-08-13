@@ -52,7 +52,7 @@
             <button class="icon-btn danger" onclick="removeStudent(${s.id})">🗑️</button>
           </td>` : ''}
         </tr>
-      `).join('') || `<tr><td colspan="${canEdit ? 7 : 6}" style="text-align:center;color:#94a3b8;padding:20px;">No students found</td></tr>`;
+      `).join('') || `<tr><td colspan="${canEdit ? 7 : 6}"><div class="empty-state"><div class="icon">🎓</div><div class="title">No students found</div><div class="sub">Try adjusting your search or add a new student</div></div></td></tr>`;
     }
 
     function filterRows() {
@@ -109,9 +109,10 @@
     }
 
     async function removeStudent(id) {
-      if (!confirm('Delete this student?')) return;
-      await apiDelete('/students/' + id);
-      load();
+      confirmModal('This will permanently remove the student and their attendance history cannot be recovered.', async () => {
+        await apiDelete('/students/' + id);
+        load();
+      });
     }
   </script>
 </body>

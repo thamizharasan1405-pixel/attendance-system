@@ -155,9 +155,10 @@
     }
 
     async function removeStaff(id) {
-      if (!confirm('Delete this staff member?')) return;
-      await apiDelete('/staff/' + id);
-      load();
+      confirmModal('This will permanently remove this staff member and revoke their login access.', async () => {
+        await apiDelete('/staff/' + id);
+        load();
+      });
     }
   </script>
 </body>
