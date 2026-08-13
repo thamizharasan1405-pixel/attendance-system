@@ -1,0 +1,976 @@
+/* =========================================================
+   LEAVE REQUESTS & NOTIFICATIONS
+   Advanced UI/UX
+   Desktop + Tablet + Mobile
+   ========================================================= */
+
+
+/* =========================================================
+   PAGE CARD
+   ========================================================= */
+
+#page-content > .card {
+  position: relative;
+
+  overflow: hidden;
+
+  border: 1px solid #e8edf5;
+
+  border-radius: 20px;
+
+  background: rgba(255, 255, 255, .94);
+
+  box-shadow:
+    0 8px 30px rgba(15, 23, 42, .055);
+
+  transition:
+    box-shadow .2s ease,
+    transform .2s ease;
+}
+
+
+#page-content > .card:hover {
+  box-shadow:
+    0 14px 40px rgba(15, 23, 42, .075);
+}
+
+
+/* =========================================================
+   TABS
+   ========================================================= */
+
+/*
+  Your JS creates the tab wrapper dynamically.
+*/
+
+#page-content > .card > div:first-child {
+  position: relative;
+
+  display: flex !important;
+  align-items: center;
+
+  gap: 8px !important;
+
+  margin-bottom: 20px !important;
+
+  padding: 5px !important;
+
+  border: 1px solid #edf1f7 !important;
+
+  border-radius: 14px;
+
+  background: #f7f9fc;
+
+  box-sizing: border-box;
+}
+
+
+/* Tab buttons */
+
+#page-content > .card > div:first-child .btn {
+  position: relative;
+
+  min-height: 40px;
+
+  padding: 9px 17px;
+
+  border-radius: 10px;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  border: 1px solid transparent;
+
+  transition:
+    color .2s ease,
+    background .2s ease,
+    box-shadow .2s ease,
+    transform .2s ease;
+}
+
+
+/* Active tab */
+
+#page-content > .card > div:first-child .btn-primary {
+  background: linear-gradient(
+    135deg,
+    #2563eb,
+    #4f46e5
+  );
+
+  border-color: transparent;
+
+  color: #fff;
+
+  box-shadow:
+    0 5px 14px rgba(37, 99, 235, .20);
+}
+
+
+/* Inactive tab */
+
+#page-content > .card > div:first-child .btn-outline {
+  color: #64748b;
+
+  background: transparent;
+
+  border-color: transparent;
+}
+
+
+#page-content > .card > div:first-child .btn-outline:hover {
+  color: #334155;
+
+  background: #fff;
+
+  border-color: #e5eaf1;
+}
+
+
+/* =========================================================
+   TAB BODY
+   ========================================================= */
+
+#tab-body {
+  min-width: 0;
+}
+
+
+/* =========================================================
+   ACTION BAR
+   ========================================================= */
+
+#tab-body > .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 6px;
+
+  min-height: 40px;
+
+  margin-bottom: 18px !important;
+
+  padding: 9px 16px;
+
+  border-radius: 10px;
+
+  font-size: 12px;
+  font-weight: 750;
+
+  box-shadow:
+    0 6px 16px rgba(37, 99, 235, .15);
+
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease;
+}
+
+
+#tab-body > .btn-primary:hover {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 9px 22px rgba(37, 99, 235, .22);
+}
+
+
+/* =========================================================
+   HOD INFORMATION MESSAGE
+   ========================================================= */
+
+#tab-body > p {
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  margin: 0 0 18px !important;
+
+  padding: 11px 14px;
+
+  border: 1px solid #dbeafe;
+
+  border-radius: 11px;
+
+  color: #475569 !important;
+
+  background: #f8fbff;
+}
+
+
+#tab-body > p::before {
+  content: "ⓘ";
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 22px;
+  height: 22px;
+
+  flex: 0 0 22px;
+
+  border-radius: 7px;
+
+  color: #2563eb;
+
+  background: #dbeafe;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   TABLE CONTAINER EFFECT
+   ========================================================= */
+
+#tab-body table {
+  width: 100%;
+
+  border-collapse: separate;
+  border-spacing: 0;
+
+  overflow: hidden;
+
+  border: 1px solid #e9eef5;
+
+  border-radius: 14px;
+
+  background: #fff;
+}
+
+
+/* =========================================================
+   TABLE HEADER
+   ========================================================= */
+
+#tab-body table thead th {
+  padding: 12px 13px;
+
+  border-bottom: 1px solid #e8edf4;
+
+  color: #64748b;
+
+  background: #f8fafc;
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  letter-spacing: .045em;
+
+  text-transform: uppercase;
+
+  white-space: nowrap;
+}
+
+
+/* First header */
+
+#tab-body table thead th:first-child {
+  border-top-left-radius: 13px;
+}
+
+
+/* Last header */
+
+#tab-body table thead th:last-child {
+  border-top-right-radius: 13px;
+}
+
+
+/* =========================================================
+   TABLE BODY
+   ========================================================= */
+
+#tab-body table tbody td {
+  padding: 13px;
+
+  border-bottom: 1px solid #f0f3f7;
+
+  color: #334155;
+
+  font-size: 12px;
+
+  line-height: 1.5;
+
+  vertical-align: middle;
+}
+
+
+#tab-body table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+
+/* Hover */
+
+#tab-body table tbody tr {
+  transition:
+    background .15s ease;
+}
+
+
+#tab-body table tbody tr:hover {
+  background: #f8fbff;
+}
+
+
+/* Name column */
+
+#tab-body table tbody td:nth-child(2) {
+  color: #172033;
+
+  font-weight: 700;
+}
+
+
+/* Reason column */
+
+#tab-body table tbody td:nth-child(5) {
+  max-width: 230px;
+
+  color: #64748b;
+
+  white-space: normal;
+}
+
+
+/* Reply column */
+
+#tab-body table tbody td:last-child {
+  word-break: break-word;
+}
+
+
+/* =========================================================
+   STATUS BADGES
+   ========================================================= */
+
+#tab-body .badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 66px;
+
+  padding: 5px 9px;
+
+  border-radius: 999px;
+
+  font-size: 9.5px;
+
+  font-weight: 800;
+
+  letter-spacing: .02em;
+
+  border: 1px solid transparent;
+}
+
+
+/* Pending */
+
+#tab-body .badge.pending {
+  color: #a16207;
+
+  background: #fef9c3;
+
+  border-color: #fde68a;
+}
+
+
+/* Approved */
+
+#tab-body .badge.approved {
+  color: #15803d;
+
+  background: #dcfce7;
+
+  border-color: #bbf7d0;
+}
+
+
+/* Rejected */
+
+#tab-body .badge.rejected {
+  color: #b91c1c;
+
+  background: #fee2e2;
+
+  border-color: #fecaca;
+}
+
+
+/* Resolved */
+
+#tab-body .badge.resolved {
+  color: #0369a1;
+
+  background: #e0f2fe;
+
+  border-color: #bae6fd;
+}
+
+
+/* =========================================================
+   ACTION ICON BUTTONS
+   ========================================================= */
+
+#tab-body .icon-btn {
+  width: 32px;
+  height: 32px;
+
+  padding: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-right: 4px;
+
+  border: 1px solid #e5eaf1;
+
+  border-radius: 9px;
+
+  background: #fff;
+
+  cursor: pointer;
+
+  transition:
+    color .18s ease,
+    background .18s ease,
+    border-color .18s ease,
+    transform .18s ease,
+    box-shadow .18s ease;
+}
+
+
+#tab-body .icon-btn:hover {
+  border-color: #cbd5e1;
+
+  background: #f8fafc;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 4px 10px rgba(15, 23, 42, .07);
+}
+
+
+/* Danger */
+
+#tab-body .icon-btn.danger:hover {
+  border-color: #fecaca;
+
+  background: #fff1f2;
+}
+
+
+/* =========================================================
+   FORM CARDS
+   ========================================================= */
+
+#leave-form > .card,
+#leave-reply-form > .card,
+#complaint-form > .card,
+#reply-form > .card {
+  position: relative;
+
+  margin-top: 20px !important;
+
+  padding: 22px !important;
+
+  border: 1px solid #e3eaf3;
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #fbfdff 0%,
+      #f7faff 100%
+    ) !important;
+
+  box-shadow:
+    0 8px 25px rgba(15, 23, 42, .055);
+}
+
+
+/* Form card top accent */
+
+#leave-form > .card::before,
+#leave-reply-form > .card::before,
+#complaint-form > .card::before,
+#reply-form > .card::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 20px;
+  right: 20px;
+
+  height: 2px;
+
+  border-radius: 0 0 4px 4px;
+
+  background: linear-gradient(
+    90deg,
+    #2563eb,
+    #6366f1
+  );
+}
+
+
+/* =========================================================
+   FORM CARD HEADINGS
+   ========================================================= */
+
+#leave-form h3,
+#leave-reply-form h3,
+#complaint-form h3,
+#reply-form h3 {
+  margin: 0 0 20px;
+
+  color: #172033;
+
+  font-size: 15px;
+
+  font-weight: 800;
+
+  letter-spacing: -.015em;
+}
+
+
+/* =========================================================
+   FORM FIELDS
+   ========================================================= */
+
+#leave-form .field,
+#leave-reply-form .field,
+#complaint-form .field,
+#reply-form .field {
+  margin-bottom: 15px;
+}
+
+
+#leave-form label,
+#leave-reply-form label,
+#complaint-form label,
+#reply-form label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: #475569;
+
+  font-size: 10.5px;
+
+  font-weight: 750;
+
+  letter-spacing: .02em;
+}
+
+
+#leave-form input,
+#leave-form select,
+#leave-form textarea,
+#leave-reply-form textarea,
+#complaint-form input,
+#reply-form textarea {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  border: 1px solid #dce3ed;
+
+  border-radius: 10px;
+
+  padding: 10px 12px;
+
+  color: #1e293b;
+
+  background: #fff;
+
+  font-family: inherit;
+
+  font-size: 12px;
+
+  outline: none;
+
+  transition:
+    border-color .18s ease,
+    box-shadow .18s ease,
+    background .18s ease;
+}
+
+
+#leave-form input,
+#leave-form select,
+#complaint-form input {
+  min-height: 40px;
+}
+
+
+#leave-form textarea,
+#leave-reply-form textarea,
+#reply-form textarea {
+  min-height: 90px;
+
+  resize: vertical;
+
+  line-height: 1.6;
+}
+
+
+#leave-form input:focus,
+#leave-form select:focus,
+#leave-form textarea:focus,
+#leave-reply-form textarea:focus,
+#complaint-form input:focus,
+#reply-form textarea:focus {
+  border-color: #93c5fd;
+
+  background: #fff;
+
+  box-shadow:
+    0 0 0 3px rgba(59, 130, 246, .09);
+}
+
+
+/* =========================================================
+   FORM ROW
+   ========================================================= */
+
+#leave-form .form-row {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 15px;
+}
+
+
+/* =========================================================
+   FORM BUTTONS
+   ========================================================= */
+
+#leave-form .btn,
+#leave-reply-form .btn,
+#complaint-form .btn,
+#reply-form .btn {
+  min-height: 39px;
+
+  padding: 9px 15px;
+
+  margin-right: 6px;
+
+  border-radius: 9px;
+
+  font-size: 11px;
+
+  font-weight: 750;
+
+  cursor: pointer;
+}
+
+
+#leave-form .btn-primary,
+#leave-reply-form .btn-primary,
+#complaint-form .btn-primary,
+#reply-form .btn-primary {
+  box-shadow:
+    0 5px 14px rgba(37, 99, 235, .15);
+}
+
+
+/* =========================================================
+   EMPTY TABLE STATE
+   ========================================================= */
+
+#tab-body table tbody td[colspan] {
+  padding: 42px 20px !important;
+
+  color: #94a3b8 !important;
+
+  font-size: 12px !important;
+
+  background: #fbfcfe;
+}
+
+
+#tab-body table tbody td[colspan]::before {
+  content: "📭";
+
+  display: block;
+
+  margin-bottom: 8px;
+
+  font-size: 25px;
+}
+
+
+/* =========================================================
+   COMPLAINTS TAB
+   ========================================================= */
+
+#tab-body table td:nth-child(3) {
+  font-weight: 600;
+}
+
+
+#tab-body table td:nth-child(4) {
+  color: #64748b;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   DESKTOP TABLE IMPROVEMENTS
+   ========================================================= */
+
+@media (min-width: 1100px) {
+
+  #tab-body table {
+    table-layout: auto;
+  }
+
+
+  #tab-body table thead th,
+  #tab-body table tbody td {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 950px) {
+
+  #page-content > .card {
+    border-radius: 17px;
+  }
+
+
+  /*
+    Make wide tables horizontally scrollable
+    without breaking the page.
+  */
+
+  #tab-body {
+    overflow-x: auto;
+  }
+
+
+  #tab-body table {
+    min-width: 850px;
+  }
+
+
+  #tab-body > p {
+    margin-right: 0;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 650px) {
+
+  #page-content > .card {
+    padding: 14px !important;
+
+    border-radius: 15px;
+  }
+
+
+  /* Tabs */
+
+  #page-content > .card > div:first-child {
+    margin-bottom: 15px !important;
+
+    width: 100%;
+  }
+
+
+  #page-content > .card > div:first-child .btn {
+    flex: 1;
+
+    min-height: 38px;
+
+    padding: 8px 9px;
+
+    font-size: 10px;
+  }
+
+
+  /* Action button */
+
+  #tab-body > .btn-primary {
+    width: 100%;
+
+    margin-bottom: 14px !important;
+  }
+
+
+  /* Table scrolling */
+
+  #tab-body {
+    margin-left: -2px;
+    margin-right: -2px;
+
+    padding-bottom: 3px;
+
+    overflow-x: auto;
+
+    -webkit-overflow-scrolling: touch;
+  }
+
+
+  #tab-body table {
+    min-width: 900px;
+
+    border-radius: 11px;
+  }
+
+
+  #tab-body table thead th {
+    padding: 10px;
+
+    font-size: 9px;
+  }
+
+
+  #tab-body table tbody td {
+    padding: 11px 10px;
+
+    font-size: 11px;
+  }
+
+
+  /* HOD message */
+
+  #tab-body > p {
+    align-items: flex-start;
+
+    font-size: 11px !important;
+
+    line-height: 1.5;
+  }
+
+
+  /* Form */
+
+  #leave-form > .card,
+  #leave-reply-form > .card,
+  #complaint-form > .card,
+  #reply-form > .card {
+    padding: 17px !important;
+
+    border-radius: 13px;
+  }
+
+
+  #leave-form .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+
+  #leave-form .btn,
+  #leave-reply-form .btn,
+  #complaint-form .btn,
+  #reply-form .btn {
+    width: 100%;
+
+    margin: 4px 0;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 390px) {
+
+  #page-content > .card {
+    padding: 11px !important;
+  }
+
+
+  #page-content > .card > div:first-child .btn {
+    font-size: 9.5px;
+
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
+
+  #tab-body table {
+    min-width: 850px;
+  }
+
+
+  #leave-form > .card,
+  #leave-reply-form > .card,
+  #complaint-form > .card,
+  #reply-form > .card {
+    padding: 14px !important;
+  }
+
+}
+
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+#tab-body::-webkit-scrollbar {
+  height: 6px;
+}
+
+
+#tab-body::-webkit-scrollbar-track {
+  background: #f1f5f9;
+
+  border-radius: 10px;
+}
+
+
+#tab-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+
+  border-radius: 10px;
+}
+
+
+#tab-body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+
+/* =========================================================
+   ACCESSIBILITY
+   ========================================================= */
+
+#tab-body button:focus-visible,
+#tab-body input:focus-visible,
+#tab-body select:focus-visible,
+#tab-body textarea:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, .15);
+
+  outline-offset: 2px;
+}

@@ -1,0 +1,776 @@
+/* =========================================================
+   CLOUD ATTENDANCE SYSTEM
+   LOGIN PORTAL
+   Advanced Responsive UI/UX
+   Desktop / Tablet / Mobile
+   ========================================================= */
+
+
+/* =========================================================
+   PAGE BACKGROUND
+   ========================================================= */
+
+.portal-bg {
+  min-height: 100vh;
+  min-height: 100svh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: relative;
+  overflow: hidden;
+
+  padding: 40px 24px;
+
+  background:
+    radial-gradient(
+      circle at 15% 15%,
+      rgba(16, 185, 129, .18),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 88% 85%,
+      rgba(245, 158, 11, .14),
+      transparent 28%
+    ),
+    linear-gradient(
+      135deg,
+      #031b12 0%,
+      #062418 48%,
+      #03140d 100%
+    );
+}
+
+
+/* =========================================================
+   DECORATIVE BACKGROUND GLOW
+   ========================================================= */
+
+.portal-bg::before,
+.portal-bg::after {
+  content: "";
+
+  position: absolute;
+
+  border-radius: 50%;
+
+  pointer-events: none;
+
+  filter: blur(80px);
+
+  opacity: .32;
+
+  animation: portalFloat 10s ease-in-out infinite alternate;
+}
+
+
+.portal-bg::before {
+  width: 430px;
+  height: 430px;
+
+  top: -170px;
+  left: -130px;
+
+  background: #059669;
+}
+
+
+.portal-bg::after {
+  width: 390px;
+  height: 390px;
+
+  right: -130px;
+  bottom: -150px;
+
+  background: #d97706;
+
+  animation-delay: -4s;
+}
+
+
+@keyframes portalFloat {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  to {
+    transform: translate3d(25px, 20px, 0) scale(1.08);
+  }
+}
+
+
+/* =========================================================
+   SUBTLE GRID OVERLAY
+   ========================================================= */
+
+.portal-bg {
+  isolation: isolate;
+}
+
+
+.portal-bg > .portal-wrap::before {
+  content: "";
+
+  position: fixed;
+  inset: 0;
+
+  pointer-events: none;
+
+  opacity: .035;
+
+  background-image:
+    linear-gradient(
+      rgba(255,255,255,.8) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255,255,255,.8) 1px,
+      transparent 1px
+    );
+
+  background-size: 45px 45px;
+
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 25%,
+    black 75%,
+    transparent
+  );
+
+  z-index: -1;
+}
+
+
+/* =========================================================
+   MAIN WRAPPER
+   ========================================================= */
+
+.portal-wrap {
+  position: relative;
+  z-index: 2;
+
+  width: min(920px, 100%);
+
+  text-align: center;
+
+  animation: portalAppear .65s ease both;
+}
+
+
+@keyframes portalAppear {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* =========================================================
+   BRAND / HEADING
+   ========================================================= */
+
+.portal-wrap h1 {
+  margin: 0 0 10px;
+
+  color: #ffffff;
+
+  font-size: clamp(25px, 4vw, 36px);
+
+  line-height: 1.15;
+
+  font-weight: 800;
+
+  letter-spacing: -.035em;
+
+  text-shadow:
+    0 8px 30px rgba(0,0,0,.25);
+}
+
+
+.portal-wrap h1::first-letter {
+  font-size: 1.05em;
+}
+
+
+/* =========================================================
+   TAGLINE
+   ========================================================= */
+
+.portal-wrap .tagline {
+  margin: 0 auto 42px;
+
+  color: #b9ccbe;
+
+  font-size: 14px;
+
+  line-height: 1.6;
+
+  letter-spacing: .01em;
+}
+
+
+/* =========================================================
+   PORTAL CARDS
+   ========================================================= */
+
+.portal-cards {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 22px;
+
+  width: 100%;
+}
+
+
+/* =========================================================
+   PORTAL CARD
+   ========================================================= */
+
+.portal-card {
+  position: relative;
+
+  display: block;
+
+  overflow: hidden;
+
+  padding: 38px 30px 32px;
+
+  border: 1px solid rgba(255,255,255,.12);
+
+  border-radius: 24px;
+
+  color: #ffffff;
+
+  text-align: center;
+
+  text-decoration: none;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.105),
+      rgba(255,255,255,.035)
+    );
+
+  box-shadow:
+    0 18px 50px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.08);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  cursor: pointer;
+
+  transform: translateY(0);
+
+  transition:
+    transform .28s cubic-bezier(.2,.8,.2,1),
+    border-color .28s ease,
+    background .28s ease,
+    box-shadow .28s ease;
+}
+
+
+/* Top shine */
+
+.portal-card::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 12%;
+
+  width: 76%;
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,.45),
+      transparent
+    );
+}
+
+
+/* Hover glow */
+
+.portal-card::after {
+  content: "";
+
+  position: absolute;
+
+  width: 170px;
+  height: 170px;
+
+  top: -90px;
+  right: -80px;
+
+  border-radius: 50%;
+
+  background: rgba(255,255,255,.08);
+
+  filter: blur(5px);
+
+  transition: transform .4s ease;
+}
+
+
+.portal-card:hover {
+  transform: translateY(-7px);
+
+  border-color: rgba(255,255,255,.22);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.14),
+      rgba(255,255,255,.055)
+    );
+
+  box-shadow:
+    0 25px 60px rgba(0,0,0,.30),
+    inset 0 1px 0 rgba(255,255,255,.12);
+}
+
+
+.portal-card:hover::after {
+  transform: scale(1.4);
+}
+
+
+/* =========================================================
+   CARD ICON
+   ========================================================= */
+
+.portal-icon {
+  position: relative;
+
+  width: 78px;
+  height: 78px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0 auto 20px;
+
+  border-radius: 23px;
+
+  font-size: 32px;
+
+  box-shadow:
+    0 12px 25px rgba(0,0,0,.18),
+    inset 0 1px 1px rgba(255,255,255,.25);
+
+  transition:
+    transform .3s ease,
+    box-shadow .3s ease;
+}
+
+
+.portal-card:hover .portal-icon {
+  transform: translateY(-3px) scale(1.04);
+
+  box-shadow:
+    0 16px 30px rgba(0,0,0,.23),
+    inset 0 1px 1px rgba(255,255,255,.3);
+}
+
+
+/* Student */
+
+.portal-card.student .portal-icon {
+  background:
+    linear-gradient(
+      135deg,
+      #047857,
+      #10b981
+    );
+}
+
+
+/* Staff */
+
+.portal-card.staff .portal-icon {
+  background:
+    linear-gradient(
+      135deg,
+      #c2410c,
+      #f59e0b
+    );
+}
+
+
+/* =========================================================
+   CARD TITLE
+   ========================================================= */
+
+.portal-card h2 {
+  position: relative;
+  z-index: 2;
+
+  margin: 0 0 9px;
+
+  color: #ffffff;
+
+  font-size: 20px;
+
+  font-weight: 800;
+
+  letter-spacing: -.02em;
+}
+
+
+/* =========================================================
+   CARD DESCRIPTION
+   ========================================================= */
+
+.portal-card p {
+  position: relative;
+  z-index: 2;
+
+  max-width: 330px;
+
+  margin: 0 auto 22px;
+
+  color: #cfe0d3;
+
+  font-size: 12.5px;
+
+  line-height: 1.65;
+}
+
+
+/* =========================================================
+   CONTINUE BUTTON
+   ========================================================= */
+
+.portal-card .go-btn {
+  position: relative;
+  z-index: 2;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-width: 145px;
+
+  min-height: 42px;
+
+  padding: 10px 22px;
+
+  border: 1px solid rgba(255,255,255,.15);
+
+  border-radius: 11px;
+
+  color: #062418;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 8px 18px rgba(0,0,0,.13);
+
+  font-size: 12px;
+
+  font-weight: 800;
+
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease,
+    background .2s ease;
+}
+
+
+.portal-card:hover .go-btn {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 11px 23px rgba(0,0,0,.20);
+
+  background: #f8fafc;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.portal-footer {
+  margin: 30px 0 0;
+
+  color: #718b7b;
+
+  font-size: 10.5px;
+
+  letter-spacing: .025em;
+}
+
+
+/* =========================================================
+   KEYBOARD ACCESSIBILITY
+   ========================================================= */
+
+.portal-card:focus-visible {
+  outline: 3px solid rgba(255,255,255,.5);
+
+  outline-offset: 4px;
+}
+
+
+.portal-card:focus-visible .go-btn {
+  box-shadow:
+    0 0 0 4px rgba(255,255,255,.15),
+    0 10px 25px rgba(0,0,0,.2);
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 760px) {
+
+  .portal-bg {
+    padding: 34px 20px;
+  }
+
+
+  .portal-wrap h1 {
+    font-size: 29px;
+  }
+
+
+  .portal-wrap .tagline {
+    margin-bottom: 30px;
+  }
+
+
+  .portal-cards {
+    gap: 17px;
+  }
+
+
+  .portal-card {
+    padding: 30px 22px;
+  }
+
+
+  .portal-icon {
+    width: 68px;
+    height: 68px;
+
+    border-radius: 20px;
+
+    font-size: 28px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 640px) {
+
+  .portal-bg {
+    min-height: 100svh;
+
+    padding: 30px 17px;
+  }
+
+
+  .portal-bg::before {
+    width: 300px;
+    height: 300px;
+
+    top: -100px;
+    left: -120px;
+  }
+
+
+  .portal-bg::after {
+    width: 290px;
+    height: 290px;
+
+    right: -130px;
+    bottom: -100px;
+  }
+
+
+  .portal-wrap h1 {
+    max-width: 330px;
+
+    margin-left: auto;
+    margin-right: auto;
+
+    font-size: 25px;
+
+    line-height: 1.2;
+  }
+
+
+  .portal-wrap .tagline {
+    margin-bottom: 25px;
+
+    font-size: 12.5px;
+  }
+
+
+  .portal-cards {
+    grid-template-columns: 1fr;
+
+    gap: 14px;
+  }
+
+
+  .portal-card {
+    padding: 25px 20px 24px;
+
+    border-radius: 19px;
+  }
+
+
+  .portal-icon {
+    width: 62px;
+    height: 62px;
+
+    margin-bottom: 14px;
+
+    border-radius: 18px;
+
+    font-size: 26px;
+  }
+
+
+  .portal-card h2 {
+    font-size: 17px;
+
+    margin-bottom: 7px;
+  }
+
+
+  .portal-card p {
+    max-width: 290px;
+
+    margin-bottom: 16px;
+
+    font-size: 11.5px;
+  }
+
+
+  .portal-card .go-btn {
+    min-height: 39px;
+
+    min-width: 130px;
+
+    padding: 8px 18px;
+
+    font-size: 11px;
+  }
+
+
+  .portal-footer {
+    margin-top: 22px;
+
+    font-size: 9.5px;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 390px) {
+
+  .portal-bg {
+    padding: 24px 13px;
+  }
+
+
+  .portal-wrap h1 {
+    font-size: 22px;
+  }
+
+
+  .portal-wrap .tagline {
+    font-size: 11.5px;
+
+    margin-bottom: 20px;
+  }
+
+
+  .portal-card {
+    padding: 22px 17px 21px;
+
+    border-radius: 17px;
+  }
+
+
+  .portal-icon {
+    width: 56px;
+    height: 56px;
+
+    border-radius: 16px;
+
+    font-size: 23px;
+  }
+
+
+  .portal-card h2 {
+    font-size: 16px;
+  }
+
+
+  .portal-card p {
+    font-size: 11px;
+
+    line-height: 1.55;
+  }
+
+
+  .portal-card .go-btn {
+    width: 100%;
+
+    box-sizing: border-box;
+  }
+
+}
+
+
+/* =========================================================
+   REDUCE MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .portal-bg::before,
+  .portal-bg::after,
+  .portal-wrap {
+    animation: none;
+  }
+
+
+  .portal-card,
+  .portal-icon,
+  .portal-card .go-btn {
+    transition: none;
+  }
+
+}
