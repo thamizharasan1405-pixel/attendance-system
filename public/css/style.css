@@ -333,3 +333,43 @@ label { font-size: 12.5px; color: var(--gray); font-weight: 700; display: block;
 .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
 .empty-state .title { font-size: 14px; font-weight: 700; color: var(--gray); margin-bottom: 4px; }
 .empty-state .sub { font-size: 12.5px; }
+
+/* ---------- Student card grid (unique template for Students page) ---------- */
+.student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.student-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow-sm); transition: box-shadow 0.2s, transform 0.2s; }
+.student-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+.student-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.student-card-actions { display: flex; gap: 2px; }
+.student-card-name { font-size: 14.5px; font-weight: 800; }
+.student-card-reg { font-size: 11.5px; color: var(--gray-light); font-weight: 600; margin-top: 1px; margin-bottom: 12px; }
+.student-card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.student-card-contact { font-size: 11.5px; color: var(--gray); font-weight: 600; display: flex; flex-direction: column; gap: 3px; border-top: 1px solid var(--border); padding-top: 10px; }
+
+/* ---------- Reports hero KPI band (unique template for Reports page) ---------- */
+.hero-kpi-band { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; background: linear-gradient(135deg, var(--indigo), #7c6ff0); border-radius: var(--radius); padding: 26px 10px; margin-bottom: 20px; box-shadow: 0 14px 32px rgba(79,70,229,0.28); }
+.hero-kpi { text-align: center; color: #fff; border-right: 1px solid rgba(255,255,255,0.25); }
+.hero-kpi:last-child { border-right: none; }
+.hero-kpi .num { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; }
+.hero-kpi .lbl { font-size: 11.5px; font-weight: 700; opacity: 0.85; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.4px; }
+@media (max-width: 700px) { .hero-kpi-band { grid-template-columns: 1fr; gap: 14px; } .hero-kpi { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.25); padding-bottom: 12px; } .hero-kpi:last-child { border-bottom: none; } }
+
+/* ---------- Absentee timeline groups (unique template for Absentee Lists) ---------- */
+.timeline-day { margin-bottom: 22px; }
+.timeline-day-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.timeline-day-header .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--indigo); }
+.timeline-day-header strong { font-size: 13.5px; }
+.timeline-day-header .count { font-size: 11px; color: var(--gray-light); font-weight: 700; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 8px; padding-left: 20px; }
+.chip {
+  display: flex; align-items: center; gap: 7px; background: var(--white); border: 1px solid var(--border);
+  border-radius: 30px; padding: 6px 13px 6px 6px; font-size: 12px; font-weight: 600;
+}
+.chip .chip-avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--rose-light); color: #9f1239; display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 800; }
+.chip .chip-meta { color: var(--gray-light); font-weight: 500; font-size: 10.8px; }
+
+/* ---------- Fee cards grid (unique template for Fee Records) ---------- */
+.fee-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+.fee-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow-sm); }
+.fee-card-top { display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; }
+.fee-card-amount { font-size: 24px; font-weight: 800; margin: 8px 0 4px; }
+.fee-card-term { font-size: 11.5px; color: var(--gray-light); font-weight: 600; }

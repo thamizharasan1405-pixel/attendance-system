@@ -24,35 +24,43 @@
       const canEdit = isAdmin || session.role === 'staff';
       const students = await apiGet('/students');
       document.getElementById('page-content').innerHTML = `
-        <div class="card">
-          <div class="toolbar">
-            <div class="search-box"><input id="search" placeholder="Search students..." oninput="filterRows()"></div>
-            ${canEdit ? `<button class="btn btn-primary" onclick="openForm()">+ Add Student</button>` : ''}
-          </div>
-          <table>
-            <thead><tr><th>#</th><th>Name</th><th>Reg No</th><th>Department</th><th>Year</th><th>Status</th>${canEdit ? '<th>Actions</th>' : ''}</tr></thead>
-            <tbody id="rows"></tbody>
-          </table>
+        <div class="toolbar" style="margin-bottom:20px;">
+          <div class="topbar-search" style="width:320px;"><span>🔍</span><input id="search" placeholder="Search students..." oninput="filterRows()"></div>
+          ${canEdit ? `<button class="btn btn-primary" onclick="openForm()">+ Add Student</button>` : ''}
         </div>
-        <div id="form-card"></div>
+        <div class="student-grid" id="rows"></div>
       `;
       window._students = students;
+      window._canEdit = canEdit;
       renderRows(students);
     }
 
+    const AVATAR_COLORS = ['c-blue', 'c-green', 'c-orange', 'c-purple', 'c-teal', 'c-rose', 'c-amber', 'c-sky', 'c-indigo', 'c-lime'];
+
     function renderRows(list) {
-      const isAdmin = session.role === 'admin';
-      const canEdit = isAdmin || session.role === 'staff';
+      const canEdit = window._canEdit;
       document.getElementById('rows').innerHTML = list.map((s, i) => `
-        <tr>
-          <td>${i + 1}</td><td>${titleCase(s.name)}</td><td>${s.regNo}</td><td>${s.department}</td><td>${s.year}</td>
-          <td><span class="badge ${s.status.toLowerCase()}">${s.status}</span></td>
-          ${canEdit ? `<td>
-            <button class="icon-btn" onclick="openForm(${s.id})">✏️</button>
-            <button class="icon-btn danger" onclick="removeStudent(${s.id})">🗑️</button>
-          </td>` : ''}
-        </tr>
-      `).join('') || `<tr><td colspan="${canEdit ? 7 : 6}"><div class="empty-state"><div class="icon">🎓</div><div class="title">No students found</div><div class="sub">Try adjusting your search or add a new student</div></div></td></tr>`;
+        <div class="student-card">
+          <div class="student-card-top">
+            <div class="student-avatar nav-badge ${AVATAR_COLORS[i % AVATAR_COLORS.length]}" style="width:44px;height:44px;font-size:16px;font-weight:800;">${titleCase(s.name).charAt(0)}</div>
+            ${canEdit ? `<div class="student-card-actions">
+              <button class="icon-btn" onclick="openForm(${s.id})">✏️</button>
+              <button class="icon-btn danger" onclick="removeStudent(${s.id})">🗑️</button>
+            </div>` : ''}
+          </div>
+          <div class="student-card-name">${titleCase(s.name)}</div>
+          <div class="student-card-reg">${s.regNo}</div>
+          <div class="student-card-tags">
+            <span class="badge pending">${s.department}</span>
+            <span class="badge pending">Year ${s.year}</span>
+            <span class="badge ${s.status.toLowerCase()}">${s.status}</span>
+          </div>
+          <div class="student-card-contact">
+            ${s.phone ? `<div>📞 ${s.phone}</div>` : ''}
+            ${s.email ? `<div>✉️ ${s.email}</div>` : ''}
+          </div>
+        </div>
+      `).join('') || `<div class="empty-state" style="grid-column:1/-1;"><div class="icon">🎓</div><div class="title">No students found</div><div class="sub">Try adjusting your search or add a new student</div></div>`;
     }
 
     function filterRows() {
@@ -63,33 +71,31 @@
     function openForm(id) {
       editingId = id || null;
       const s = id ? window._students.find(x => x.id === id) : { name: '', regNo: '', department: '', year: '', dob: '', phone: '', email: '', status: 'Active' };
-      document.getElementById('form-card').innerHTML = `
-        <div class="card">
-          <h3>${id ? 'Edit Student' : 'Add Student'}</h3>
-          <div class="form-row">
-            <div class="field"><label>Name</label><input id="f-name" value="${s.name}"></div>
-            <div class="field"><label>Register Number</label><input id="f-regNo" value="${s.regNo}"></div>
+      openModal(`
+        <h3>${id ? 'Edit Student' : 'Add Student'}</h3>
+        <div class="form-row">
+          <div class="field"><label>Name</label><input id="f-name" value="${s.name}"></div>
+          <div class="field"><label>Register Number</label><input id="f-regNo" value="${s.regNo}"></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Department</label>
+            <select id="f-department">${ALL_DEPARTMENTS.map(d => `<option value="${d}" ${s.department === d ? 'selected' : ''}>${d}</option>`).join('')}</select>
           </div>
-          <div class="form-row">
-            <div class="field"><label>Department</label>
-              <select id="f-department">${ALL_DEPARTMENTS.map(d => `<option value="${d}" ${s.department === d ? 'selected' : ''}>${d}</option>`).join('')}</select>
-            </div>
-            <div class="field"><label>Year</label>
-              <select id="f-year">${ALL_YEARS.map(y => `<option value="${y}" ${String(s.year) === String(y) ? 'selected' : ''}>Year ${y}</option>`).join('')}</select>
-            </div>
-          </div>
-          <div class="field"><label>Date of Birth</label><input id="f-dob" type="date" value="${s.dob || ''}"></div>
-          <div style="font-size:11.5px;color:#94a3b8;margin:-8px 0 16px;">Student uses Register Number + Department + this Date of Birth to log in.</div>
-          <div class="form-row">
-            <div class="field"><label>Phone</label><input id="f-phone" value="${s.phone || ''}"></div>
-            <div class="field"><label>Email</label><input id="f-email" value="${s.email || ''}"></div>
-          </div>
-          <div style="display:flex;gap:10px;">
-            <button class="btn btn-primary" onclick="saveStudent()">Save</button>
-            <button class="btn btn-outline" onclick="document.getElementById('form-card').innerHTML=''">Cancel</button>
+          <div class="field"><label>Year</label>
+            <select id="f-year">${ALL_YEARS.map(y => `<option value="${y}" ${String(s.year) === String(y) ? 'selected' : ''}>Year ${y}</option>`).join('')}</select>
           </div>
         </div>
-      `;
+        <div class="field"><label>Date of Birth</label><input id="f-dob" type="date" value="${s.dob || ''}"></div>
+        <div style="font-size:11.5px;color:#94a3b8;margin:-8px 0 16px;">Student uses Register Number + Department + this Date of Birth to log in.</div>
+        <div class="form-row">
+          <div class="field"><label>Phone</label><input id="f-phone" value="${s.phone || ''}"></div>
+          <div class="field"><label>Email</label><input id="f-email" value="${s.email || ''}"></div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary" onclick="saveStudent()">Save</button>
+          <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        </div>
+      `);
     }
 
     async function saveStudent() {
@@ -104,7 +110,7 @@
       };
       if (editingId) await apiPut('/students/' + editingId, body);
       else await apiPost('/students', body);
-      document.getElementById('form-card').innerHTML = '';
+      closeModal();
       load();
     }
 

@@ -29,6 +29,11 @@
         depts = depts.filter(d => myDepts.has(d));
       }
       document.getElementById('page-content').innerHTML = `
+        <div class="hero-kpi-band" id="hero-band">
+          <div class="hero-kpi"><div class="num" id="hero-percent">-</div><div class="lbl">Overall Attendance</div></div>
+          <div class="hero-kpi"><div class="num" id="hero-present">-</div><div class="lbl">Total Present</div></div>
+          <div class="hero-kpi"><div class="num" id="hero-absent">-</div><div class="lbl">Total Absent</div></div>
+        </div>
         <div class="card">
           <div class="toolbar">
             <div class="form-row" style="flex:1;grid-template-columns:1fr 1fr 1fr 1fr;">
@@ -109,6 +114,13 @@
       const labels = Object.keys(summary.weekly).sort();
       const present = labels.map(d => summary.weekly[d].present);
       const absent = labels.map(d => summary.weekly[d].absent);
+
+      const totalPresent = present.reduce((a, b) => a + b, 0);
+      const totalAbsent = absent.reduce((a, b) => a + b, 0);
+      const totalAll = totalPresent + totalAbsent;
+      document.getElementById('hero-percent').textContent = totalAll ? Math.round((totalPresent / totalAll) * 100) + '%' : '-';
+      document.getElementById('hero-present').textContent = totalPresent;
+      document.getElementById('hero-absent').textContent = totalAbsent;
 
       if (barChart) barChart.destroy();
       barChart = new Chart(document.getElementById('barChart'), {
