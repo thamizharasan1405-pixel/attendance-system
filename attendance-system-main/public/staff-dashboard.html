@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff Dashboard</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-shell" id="app-shell"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    const session = requireRole('staff');
+    if (session) {
+      renderShell({ role: 'staff', activeHref: '/staff-dashboard.html', title: 'Staff Dashboard', welcomeName: session.data.name });
+      load();
+    }
+
+    async function load() {
+      const staffId = session.data.staffId;
+      const data = await apiGet('/dashboard/staff/' + staffId);
+      const alertHtml = await buildMissedClassAlert();
+      document.getElementById('page-content').innerHTML = `
+        <div class="profile-head">
+          <div class="avatar-lg">${data.staff.name.charAt(0)}</div>
+          <div><h2>Welcome, ${data.staff.name}</h2><p>${data.staff.role} - ${data.staff.department}</p></div>
+        </div>
+        ${alertHtml}
+        <div class="stats-row">
+          <div class="stat-card blue"><div class="label">My Students</div><div class="value">${data.totalStudents}</div></div>
+          <div class="stat-card green"><div class="label">Today Present</div><div class="value">${data.todayPresent}</div></div>
+          <div class="stat-card red"><div class="label">Today Absent</div><div class="value">${data.todayAbsent}</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Quick Actions</h3>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <a href="/attendance-manual.html" class="btn btn-outline">✅ Mark Attendance</a>
+              <a href="/absentees.html" class="btn btn-outline">📋 Absentee Lists</a>
+              <a href="/staff-timetable.html" class="btn btn-outline">🗓️ Manage Timetable</a>
+              <a href="/reports.html" class="btn btn-outline">📈 View Reports</a>
+              <a href="/students.html" class="btn btn-outline">🎓 Student List</a>
+              <a href="/fees.html" class="btn btn-outline">💰 Fee Records</a>
+              <a href="/leave-notifications.html" class="btn btn-outline">📝 Leave Requests</a>
+            </div>
+          </div>
+          <div class="card">
+            <h3>My Profile</h3>
+            <p style="font-size:13px;margin-bottom:8px;"><strong>Staff ID:</strong> ${data.staff.staffId}</p>
+            <p style="font-size:13px;margin-bottom:8px;"><strong>Subject:</strong> ${data.staff.subject || '-'}</p>
+            <p style="font-size:13px;margin-bottom:8px;"><strong>Role:</strong> ${data.staff.role}</p>
+            <p style="font-size:13px;margin-bottom:8px;"><strong>Assigned To:</strong> ${data.staff.role === 'HOD' ? 'All departments · All years' : (data.staff.assignments || []).map(a => a.department + '-Y' + a.year).join(', ') || '-'}</p>
+            <p style="font-size:13px;margin-bottom:8px;"><strong>Phone:</strong> ${data.staff.phone || '-'}</p>
+            <p style="font-size:13px;"><strong>Email:</strong> ${data.staff.email || '-'}</p>
+            ${data.staff.bio ? `<p style="font-size:13px;margin-top:8px;color:#64748b;">${data.staff.bio}</p>` : ''}
+          </div>
+        </div>
+        <div class="card" style="margin-top:20px;" id="admin-card"></div>
+      `;
+      loadAdminCard();
+    }
+
+    async function loadAdminCard() {
+      try {
+        const admin = await apiGet('/admin/profile');
+        if (!admin.bio && !admin.link) { document.getElementById('admin-card').remove(); return; }
+        document.getElementById('admin-card').innerHTML = `
+          <h3>🏫 College Administration</h3>
+          <div style="display:flex;gap:14px;align-items:center;">
+            ${admin.photo ? `<img src="${admin.photo}" style="width:52px;height:52px;border-radius:16px;object-fit:cover;">` : `<div class="avatar-lg" style="width:52px;height:52px;font-size:18px;">${(admin.name || 'A').charAt(0)}</div>`}
+            <div>
+              <p style="font-size:13px;color:#475569;">${admin.bio || ''}</p>
+              ${admin.link ? `<a href="${admin.link}" target="_blank" style="font-size:12.5px;color:#6366f1;font-weight:600;">🔗 ${admin.link}</a>` : ''}
+            </div>
+          </div>
+        `;
+      } catch (e) { document.getElementById('admin-card')?.remove(); }
+    }
+
+    async function buildMissedClassAlert() {
+      if (session.data.role === 'HOD') return ''; // HOD isn't tied to one class, skip
+      const assignments = session.data.assignments || [];
+      const today = new Date().toISOString().slice(0, 10);
+      const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+      const missedAll = [];
+      for (const a of assignments) {
+        const timetable = await apiGet(`/timetable?department=${encodeURIComponent(a.department)}&year=${encodeURIComponent(a.year)}`);
+        const todayEntry = timetable.find(d => d.day === todayName);
+        if (!todayEntry || !todayEntry.slots.length) continue;
+        const marked = await apiGet(`/attendance?date=${today}&department=${encodeURIComponent(a.department)}`);
+        const markedPeriods = new Set(marked.filter(m => String(m.year || '') === String(a.year) || true).map(m => String(m.period)));
+        todayEntry.slots.forEach((s, i) => {
+          const period = i + 1;
+          if (!markedPeriods.has(String(period))) missedAll.push({ ...s, period, department: a.department, year: a.year });
+        });
+      }
+      if (missedAll.length === 0) return '';
+      return `
+        <div class="alert-banner">
+          ⚠️ <strong>${missedAll.length} class${missedAll.length > 1 ? 'es' : ''} today not yet marked:</strong>
+          ${missedAll.map(s => `${s.department}-Y${s.year} Period ${s.period} (${s.subject || 'Subject'} @ ${s.time})`).join(', ')}
+          — <a href="/attendance-manual.html" style="color:#9a3412;font-weight:700;">Mark now →</a>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

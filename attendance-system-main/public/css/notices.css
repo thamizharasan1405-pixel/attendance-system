@@ -1,0 +1,763 @@
+/* =========================================================
+   CLOUD ATTENDANCE SYSTEM
+   NOTICES & ANNOUNCEMENTS
+   Advanced SaaS UI / UX
+   Desktop + Tablet + Mobile
+   ========================================================= */
+
+
+/* =========================================================
+   MAIN CARD
+   ========================================================= */
+
+#page-content > .card {
+  position: relative;
+
+  overflow: hidden;
+
+  padding: 22px !important;
+
+  border: 1px solid #e7ecf3;
+
+  border-radius: 20px;
+
+  background: rgba(255, 255, 255, .96);
+
+  box-shadow:
+    0 10px 35px rgba(15, 23, 42, .055);
+}
+
+
+/* =========================================================
+   POST BUTTON
+   ========================================================= */
+
+#page-content > .card > .btn-primary {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 40px;
+
+  padding: 9px 16px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  font-size: 11.5px;
+
+  font-weight: 800;
+
+  letter-spacing: .01em;
+
+  box-shadow:
+    0 7px 18px rgba(37, 99, 235, .16);
+
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease;
+}
+
+
+#page-content > .card > .btn-primary:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 10px 24px rgba(37, 99, 235, .23);
+}
+
+
+/* =========================================================
+   NOTICE LIST
+   ========================================================= */
+
+#notice-list {
+  display: flex;
+
+  flex-direction: column;
+}
+
+
+/* =========================================================
+   INDIVIDUAL NOTICE
+   ========================================================= */
+
+#notice-list > div {
+  position: relative;
+
+  padding: 18px 4px !important;
+
+  border-bottom: 1px solid #edf1f5 !important;
+
+  transition:
+    background .2s ease,
+    padding-left .2s ease,
+    padding-right .2s ease;
+}
+
+
+#notice-list > div:first-child {
+  padding-top: 10px !important;
+}
+
+
+#notice-list > div:last-child {
+  border-bottom: none !important;
+
+  padding-bottom: 5px !important;
+}
+
+
+#notice-list > div:hover {
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+
+  border-radius: 12px;
+
+  background: #f8fafc;
+}
+
+
+/* =========================================================
+   NOTICE HEADER
+   ========================================================= */
+
+#notice-list > div > div:first-child {
+  display: flex;
+
+  align-items: flex-start;
+
+  justify-content: space-between;
+
+  gap: 18px;
+}
+
+
+/* =========================================================
+   NOTICE TITLE
+   ========================================================= */
+
+#notice-list strong {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  align-items: center;
+
+  gap: 5px;
+
+  max-width: 75%;
+
+  color: #172033;
+
+  font-size: 14px !important;
+
+  line-height: 1.45;
+
+  font-weight: 800;
+
+  letter-spacing: -.01em;
+}
+
+
+/* =========================================================
+   BELL ICON
+   ========================================================= */
+
+#notice-list strong::first-letter {
+  font-size: 15px;
+}
+
+
+/* =========================================================
+   SUBJECT / AUDIENCE BADGES
+   ========================================================= */
+
+#notice-list .badge {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 21px;
+
+  padding: 3px 8px !important;
+
+  border-radius: 999px;
+
+  font-size: 9px !important;
+
+  line-height: 1;
+
+  font-weight: 800;
+
+  letter-spacing: .02em;
+
+  white-space: nowrap;
+}
+
+
+/* Subject */
+
+#notice-list .badge.pending {
+  color: #92400e;
+
+  background: #fef3c7;
+
+  border: 1px solid #fde68a;
+}
+
+
+/* Audience */
+
+#notice-list .badge.active {
+  color: #1d4ed8;
+
+  background: #eff6ff;
+
+  border: 1px solid #bfdbfe;
+}
+
+
+/* =========================================================
+   DATE + DELETE AREA
+   ========================================================= */
+
+#notice-list > div > div:first-child > div {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: flex-end;
+
+  gap: 9px;
+
+  flex-shrink: 0;
+}
+
+
+#notice-list > div > div:first-child > div > span {
+  color: #94a3b8 !important;
+
+  font-size: 10.5px !important;
+
+  font-weight: 600;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   DELETE BUTTON
+   ========================================================= */
+
+#notice-list .icon-btn {
+  width: 31px;
+  height: 31px;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid #e7ebf0;
+
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  cursor: pointer;
+
+  transition:
+    color .18s ease,
+    background .18s ease,
+    border-color .18s ease,
+    transform .18s ease;
+}
+
+
+#notice-list .icon-btn:hover {
+  color: #dc2626;
+
+  border-color: #fecaca;
+
+  background: #fff1f2;
+
+  transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   NOTICE MESSAGE
+   ========================================================= */
+
+#notice-list > div > p:first-of-type {
+  max-width: 850px;
+
+  margin: 8px 0 5px !important;
+
+  color: #475569 !important;
+
+  font-size: 12.5px !important;
+
+  line-height: 1.7;
+}
+
+
+/* =========================================================
+   POSTED BY
+   ========================================================= */
+
+#notice-list > div > p:last-of-type {
+  display: flex;
+
+  align-items: center;
+
+  gap: 5px;
+
+  margin: 5px 0 0 !important;
+
+  color: #94a3b8 !important;
+
+  font-size: 10.5px !important;
+
+  line-height: 1.5;
+}
+
+
+#notice-list > div > p:last-of-type::before {
+  content: "•";
+
+  color: #cbd5e1;
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+#notice-list > p {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 170px;
+
+  margin: 0 !important;
+
+  padding: 30px 20px !important;
+
+  color: #94a3b8 !important;
+
+  font-size: 12px !important;
+
+  text-align: center;
+}
+
+
+#notice-list > p::before {
+  content: "🔔";
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 50px;
+  height: 50px;
+
+  margin-bottom: 12px;
+
+  border-radius: 16px;
+
+  background: #f1f5f9;
+
+  font-size: 22px;
+}
+
+
+/* =========================================================
+   POST FORM CARD
+   ========================================================= */
+
+#form-card > .card {
+  position: relative;
+
+  margin-bottom: 20px !important;
+
+  padding: 21px !important;
+
+  border: 1px solid #dbe5f0 !important;
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #fbfdff 0%,
+      #f6f9fd 100%
+    ) !important;
+
+  box-shadow:
+    0 8px 28px rgba(15, 23, 42, .055);
+}
+
+
+/* Top accent */
+
+#form-card > .card::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 20px;
+  right: 20px;
+
+  height: 2px;
+
+  border-radius: 0 0 4px 4px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #2563eb,
+      #6366f1
+    );
+}
+
+
+/* =========================================================
+   FORM TITLE
+   ========================================================= */
+
+#form-card h3 {
+  margin: 0 0 18px;
+
+  color: #172033;
+
+  font-size: 15px;
+
+  font-weight: 800;
+
+  letter-spacing: -.015em;
+}
+
+
+/* =========================================================
+   FORM FIELD
+   ========================================================= */
+
+#form-card .field {
+  margin-bottom: 14px;
+}
+
+
+#form-card label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: #475569;
+
+  font-size: 10.5px;
+
+  font-weight: 750;
+
+  letter-spacing: .02em;
+}
+
+
+/* =========================================================
+   FORM INPUTS
+   ========================================================= */
+
+#form-card input,
+#form-card select,
+#form-card textarea {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  border: 1px solid #dce3ed;
+
+  border-radius: 10px;
+
+  color: #1e293b;
+
+  background: #ffffff;
+
+  font-family: inherit;
+
+  font-size: 12px;
+
+  outline: none;
+
+  transition:
+    border-color .18s ease,
+    box-shadow .18s ease,
+    background .18s ease;
+}
+
+
+#form-card input,
+#form-card select {
+  min-height: 40px;
+
+  padding: 9px 12px;
+}
+
+
+#form-card textarea {
+  min-height: 90px;
+
+  padding: 10px 12px;
+
+  resize: vertical;
+
+  line-height: 1.6;
+}
+
+
+#form-card input:focus,
+#form-card select:focus,
+#form-card textarea:focus {
+  border-color: #93c5fd;
+
+  box-shadow:
+    0 0 0 3px rgba(59, 130, 246, .09);
+}
+
+
+/* =========================================================
+   FORM BUTTONS
+   ========================================================= */
+
+#form-card .btn {
+  min-height: 39px;
+
+  padding: 9px 16px;
+
+  margin-right: 6px;
+
+  border-radius: 9px;
+
+  font-size: 11px;
+
+  font-weight: 750;
+
+  cursor: pointer;
+}
+
+
+#form-card .btn-primary {
+  box-shadow:
+    0 5px 14px rgba(37, 99, 235, .15);
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 850px) {
+
+  #page-content > .card {
+    padding: 18px !important;
+  }
+
+
+  #notice-list > div > div:first-child {
+    gap: 12px;
+  }
+
+
+  #notice-list strong {
+    max-width: 70%;
+
+    font-size: 13px !important;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  #page-content > .card {
+    padding: 14px !important;
+
+    border-radius: 16px;
+  }
+
+
+  /* Post button */
+
+  #page-content > .card > .btn-primary {
+    width: 100%;
+
+    margin-bottom: 14px !important;
+  }
+
+
+  /* Notice item */
+
+  #notice-list > div {
+    padding: 16px 2px !important;
+  }
+
+
+  #notice-list > div:hover {
+    padding-left: 7px !important;
+    padding-right: 7px !important;
+  }
+
+
+  /* Header becomes two-row layout */
+
+  #notice-list > div > div:first-child {
+    flex-direction: column;
+
+    gap: 8px;
+  }
+
+
+  #notice-list strong {
+    max-width: 100%;
+
+    width: 100%;
+
+    font-size: 13px !important;
+  }
+
+
+  /* Date + delete */
+
+  #notice-list > div > div:first-child > div {
+    width: 100%;
+
+    justify-content: space-between;
+  }
+
+
+  #notice-list > div > div:first-child > div > span {
+    font-size: 10px !important;
+  }
+
+
+  /* Message */
+
+  #notice-list > div > p:first-of-type {
+    margin-top: 9px !important;
+
+    font-size: 11.5px !important;
+
+    line-height: 1.65;
+  }
+
+
+  /* Posted by */
+
+  #notice-list > div > p:last-of-type {
+    font-size: 9.5px !important;
+  }
+
+
+  /* Form */
+
+  #form-card > .card {
+    padding: 17px !important;
+
+    border-radius: 13px;
+  }
+
+
+  #form-card h3 {
+    font-size: 14px;
+  }
+
+
+  #form-card .btn {
+    width: 100%;
+
+    margin: 4px 0;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 390px) {
+
+  #page-content > .card {
+    padding: 11px !important;
+  }
+
+
+  #notice-list strong {
+    font-size: 12px !important;
+  }
+
+
+  #notice-list .badge {
+    font-size: 8px !important;
+
+    padding: 3px 6px !important;
+  }
+
+
+  #notice-list > div > p:first-of-type {
+    font-size: 11px !important;
+  }
+
+
+  #form-card > .card {
+    padding: 14px !important;
+  }
+
+}
+
+
+/* =========================================================
+   ACCESSIBILITY
+   ========================================================= */
+
+#notice-list button:focus-visible,
+#form-card button:focus-visible,
+#form-card input:focus-visible,
+#form-card select:focus-visible,
+#form-card textarea:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, .15);
+
+  outline-offset: 2px;
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  #notice-list > div,
+  #notice-list .icon-btn,
+  #page-content > .card > .btn-primary {
+    transition: none;
+  }
+
+}

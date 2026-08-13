@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR Code Attendance</title>
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/attendance-qr.css">
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</head>
+<body>
+  <div class="app-shell" id="app-shell"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const isSelfMode = params.get('self') === '1';
+    const session = getSession();
+    if (!session) window.location.href = '/login.html';
+    else if (isSelfMode && session.role === 'student') {
+      renderShell({ role: 'student', activeHref: '/attendance-qr.html', title: 'My QR Code', welcomeName: session.data.name });
+      loadSelfQr();
+    } else {
+      const s2 = requireAnyRole(['admin', 'staff']);
+      if (s2) {
+        renderShell({ role: s2.role, activeHref: '/attendance-qr.html', title: 'QR Code Attendance', welcomeName: s2.role === 'admin' ? 'Admin' : s2.data.name });
+        load();
+      }
+    }
+
+    function loadSelfQr() {
+      const student = session.data;
+      document.getElementById('page-content').innerHTML = `
+        <div class="card" style="max-width:360px;margin:0 auto;text-align:center;">
+          <h3>My QR Code</h3>
+          <p style="font-size:12.5px;color:#64748b;margin-bottom:16px;">Show this to staff for QR attendance scanning.</p>
+          <canvas id="my-qr"></canvas>
+          <p style="margin-top:10px;font-weight:600;">${student.name}</p>
+          <p style="font-size:12.5px;color:#94a3b8;">${student.regNo}</p>
+          <button class="btn btn-primary" style="margin-top:14px;" onclick="downloadMyQr()">Download QR Code</button>
+        </div>
+      `;
+      QRCode.toCanvas(document.getElementById('my-qr'), student.regNo, { width: 220 });
+    }
+
+    function downloadMyQr() {
+      const canvas = document.getElementById('my-qr');
+      const link = document.createElement('a');
+      link.download = session.data.regNo + '_qrcode.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    }
+
+    async function load() {
+      const students = await apiGet('/students');
+      document.getElementById('page-content').innerHTML = `
+        <div class="grid-2">
+          <div class="card">
+            <h3>Scan Student QR Code</h3>
+            <div class="qr-box">
+              <div id="qr-reader"></div>
+              <div class="scan-result" id="scan-result" style="display:none;"></div>
+              <button class="btn btn-primary" style="margin-top:14px;" id="scan-btn" onclick="startScanning()">Start Scanning</button>
+            </div>
+            <p style="font-size:12px;color:#94a3b8;text-align:center;">Point the camera at a student's QR code below. Allow camera access when prompted.</p>
+          </div>
+          <div class="card">
+            <h3>Recent Scans (Today)</h3>
+            <table>
+              <thead><tr><th>Student</th><th>Reg No</th><th>Time</th><th>Status</th></tr></thead>
+              <tbody id="recent-rows"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Student QR Codes (for testing without a camera)</h3>
+          <p style="font-size:12.5px;color:#64748b;margin-bottom:14px;">Each student's QR encodes their Register Number. Print or display these to scan, or use the manual "Simulate Scan" button.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:20px;" id="qr-grid"></div>
+        </div>
+      `;
+      loadRecent();
+      renderQrGrid(students);
+    }
+
+    async function loadRecent() {
+      const today = new Date().toISOString().slice(0, 10);
+      const records = await apiGet('/attendance?date=' + today);
+      const students = await apiGet('/students');
+      document.getElementById('recent-rows').innerHTML = records.slice().reverse().map(r => {
+        const st = students.find(s => s.regNo === r.regNo);
+        return `<tr><td>${st ? st.name : r.regNo}</td><td>${r.regNo}</td><td>${r.time}</td><td><span class="badge ${r.status.toLowerCase()}">${r.status}</span></td></tr>`;
+      }).join('') || '<tr><td colspan="4" style="text-align:center;color:#94a3b8;">No scans yet today</td></tr>';
+    }
+
+    function renderQrGrid(students) {
+      const grid = document.getElementById('qr-grid');
+      grid.innerHTML = students.map(s => `
+        <div style="text-align:center;">
+          <canvas id="qr-${s.regNo}"></canvas>
+          <div style="font-size:12px;margin-top:4px;">${s.name}<br><span style="color:#94a3b8;">${s.regNo}</span></div>
+          <button class="btn btn-outline" style="margin-top:6px;padding:4px 10px;font-size:11px;" onclick="simulateScan('${s.regNo}')">Simulate Scan</button>
+        </div>
+      `).join('');
+      students.forEach(s => {
+        QRCode.toCanvas(document.getElementById('qr-' + s.regNo), s.regNo, { width: 110 });
+      });
+    }
+
+    async function simulateScan(regNo) {
+      const result = await apiPost('/attendance/qr-scan', { regNo });
+      showResult(result);
+      loadRecent();
+    }
+
+    function showResult(result) {
+      const el = document.getElementById('scan-result');
+      el.style.display = 'block';
+      if (result.success) {
+        el.className = 'scan-result ok';
+        el.textContent = `✅ ${result.student} (${result.regNo}) marked Present at ${result.time}`;
+      } else {
+        el.className = 'scan-result err';
+        el.textContent = `❌ ${result.message}`;
+      }
+    }
+
+    let html5QrCode = null;
+    async function startScanning() {
+      const btn = document.getElementById('scan-btn');
+      if (html5QrCode) {
+        await html5QrCode.stop().catch(() => {});
+        html5QrCode = null;
+        btn.textContent = 'Start Scanning';
+        return;
+      }
+      try {
+        html5QrCode = new Html5Qrcode('qr-reader');
+        await html5QrCode.start(
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: 220 },
+          async (decodedText) => {
+            const result = await apiPost('/attendance/qr-scan', { regNo: decodedText.trim() });
+            showResult(result);
+            loadRecent();
+          },
+          () => {}
+        );
+        btn.textContent = 'Stop Scanning';
+      } catch (e) {
+        alert('Camera not available: ' + e.message + '\\nYou can use the "Simulate Scan" buttons below instead.');
+      }
+    }
+  </script>
+</body>
+</html>

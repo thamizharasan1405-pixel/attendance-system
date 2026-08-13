@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leave Requests / Notifications</title>
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/leave-notifications.css">
+</head>
+<body>
+  <div class="app-shell" id="app-shell"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    const session = getSession();
+    if (!session) window.location.href = '/login.html';
+    renderShell({ role: session.role, activeHref: '/leave-notifications.html', title: 'Leave Requests & Notifications', welcomeName: session.role === 'admin' ? 'Admin' : (session.data ? session.data.name : 'User') });
+
+    let tab = 'leave';
+    const LEAVE_TOPICS = ['Medical Leave', 'Personal Leave', 'Emergency', 'Family Function', 'Other'];
+
+    async function init() {
+      renderTabs();
+      loadLeave();
+    }
+
+    function renderTabs() {
+      document.getElementById('page-content').innerHTML = `
+        <div class="card">
+          <div style="display:flex;gap:10px;margin-bottom:16px;border-bottom:1px solid #e2e8f0;padding-bottom:10px;">
+            <button class="btn ${tab === 'leave' ? 'btn-primary' : 'btn-outline'}" onclick="switchTab('leave')">Leave Requests</button>
+            ${session.role !== 'staff' ? `<button class="btn ${tab === 'complaints' ? 'btn-primary' : 'btn-outline'}" onclick="switchTab('complaints')">Complaints</button>` : ''}
+          </div>
+          <div id="tab-body"></div>
+        </div>
+      `;
+    }
+
+    function switchTab(t) {
+      tab = t;
+      renderTabs();
+      if (t === 'leave') loadLeave(); else loadComplaints();
+    }
+
+    async function loadLeave() {
+      const isStudent = session.role === 'student';
+      const isStaff = session.role === 'staff';
+      const isAdmin = session.role === 'admin';
+      const isHOD = isStaff && session.data.role === 'HOD';
+      let query = '';
+      if (isStudent) query = '?regNo=' + session.data.regNo;
+      if (isStaff && !isHOD) query = '?staffId=' + session.data.staffId;
+      let list = await apiGet('/leave-requests' + query);
+      // Admin only reviews STUDENT leave requests. HOD reviews STAFF leave requests.
+      if (isAdmin) list = list.filter(l => !l.staffId);
+      if (isHOD) list = list.filter(l => !!l.staffId);
+      const canApprove = isAdmin || isHOD;
+      const body = document.getElementById('tab-body');
+      body.innerHTML = `
+        ${isStudent || (isStaff && !isHOD) ? `<button class="btn btn-primary" style="margin-bottom:14px;" onclick="openLeaveForm()">+ Request Leave</button>` : ''}
+        ${isHOD ? `<p style="font-size:12.5px;color:#94a3b8;margin-bottom:14px;">As HOD, you review leave requests from all staff.</p>` : ''}
+        <table>
+          <thead><tr><th>#</th><th>Name</th><th>Type</th><th>Topic</th><th>Reason</th><th>From</th><th>To</th><th>Status</th><th>Reply</th>${canApprove ? '<th>Actions</th>' : ''}</tr></thead>
+          <tbody>
+            ${list.map((l, i) => `
+              <tr>
+                <td>${i + 1}</td><td>${titleCase(l.studentName || l.staffName)}</td>
+                <td>${l.staffId ? 'Staff' : 'Student'}</td>
+                <td>${l.topic || '-'}</td>
+                <td>${l.reason}</td><td>${l.from}</td><td>${l.to}</td>
+                <td><span class="badge ${l.status.toLowerCase()}">${l.status}</span></td>
+                <td style="max-width:180px;font-size:12.5px;color:#64748b;">${l.reply || '-'}</td>
+                ${canApprove ? `<td>
+                  ${l.status === 'Pending' ? `
+                    <button class="icon-btn" onclick="setLeaveStatus(${l.id}, 'Approved')">✅</button>
+                    <button class="icon-btn danger" onclick="setLeaveStatus(${l.id}, 'Rejected')">❌</button>` : ''}
+                  <button class="icon-btn" onclick="openLeaveReply(${l.id}, '${(l.reply || '').replace(/'/g, "\\'")}')">💬</button>
+                </td>` : ''}
+              </tr>
+            `).join('') || `<tr><td colspan="10" style="text-align:center;color:#94a3b8;">No leave requests</td></tr>`}
+          </tbody>
+        </table>
+        <div id="leave-form"></div>
+        <div id="leave-reply-form"></div>
+      `;
+    }
+
+    function openLeaveForm() {
+      const isStaff = session.role === 'staff';
+      document.getElementById('leave-form').innerHTML = `
+        <div class="card" style="margin-top:14px;background:#f8fafc;">
+          <h3>New Leave Request</h3>
+          <div class="field"><label>Topic</label>
+            <select id="lf-topic">${LEAVE_TOPICS.map(t => `<option value="${t}">${t}</option>`).join('')}</select>
+          </div>
+          <div class="field"><label>Reason (details)</label><textarea id="lf-reason" rows="3" placeholder="Explain your reason for leave..."></textarea></div>
+          <div class="form-row">
+            <div class="field"><label>From</label><input type="date" id="lf-from"></div>
+            <div class="field"><label>To</label><input type="date" id="lf-to"></div>
+          </div>
+          <button class="btn btn-primary" onclick="submitLeave()">Submit to Admin</button>
+          <button class="btn btn-outline" onclick="document.getElementById('leave-form').innerHTML=''">Cancel</button>
+        </div>
+      `;
+    }
+
+    async function submitLeave() {
+      const isStaff = session.role === 'staff';
+      const body = {
+        topic: document.getElementById('lf-topic').value,
+        reason: document.getElementById('lf-reason').value,
+        from: document.getElementById('lf-from').value,
+        to: document.getElementById('lf-to').value
+      };
+      if (isStaff) {
+        body.staffId = session.data.staffId;
+        body.staffName = session.data.name;
+        body.department = session.data.department;
+      } else {
+        body.regNo = session.data.regNo;
+        body.studentName = session.data.name;
+      }
+      await apiPost('/leave-requests', body);
+      loadLeave();
+    }
+
+    async function setLeaveStatus(id, status) {
+      await apiPut('/leave-requests/' + id, { status });
+      loadLeave();
+    }
+
+    function openLeaveReply(id, existingReply) {
+      document.getElementById('leave-reply-form').innerHTML = `
+        <div class="card" style="margin-top:14px;">
+          <h3>Message to Requester</h3>
+          <div class="field"><label>Message</label><textarea id="lr-text" rows="3">${existingReply}</textarea></div>
+          <button class="btn btn-primary" onclick="submitLeaveReply(${id})">Send</button>
+        </div>
+      `;
+    }
+
+    async function submitLeaveReply(id) {
+      await apiPut('/leave-requests/' + id, { reply: document.getElementById('lr-text').value });
+      document.getElementById('leave-reply-form').innerHTML = '';
+      loadLeave();
+    }
+
+    async function loadComplaints() {
+      const isStudent = session.role === 'student';
+      const canReply = session.role === 'admin' || session.role === 'staff';
+      const query = isStudent ? '?regNo=' + session.data.regNo : '';
+      const list = await apiGet('/complaints' + query);
+      document.getElementById('tab-body').innerHTML = `
+        ${isStudent ? `<button class="btn btn-primary" style="margin-bottom:14px;" onclick="openComplaintForm()">+ Raise Complaint</button>` : ''}
+        <table>
+          <thead><tr><th>#</th><th>Student</th><th>Subject</th><th>Date</th><th>Status</th><th>Reply</th>${canReply ? '<th>Actions</th>' : ''}</tr></thead>
+          <tbody>
+            ${list.map((c, i) => `
+              <tr>
+                <td>${i + 1}</td><td>${titleCase(c.studentName)}</td><td>${c.subject}</td><td>${c.date}</td>
+                <td><span class="badge ${c.status.toLowerCase()}">${c.status}</span></td>
+                <td style="max-width:200px;font-size:12.5px;color:#64748b;">${c.reply || '-'}</td>
+                ${canReply ? `<td>
+                  <button class="icon-btn" onclick="openReplyForm(${c.id}, '${(c.reply || '').replace(/'/g, "\\'")}')">💬</button>
+                  ${c.status !== 'Resolved' ? `<button class="icon-btn" onclick="resolveComplaint(${c.id})">✅</button>` : ''}
+                </td>` : ''}
+              </tr>
+            `).join('') || `<tr><td colspan="7" style="text-align:center;color:#94a3b8;">No complaints</td></tr>`}
+          </tbody>
+        </table>
+        <div id="complaint-form"></div>
+        <div id="reply-form"></div>
+      `;
+    }
+
+    function openReplyForm(id, existingReply) {
+      document.getElementById('reply-form').innerHTML = `
+        <div class="card" style="margin-top:14px;">
+          <h3>Reply to Complaint</h3>
+          <div class="field"><label>Reply Message</label><textarea id="reply-text" rows="3">${existingReply}</textarea></div>
+          <button class="btn btn-primary" onclick="submitReply(${id})">Send Reply</button>
+        </div>
+      `;
+    }
+
+    async function submitReply(id) {
+      const reply = document.getElementById('reply-text').value;
+      await apiPut('/complaints/' + id, { reply });
+      document.getElementById('reply-form').innerHTML = '';
+      loadComplaints();
+    }
+
+    async function resolveComplaint(id) {
+      await apiPut('/complaints/' + id, { status: 'Resolved' });
+      loadComplaints();
+    }
+
+    function openComplaintForm() {
+      document.getElementById('complaint-form').innerHTML = `
+        <div class="card" style="margin-top:14px;">
+          <h3>New Complaint</h3>
+          <div class="field"><label>Subject</label><input id="cf-subject"></div>
+          <button class="btn btn-primary" onclick="submitComplaint()">Submit</button>
+        </div>
+      `;
+    }
+
+    async function submitComplaint() {
+      await apiPost('/complaints', {
+        regNo: session.data.regNo,
+        studentName: session.data.name,
+        subject: document.getElementById('cf-subject').value
+      });
+      loadComplaints();
+    }
+
+    init();
+  </script>
+</body>
+</html>

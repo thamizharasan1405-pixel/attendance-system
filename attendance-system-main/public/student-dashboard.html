@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Dashboard</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-shell" id="app-shell"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    const session = requireRole('student');
+    if (session) {
+      renderShell({ role: 'student', activeHref: '/student-dashboard.html', title: 'Student Dashboard', welcomeName: session.data.name });
+      load();
+    }
+
+    async function load() {
+      const regNo = session.data.regNo;
+      const data = await apiGet('/dashboard/student/' + regNo);
+      const fees = await apiGet('/fees?regNo=' + encodeURIComponent(regNo));
+      const alertHtml = (data.todayAbsences || []).length ? `
+        <div class="alert-banner danger">
+          ⚠️ You were marked <strong>Absent</strong> today${data.todayAbsences.map(a => ` — Period ${a.period || '-'}${a.subject ? ' (' + a.subject + ')' : ''}`).join(', ')}. Please check with your teacher if this is a mistake.
+        </div>
+      ` : '';
+      document.getElementById('page-content').innerHTML = `
+        <div class="profile-head">
+          <div class="avatar-lg">${data.student.name.charAt(0)}</div>
+          <div><h2>Welcome, ${data.student.name}</h2><p>${data.student.department} - Year ${data.student.year}</p></div>
+        </div>
+        ${alertHtml}
+        <div class="stats-row">
+          <div class="stat-card blue"><div class="label">Overall Attendance</div><div class="value">${data.stats.percent}%</div></div>
+          <div class="stat-card orange"><div class="label">This Month</div><div class="value">${data.monthStats.percent}%</div><div class="delta ${data.monthStats.percent >= 75 ? 'up' : 'down'}">${data.monthStats.present}/${data.monthStats.total} days present</div></div>
+          <div class="stat-card blue"><div class="label">This Week</div><div class="value">${data.weekStats.percent}%</div><div class="delta ${data.weekStats.percent >= 75 ? 'up' : 'down'}">${data.weekStats.present}/${data.weekStats.total} days present</div></div>
+          <div class="stat-card green"><div class="label">Present Days</div><div class="value">${data.stats.present}</div></div>
+          <div class="stat-card red"><div class="label">Absent Days</div><div class="value">${data.stats.absent}</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Recent Attendance</h3>
+            <table>
+              <thead><tr><th>Date</th><th>Period</th><th>Status</th></tr></thead>
+              <tbody>${data.recent.map(r => `<tr><td>${r.date}</td><td>${r.period ? 'Period ' + r.period : '-'}</td><td><span class="badge ${r.status.toLowerCase()}">${r.status}</span></td></tr>`).join('') || '<tr><td colspan="3" style="text-align:center;color:#94a3b8;">No records yet</td></tr>'}</tbody>
+            </table>
+            <button class="btn btn-outline" style="margin-top:14px;" onclick="downloadReport()">⬇ Download My Attendance Report (CSV)</button>
+          </div>
+          <div class="card">
+            <h3>My Profile</h3>
+            <p style="font-size:13px;margin-bottom:8px;"><strong>Reg No:</strong> ${data.student.regNo}</p>
+            <p style="font-size:13px;margin-bottom:8px;"><strong>Department:</strong> ${data.student.department}</p>
+            <p style="font-size:13px;margin-bottom:8px;"><strong>Year:</strong> ${data.student.year}</p>
+            <p style="font-size:13px;margin-bottom:8px;"><strong>Phone:</strong> ${data.student.phone || '-'}</p>
+            <p style="font-size:13px;"><strong>Email:</strong> ${data.student.email || '-'}</p>
+          </div>
+        </div>
+        <div class="card" style="margin-top:20px;">
+          <h3>💰 My Fees</h3>
+          <table>
+            <thead><tr><th>Term</th><th>Amount</th><th>Bill</th><th>Status</th></tr></thead>
+            <tbody>
+              ${fees.map(f => `
+                <tr>
+                  <td>${f.term || '-'}</td><td>₹${f.amount || 0}</td>
+                  <td>${f.photo ? `<a href="${f.photo}" target="_blank">📄 View</a>` : '-'}</td>
+                  <td><span class="badge ${f.status === 'Paid' ? 'active' : (f.status === 'Reported' ? 'pending' : 'pending')}">${f.status}</span></td>
+                </tr>
+              `).join('') || `<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:16px;">No fee records yet</td></tr>`}
+            </tbody>
+          </table>
+          <button class="btn btn-outline" style="margin-top:14px;" onclick="openFeeReportForm()">+ Report a Fee Payment</button>
+          <div id="fee-report-form"></div>
+        </div>
+        <div class="card" style="margin-top:20px;">
+          <h3>Quick Links</h3>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <a href="/timetable.html" class="btn btn-outline">🗓️ Timetable</a>
+            <a href="/subject-attendance.html" class="btn btn-outline">📚 Subject-wise Attendance</a>
+            <a href="/notices.html" class="btn btn-outline">🔔 Notices</a>
+            <a href="/leave-notifications.html?role=student" class="btn btn-outline">📝 Leave / Complaints</a>
+          </div>
+        </div>
+        <div class="card" style="margin-top:20px;" id="admin-card"></div>
+      `;
+      loadAdminCard();
+    }
+
+    function openFeeReportForm() {
+      document.getElementById('fee-report-form').innerHTML = `
+        <div class="card" style="margin-top:14px;background:#f8fafc;">
+          <h3>Report a Fee Payment</h3>
+          <p style="font-size:12px;color:#94a3b8;margin-bottom:14px;">Tell your staff/admin how much you paid — they'll verify and mark it.</p>
+          <div class="form-row">
+            <div class="field"><label>Amount (₹)</label><input id="fr-amount" type="number" placeholder="e.g. 20000"></div>
+            <div class="field"><label>Term</label><input id="fr-term" placeholder="e.g. Semester 4"></div>
+          </div>
+          <div class="field"><label>Note (optional)</label><textarea id="fr-note" rows="2" placeholder="Any extra detail for staff"></textarea></div>
+          <button class="btn btn-primary" onclick="submitFeeReport()">Submit</button>
+          <button class="btn btn-outline" onclick="document.getElementById('fee-report-form').innerHTML=''">Cancel</button>
+        </div>
+      `;
+    }
+
+    async function submitFeeReport() {
+      await apiPost('/fees', {
+        regNo: session.data.regNo,
+        amount: Number(document.getElementById('fr-amount').value) || 0,
+        term: document.getElementById('fr-term').value,
+        note: document.getElementById('fr-note').value,
+        status: 'Reported',
+        reportedBy: 'Student'
+      });
+      document.getElementById('fee-report-form').innerHTML = '';
+      load();
+    }
+
+    async function loadAdminCard() {
+      try {
+        const admin = await apiGet('/admin/profile');
+        if (!admin.bio && !admin.link) { document.getElementById('admin-card').remove(); return; }
+        document.getElementById('admin-card').innerHTML = `
+          <h3>🏫 College Administration</h3>
+          <div style="display:flex;gap:14px;align-items:center;">
+            ${admin.photo ? `<img src="${admin.photo}" style="width:52px;height:52px;border-radius:16px;object-fit:cover;">` : `<div class="avatar-lg" style="width:52px;height:52px;font-size:18px;">${(admin.name || 'A').charAt(0)}</div>`}
+            <div>
+              <p style="font-size:13px;color:#475569;">${admin.bio || ''}</p>
+              ${admin.link ? `<a href="${admin.link}" target="_blank" style="font-size:12.5px;color:#6366f1;font-weight:600;">🔗 ${admin.link}</a>` : ''}
+            </div>
+          </div>
+        `;
+      } catch (e) { document.getElementById('admin-card')?.remove(); }
+    }
+
+    function downloadReport() {
+      window.location.href = '/api/student/' + encodeURIComponent(session.data.regNo) + '/report-csv';
+    }
+  </script>
+</body>
+</html>

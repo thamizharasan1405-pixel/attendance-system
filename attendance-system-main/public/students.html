@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Management</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-shell" id="app-shell"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    const session = requireAnyRole(['admin', 'staff']);
+    if (session) {
+      const isAdmin = session.role === 'admin';
+      renderShell({ role: session.role, activeHref: '/students.html', title: 'Student Management', welcomeName: isAdmin ? 'Admin' : session.data.name });
+      load();
+    }
+
+    let editingId = null;
+
+    async function load() {
+      const isAdmin = session.role === 'admin';
+      const canEdit = isAdmin || session.role === 'staff';
+      const students = await apiGet('/students');
+      document.getElementById('page-content').innerHTML = `
+        <div class="toolbar" style="margin-bottom:20px;">
+          <div class="topbar-search" style="width:320px;"><span>🔍</span><input id="search" placeholder="Search students..." oninput="filterRows()"></div>
+          ${canEdit ? `<button class="btn btn-primary" onclick="openForm()">+ Add Student</button>` : ''}
+        </div>
+        <div class="student-grid" id="rows"></div>
+      `;
+      window._students = students;
+      window._canEdit = canEdit;
+      renderRows(students);
+    }
+
+    const AVATAR_COLORS = ['c-blue', 'c-green', 'c-orange', 'c-purple', 'c-teal', 'c-rose', 'c-amber', 'c-sky', 'c-indigo', 'c-lime'];
+
+    function renderRows(list) {
+      const canEdit = window._canEdit;
+      document.getElementById('rows').innerHTML = list.map((s, i) => `
+        <div class="student-card">
+          <div class="student-card-top">
+            <div class="student-avatar nav-badge ${AVATAR_COLORS[i % AVATAR_COLORS.length]}" style="width:44px;height:44px;font-size:16px;font-weight:800;">${titleCase(s.name).charAt(0)}</div>
+            ${canEdit ? `<div class="student-card-actions">
+              <button class="icon-btn" onclick="openForm(${s.id})">✏️</button>
+              <button class="icon-btn danger" onclick="removeStudent(${s.id})">🗑️</button>
+            </div>` : ''}
+          </div>
+          <div class="student-card-name">${titleCase(s.name)}</div>
+          <div class="student-card-reg">${s.regNo}</div>
+          <div class="student-card-tags">
+            <span class="badge pending">${s.department}</span>
+            <span class="badge pending">Year ${s.year}</span>
+            <span class="badge ${s.status.toLowerCase()}">${s.status}</span>
+          </div>
+          <div class="student-card-contact">
+            ${s.phone ? `<div>📞 ${s.phone}</div>` : ''}
+            ${s.email ? `<div>✉️ ${s.email}</div>` : ''}
+          </div>
+        </div>
+      `).join('') || `<div class="empty-state" style="grid-column:1/-1;"><div class="icon">🎓</div><div class="title">No students found</div><div class="sub">Try adjusting your search or add a new student</div></div>`;
+    }
+
+    function filterRows() {
+      const q = document.getElementById('search').value.toLowerCase();
+      renderRows(window._students.filter(s => s.name.toLowerCase().includes(q) || s.regNo.toLowerCase().includes(q)));
+    }
+
+    function openForm(id) {
+      editingId = id || null;
+      const s = id ? window._students.find(x => x.id === id) : { name: '', regNo: '', department: '', year: '', dob: '', phone: '', email: '', status: 'Active' };
+      openModal(`
+        <h3>${id ? 'Edit Student' : 'Add Student'}</h3>
+        <div class="form-row">
+          <div class="field"><label>Name</label><input id="f-name" value="${s.name}"></div>
+          <div class="field"><label>Register Number</label><input id="f-regNo" value="${s.regNo}"></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Department</label>
+            <select id="f-department">${ALL_DEPARTMENTS.map(d => `<option value="${d}" ${s.department === d ? 'selected' : ''}>${d}</option>`).join('')}</select>
+          </div>
+          <div class="field"><label>Year</label>
+            <select id="f-year">${ALL_YEARS.map(y => `<option value="${y}" ${String(s.year) === String(y) ? 'selected' : ''}>Year ${y}</option>`).join('')}</select>
+          </div>
+        </div>
+        <div class="field"><label>Date of Birth</label><input id="f-dob" type="date" value="${s.dob || ''}"></div>
+        <div style="font-size:11.5px;color:#94a3b8;margin:-8px 0 16px;">Student uses Register Number + Department + this Date of Birth to log in.</div>
+        <div class="form-row">
+          <div class="field"><label>Phone</label><input id="f-phone" value="${s.phone || ''}"></div>
+          <div class="field"><label>Email</label><input id="f-email" value="${s.email || ''}"></div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary" onclick="saveStudent()">Save</button>
+          <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        </div>
+      `);
+    }
+
+    async function saveStudent() {
+      const body = {
+        name: titleCase(document.getElementById('f-name').value.trim()),
+        regNo: document.getElementById('f-regNo').value.trim().toUpperCase(),
+        department: document.getElementById('f-department').value,
+        year: document.getElementById('f-year').value,
+        dob: document.getElementById('f-dob').value,
+        phone: document.getElementById('f-phone').value,
+        email: document.getElementById('f-email').value
+      };
+      if (editingId) await apiPut('/students/' + editingId, body);
+      else await apiPost('/students', body);
+      closeModal();
+      load();
+    }
+
+    async function removeStudent(id) {
+      confirmModal('This will permanently remove the student and their attendance history cannot be recovered.', async () => {
+        await apiDelete('/students/' + id);
+        load();
+      });
+    }
+  </script>
+</body>
+</html>

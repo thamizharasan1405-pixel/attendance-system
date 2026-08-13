@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timetable</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-shell" id="app-shell"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    const session = requireRole('student');
+    const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const PERIODS = [1, 2, 3, 4, 5];
+    if (session) {
+      renderShell({ role: 'student', activeHref: '/timetable.html', title: 'My Timetable', welcomeName: session.data.name });
+      load();
+    }
+
+    async function load() {
+      const timetable = await apiGet(`/timetable?department=${encodeURIComponent(session.data.department)}&year=${encodeURIComponent(session.data.year)}`);
+      const byDay = {};
+      timetable.forEach(d => byDay[d.day] = d.slots || []);
+      document.getElementById('page-content').innerHTML = `
+        <div class="card">
+          <h3>${session.data.department} - Year ${session.data.year} · Weekly Timetable</h3>
+          ${timetable.length === 0 ? '<p style="text-align:center;color:#94a3b8;padding:20px;">No timetable published yet</p>' : `
+          <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Day</th>${PERIODS.map(p => `<th>Period ${p}</th>`).join('')}</tr></thead>
+            <tbody>
+              ${DAYS.map(day => {
+                const slots = byDay[day] || [];
+                return `<tr>
+                  <td style="font-weight:700;color:#6366f1;">${day}</td>
+                  ${PERIODS.map((p, i) => {
+                    const s = slots[i];
+                    return `<td>${s ? `<div style="font-weight:600;">${s.subject || '-'}</div><div style="font-size:11px;color:#94a3b8;">${s.staff || ''}${s.time ? ' · ' + s.time : ''}</div>` : '<span style="color:#d1d5db;">-</span>'}</td>`;
+                  }).join('')}
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+          </div>`}
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

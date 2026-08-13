@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fee Records</title>
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/fees.css">
+</head>
+<body>
+  <div class="app-shell" id="app-shell"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    const session = requireAnyRole(['admin', 'staff']);
+    const isStaff = session && session.role === 'staff';
+    let allStudents = [];
+    let pendingBillPhoto = null;
+
+    async function init() {
+      if (!session) return;
+      renderShell({ role: session.role, activeHref: '/fees.html', title: 'Fee Records', welcomeName: session.role === 'admin' ? 'Admin' : session.data.name });
+      allStudents = await apiGet('/students');
+      const isHOD = isStaff && session.data.role === 'HOD';
+      const assignments = isStaff ? (session.data.assignments || []) : [];
+      const depts = isHOD || !isStaff ? ALL_DEPARTMENTS.slice() : [...new Set(assignments.map(a => a.department))];
+      window._assignments = assignments;
+      window._isLocked = isStaff && !isHOD;
+      document.getElementById('page-content').innerHTML = `
+        <div class="card">
+          <div class="form-row" style="grid-template-columns:1fr 1fr;max-width:520px;">
+            <div class="field"><label>Department</label>
+              <select id="dept" onchange="onDeptChange()">${depts.map(d => `<option value="${d}">${d}</option>`).join('')}</select>
+            </div>
+            <div class="field"><label>Year</label>
+              <select id="year" onchange="load()"></select>
+            </div>
+          </div>
+          <div id="wrap"></div>
+        </div>
+        <div id="fee-form"></div>
+      `;
+      populateYears();
+      load();
+    }
+
+    function populateYears() {
+      const dept = document.getElementById('dept').value;
+      const yearSel = document.getElementById('year');
+      if (window._isLocked) {
+        const years = window._assignments.filter(a => a.department === dept).map(a => a.year);
+        yearSel.innerHTML = `<option value="">All my years</option>` + years.map(y => `<option value="${y}">Year ${y}</option>`).join('');
+      } else {
+        yearSel.innerHTML = `<option value="">All Years</option>` + ALL_YEARS.map(y => `<option value="${y}">Year ${y}</option>`).join('');
+      }
+    }
+
+    function onDeptChange() {
+      populateYears();
+      load();
+    }
+
+    async function load() {
+      const dept = document.getElementById('dept').value;
+      const year = document.getElementById('year').value;
+      let students = allStudents.filter(s => s.department === dept);
+      if (year) students = students.filter(s => String(s.year) === String(year));
+      const fees = await apiGet(`/fees?department=${encodeURIComponent(dept)}`);
+      window._feesByReg = {};
+      fees.forEach(f => { (window._feesByReg[f.regNo] = window._feesByReg[f.regNo] || []).push(f); });
+      window._students = students;
+
+      const cards = [];
+      students.forEach(s => {
+        const records = window._feesByReg[s.regNo] || [];
+        if (records.length === 0) {
+          cards.push(`
+            <div class="fee-card">
+              <div class="fee-card-top"><strong>${titleCase(s.name)}</strong><span class="badge pending">No Record</span></div>
+              <div class="fee-card-term">${s.regNo}</div>
+              <button class="btn btn-outline" style="margin-top:14px;width:100%;" onclick="openFeeForm('${s.regNo}')">+ Add Record</button>
+            </div>
+          `);
+        } else {
+          records.forEach(f => {
+            cards.push(`
+              <div class="fee-card">
+                <div class="fee-card-top"><strong>${titleCase(s.name)}</strong><span class="badge ${f.status === 'Paid' ? 'active' : 'pending'}">${f.status}</span></div>
+                <div class="fee-card-term">${s.regNo} · ${f.term || 'No term set'}</div>
+                <div class="fee-card-amount">₹${f.amount || 0}</div>
+                ${f.reportedBy === 'Student' ? `<div style="font-size:10.8px;color:#94a3b8;margin-bottom:8px;">📌 Reported by student${f.note ? ': ' + f.note : ''}</div>` : ''}
+                ${f.photo ? `<a href="${f.photo}" target="_blank" style="font-size:11.5px;font-weight:700;color:var(--indigo);">📄 View Bill</a>` : ''}
+                <div style="display:flex;gap:8px;margin-top:12px;">
+                  ${f.status !== 'Paid' ? `<button class="btn btn-primary" style="flex:1;" onclick="markPaid(${f.id})">Mark Paid</button>` : ''}
+                  <button class="icon-btn" onclick="openFeeForm('${s.regNo}', ${f.id})">✏️</button>
+                </div>
+              </div>
+            `);
+          });
+        }
+      });
+
+      document.getElementById('wrap').innerHTML = `<div class="fee-grid">${cards.join('') || `<div class="empty-state" style="grid-column:1/-1;"><div class="icon">💰</div><div class="title">No students in this selection</div></div>`}</div>`;
+    }
+
+    function openFeeForm(regNo, feeId) {
+      const existing = feeId ? (window._feesByReg[regNo] || []).find(f => f.id === feeId) : null;
+      pendingBillPhoto = existing ? existing.photo : null;
+      openModal(`
+        <h3>${feeId ? 'Edit' : 'Add'} Fee Record</h3>
+        <div class="form-row">
+          <div class="field"><label>Term</label><input id="ff-term" value="${existing ? existing.term || '' : ''}" placeholder="e.g. Semester 5"></div>
+          <div class="field"><label>Amount (₹)</label><input id="ff-amount" type="number" value="${existing ? existing.amount || '' : ''}" placeholder="5000"></div>
+        </div>
+        <div class="field"><label>Status</label>
+          <select id="ff-status">
+            <option value="Due" ${existing && existing.status === 'Due' ? 'selected' : ''}>Due</option>
+            <option value="Reported" ${existing && existing.status === 'Reported' ? 'selected' : ''}>Reported (awaiting verification)</option>
+            <option value="Paid" ${existing && existing.status === 'Paid' ? 'selected' : ''}>Paid</option>
+          </select>
+        </div>
+        <div class="field"><label>Bill / Receipt Photo</label>
+          <input type="file" id="ff-photo" accept="image/*,.pdf" onchange="onBillPhoto(event)">
+          ${existing && existing.photo ? `<div style="margin-top:8px;font-size:12px;color:#16a34a;">✅ Photo already attached — choose a new file to replace it</div>` : ''}
+        </div>
+        <button class="btn btn-primary" onclick="saveFee('${regNo}', ${feeId || 'null'})">Save</button>
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      `);
+    }
+
+    function onBillPhoto(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => { pendingBillPhoto = reader.result; };
+      reader.readAsDataURL(file);
+    }
+
+    async function saveFee(regNo, feeId) {
+      const body = {
+        term: document.getElementById('ff-term').value,
+        amount: Number(document.getElementById('ff-amount').value) || 0,
+        status: document.getElementById('ff-status').value
+      };
+      if (pendingBillPhoto) body.photo = pendingBillPhoto;
+      if (feeId) await apiPut('/fees/' + feeId, body);
+      else await apiPost('/fees', { regNo, ...body });
+      closeModal();
+      pendingBillPhoto = null;
+      load();
+    }
+
+    async function markPaid(id) {
+      await apiPut('/fees/' + id, { status: 'Paid' });
+      load();
+    }
+
+    if (session) init();
+  </script>
+</body>
+</html>

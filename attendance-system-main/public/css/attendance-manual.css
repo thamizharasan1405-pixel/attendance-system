@@ -1,0 +1,1083 @@
+/* =========================================================
+   CLOUD ATTENDANCE SYSTEM
+   MANUAL ATTENDANCE PAGE
+   Desktop + Tablet + Mobile
+   ========================================================= */
+
+
+/* =========================================================
+   PAGE FOUNDATION
+   ========================================================= */
+
+#page-content {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+
+/* =========================================================
+   MAIN CARD
+   ========================================================= */
+
+#page-content > .card {
+  width: 100%;
+
+  overflow: hidden;
+
+  padding: 0;
+
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  border-radius: 24px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 12px 35px rgba(15, 23, 42, 0.055),
+    0 2px 7px rgba(15, 23, 42, 0.025);
+
+  animation: manual-page-in 0.45s ease both;
+}
+
+
+/* =========================================================
+   FILTER SECTION
+   ========================================================= */
+
+#page-content > .card > .form-row {
+  display: grid !important;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr)) !important;
+
+  gap: 16px;
+
+  margin: 0 !important;
+
+  padding: 24px;
+
+  border-bottom: 1px solid #edf0f4;
+
+  background:
+    linear-gradient(
+      180deg,
+      #f8fafc 0%,
+      #ffffff 100%
+    );
+}
+
+
+/* =========================================================
+   FIELD
+   ========================================================= */
+
+#page-content .field {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+
+#page-content .field label {
+  color: #475467;
+
+  font-size: 10.5px;
+
+  line-height: 1.3;
+
+  font-weight: 800;
+
+  letter-spacing: 0.055em;
+
+  text-transform: uppercase;
+}
+
+
+/* =========================================================
+   FILTER CONTROLS
+   ========================================================= */
+
+#page-content .field select,
+#page-content .field input[type="date"],
+#page-content > .card > .field input {
+  width: 100%;
+
+  height: 46px;
+
+  box-sizing: border-box;
+
+  padding: 0 14px;
+
+  border: 1px solid #dfe3ea;
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  color: #172033;
+
+  font-family: inherit;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+
+#page-content .field select {
+  appearance: none;
+  -webkit-appearance: none;
+
+  padding-right: 38px;
+
+  background-image:
+    linear-gradient(45deg, transparent 50%, #667085 50%),
+    linear-gradient(135deg, #667085 50%, transparent 50%);
+
+  background-position:
+    calc(100% - 17px) 19px,
+    calc(100% - 12px) 19px;
+
+  background-size:
+    5px 5px,
+    5px 5px;
+
+  background-repeat: no-repeat;
+}
+
+
+#page-content .field select:hover,
+#page-content .field input:hover {
+  border-color: #c7cdd8;
+}
+
+
+#page-content .field select:focus,
+#page-content .field input:focus {
+  border-color: #6366f1;
+
+  box-shadow:
+    0 0 0 4px rgba(99, 102, 241, 0.10);
+}
+
+
+/* =========================================================
+   ASSIGNMENT HINT
+   ========================================================= */
+
+#page-content .field > div[style*="font-size"] {
+  margin-top: -2px !important;
+
+  color: #98a2b3 !important;
+
+  font-size: 10.5px !important;
+
+  line-height: 1.4;
+
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   SUBJECT FIELD
+   ========================================================= */
+
+#page-content > .card > .field {
+  margin: 0;
+
+  padding: 20px 24px 0;
+}
+
+
+#page-content > .card > .field > label {
+  margin-bottom: 0;
+}
+
+
+#page-content > .card > .field > input {
+  max-width: 100%;
+}
+
+
+/* =========================================================
+   TABLE WRAPPER
+   ========================================================= */
+
+#table-wrap {
+  margin-top: 20px !important;
+
+  padding: 0 24px 26px;
+
+  overflow-x: auto;
+
+  -webkit-overflow-scrolling: touch;
+
+  scrollbar-width: thin;
+
+  scrollbar-color: #d0d5dd transparent;
+}
+
+
+/* =========================================================
+   QUICK ACTIONS
+   ========================================================= */
+
+#table-wrap > div:first-child {
+  display: flex !important;
+
+  align-items: center;
+
+  gap: 10px !important;
+
+  min-height: 42px;
+
+  margin-bottom: 14px !important;
+
+  padding: 0;
+}
+
+
+/* =========================================================
+   BUTTON BASE
+   ========================================================= */
+
+#table-wrap .btn {
+  min-height: 42px;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  padding: 0 15px;
+
+  border-radius: 11px;
+
+  font-family: inherit;
+
+  font-size: 12px;
+
+  font-weight: 750;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+
+#table-wrap .btn:hover {
+  transform: translateY(-1px);
+}
+
+
+#table-wrap .btn:active {
+  transform: translateY(0);
+}
+
+
+#table-wrap .btn-primary {
+  border: 1px solid #4f46e5;
+
+  background:
+    linear-gradient(
+      135deg,
+      #4f46e5,
+      #6366f1
+    );
+
+  color: #ffffff;
+
+  box-shadow:
+    0 6px 15px rgba(79, 70, 229, 0.18);
+}
+
+
+#table-wrap .btn-primary:hover {
+  box-shadow:
+    0 9px 20px rgba(79, 70, 229, 0.25);
+}
+
+
+#table-wrap .btn-outline {
+  border: 1px solid #dfe3ea;
+
+  background: #ffffff;
+
+  color: #475467;
+}
+
+
+#table-wrap .btn-outline:hover {
+  border-color: #c7cdd8;
+
+  background: #f8fafc;
+}
+
+
+/* =========================================================
+   ATTENDANCE TABLE
+   ========================================================= */
+
+#table-wrap table {
+  width: 100%;
+
+  min-width: 720px;
+
+  border-collapse: separate;
+
+  border-spacing: 0;
+
+  overflow: hidden;
+
+  border: 1px solid #eaecf0;
+
+  border-radius: 15px;
+
+  background: #ffffff;
+
+  font-size: 12.5px;
+}
+
+
+/* =========================================================
+   TABLE HEADER
+   ========================================================= */
+
+#table-wrap table thead th {
+  height: 45px;
+
+  padding: 0 15px;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  background:
+    linear-gradient(
+      180deg,
+      #f8fafc,
+      #f5f7fa
+    );
+
+  color: #667085;
+
+  font-size: 10px;
+
+  line-height: 1;
+
+  font-weight: 800;
+
+  letter-spacing: 0.055em;
+
+  text-align: left;
+
+  text-transform: uppercase;
+
+  white-space: nowrap;
+}
+
+
+#table-wrap table thead th:first-child {
+  padding-left: 18px;
+
+  width: 50px;
+
+  text-align: center;
+}
+
+
+#table-wrap table thead th:last-child {
+  padding-right: 18px;
+}
+
+
+/* =========================================================
+   TABLE BODY
+   ========================================================= */
+
+#table-wrap table tbody tr {
+  transition: background 0.16s ease;
+}
+
+
+#table-wrap table tbody tr:hover {
+  background: #fafbff;
+}
+
+
+#table-wrap table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+
+#table-wrap table tbody td {
+  height: 62px;
+
+  padding: 8px 15px;
+
+  border-bottom: 1px solid #f0f2f5;
+
+  color: #475467;
+
+  font-size: 12.5px;
+
+  font-weight: 550;
+
+  vertical-align: middle;
+}
+
+
+#table-wrap table tbody td:first-child {
+  padding-left: 18px;
+
+  color: #98a2b3;
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  text-align: center;
+}
+
+
+#table-wrap table tbody td:nth-child(2) {
+  color: #1d2939;
+
+  font-weight: 750;
+}
+
+
+#table-wrap table tbody td:nth-child(3) {
+  color: #667085;
+
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+
+  font-size: 11px;
+
+  font-weight: 600;
+}
+
+
+#table-wrap table tbody td:nth-child(4) {
+  color: #667085;
+
+  font-weight: 650;
+}
+
+
+/* =========================================================
+   STATUS TOGGLE
+   ========================================================= */
+
+.status-toggle {
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  min-width: max-content;
+}
+
+
+/* =========================================================
+   STATUS BUTTON
+   ========================================================= */
+
+.status-btn {
+  min-height: 34px;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 10px;
+
+  border: 1px solid #e4e7ec;
+
+  border-radius: 9px;
+
+  background: #ffffff;
+
+  color: #667085;
+
+  font-family: inherit;
+
+  font-size: 10.5px;
+
+  font-weight: 700;
+
+  line-height: 1;
+
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  opacity: 0.72;
+
+  transition:
+    color 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+
+.status-btn:hover {
+  opacity: 1;
+
+  transform: translateY(-1px);
+
+  border-color: var(--sc, #6366f1);
+}
+
+
+.status-btn.active {
+  opacity: 1;
+
+  color: var(--sc, #6366f1);
+
+  border-color: color-mix(
+    in srgb,
+    var(--sc, #6366f1) 28%,
+    white
+  );
+
+  background: color-mix(
+    in srgb,
+    var(--sc, #6366f1) 9%,
+    white
+  );
+
+  box-shadow:
+    0 3px 8px color-mix(
+      in srgb,
+      var(--sc, #6366f1) 12%,
+      transparent
+    );
+}
+
+
+.status-btn:focus-visible {
+  outline: 3px solid rgba(99, 102, 241, 0.16);
+
+  outline-offset: 2px;
+}
+
+
+/* =========================================================
+   SAVE AREA
+   ========================================================= */
+
+#table-wrap > table + .btn {
+  margin-top: 18px !important;
+
+  min-height: 46px;
+
+  padding: 0 20px;
+
+  border-radius: 12px;
+
+  font-size: 12.5px;
+
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   SAVE MESSAGE
+   ========================================================= */
+
+#save-msg {
+  display: inline-flex;
+
+  align-items: center;
+
+  min-height: 30px;
+
+  margin-left: 10px !important;
+
+  padding: 0 10px;
+
+  color: #087443 !important;
+
+  font-size: 11.5px !important;
+
+  font-weight: 700;
+
+  vertical-align: middle;
+}
+
+
+/* =========================================================
+   NO STUDENTS STATE
+   ========================================================= */
+
+#table-wrap table tbody td[colspan] {
+  height: 120px;
+
+  padding: 20px;
+
+  color: #98a2b3 !important;
+
+  font-size: 12px;
+
+  text-align: center !important;
+}
+
+
+/* =========================================================
+   TABLE SCROLLBAR
+   ========================================================= */
+
+#table-wrap::-webkit-scrollbar {
+  height: 6px;
+}
+
+
+#table-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+#table-wrap::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+
+  background: #d0d5dd;
+}
+
+
+#table-wrap::-webkit-scrollbar-thumb:hover {
+  background: #98a2b3;
+}
+
+
+/* =========================================================
+   LARGE DESKTOP
+   ========================================================= */
+
+@media (min-width: 1400px) {
+
+  #page-content > .card > .form-row {
+    padding: 26px 28px;
+  }
+
+
+  #page-content > .card > .field {
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+
+
+  #table-wrap {
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+
+
+  #table-wrap table tbody td {
+    height: 66px;
+  }
+
+}
+
+
+/* =========================================================
+   LAPTOP
+   ========================================================= */
+
+@media (max-width: 1050px) {
+
+  #page-content > .card > .form-row {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+  }
+
+
+  #table-wrap table {
+    min-width: 700px;
+  }
+
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  #page-content > .card {
+    border-radius: 20px;
+  }
+
+
+  #page-content > .card > .form-row {
+    gap: 13px;
+
+    padding: 18px;
+  }
+
+
+  #page-content > .card > .field {
+    padding: 18px 18px 0;
+  }
+
+
+  #table-wrap {
+    margin-top: 18px !important;
+
+    padding:
+      0
+      18px
+      22px;
+  }
+
+
+  #table-wrap table {
+    min-width: 700px;
+  }
+
+
+  .status-btn {
+    min-height: 36px;
+
+    padding: 0 10px;
+
+    font-size: 10px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 560px) {
+
+  #page-content > .card {
+    border-radius: 17px;
+  }
+
+
+  /* -----------------------------
+     Filter area
+     ----------------------------- */
+
+  #page-content > .card > .form-row {
+    display: flex !important;
+
+    flex-direction: column;
+
+    gap: 13px;
+
+    padding: 16px;
+  }
+
+
+  #page-content .field {
+    width: 100%;
+  }
+
+
+  #page-content .field label {
+    font-size: 9.5px;
+  }
+
+
+  #page-content .field select,
+  #page-content .field input[type="date"],
+  #page-content > .card > .field input {
+    height: 47px;
+
+    font-size: 13px;
+  }
+
+
+  /* -----------------------------
+     Subject
+     ----------------------------- */
+
+  #page-content > .card > .field {
+    padding:
+      16px
+      16px
+      0;
+  }
+
+
+  /* -----------------------------
+     Table area
+     ----------------------------- */
+
+  #table-wrap {
+    margin-top: 16px !important;
+
+    padding:
+      0
+      12px
+      18px;
+  }
+
+
+  /* -----------------------------
+     Quick actions
+     ----------------------------- */
+
+  #table-wrap > div:first-child {
+    display: grid !important;
+
+    grid-template-columns:
+      1fr 1fr;
+
+    gap: 8px !important;
+
+    margin-bottom: 12px !important;
+  }
+
+
+  #table-wrap > div:first-child .btn {
+    width: 100%;
+
+    min-height: 43px;
+
+    padding: 0 8px;
+
+    font-size: 10.5px;
+  }
+
+
+  /* -----------------------------
+     Table
+     ----------------------------- */
+
+  #table-wrap table {
+    min-width: 680px;
+
+    border-radius: 13px;
+  }
+
+
+  #table-wrap table thead th {
+    height: 42px;
+
+    padding: 0 12px;
+
+    font-size: 9px;
+  }
+
+
+  #table-wrap table thead th:first-child {
+    padding-left: 14px;
+  }
+
+
+  #table-wrap table thead th:last-child {
+    padding-right: 14px;
+  }
+
+
+  #table-wrap table tbody td {
+    height: 58px;
+
+    padding:
+      7px
+      12px;
+
+    font-size: 11.5px;
+  }
+
+
+  #table-wrap table tbody td:first-child {
+    padding-left: 14px;
+  }
+
+
+  #table-wrap table tbody td:nth-child(3) {
+    font-size: 10px;
+  }
+
+
+  /* -----------------------------
+     Status controls
+     ----------------------------- */
+
+  .status-toggle {
+    gap: 5px;
+  }
+
+
+  .status-btn {
+    min-height: 35px;
+
+    padding: 0 8px;
+
+    border-radius: 8px;
+
+    font-size: 9.5px;
+  }
+
+
+  /* -----------------------------
+     Save
+     ----------------------------- */
+
+  #table-wrap > table + .btn {
+    width: 100%;
+
+    min-height: 48px;
+
+    margin-top: 14px !important;
+  }
+
+
+  #save-msg {
+    display: flex;
+
+    justify-content: center;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    margin:
+      8px 0
+      0 !important;
+
+    padding: 0;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+  #page-content > .card > .form-row {
+    padding: 14px;
+  }
+
+
+  #page-content > .card > .field {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+
+  #table-wrap {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+
+  #table-wrap > div:first-child .btn {
+    font-size: 9.5px;
+  }
+
+
+  #table-wrap table {
+    min-width: 650px;
+  }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  #page-content > .card {
+    animation: none;
+  }
+
+
+  .status-btn,
+  .btn,
+  #page-content .field select,
+  #page-content .field input {
+    transition: none;
+  }
+
+}
+
+
+/* =========================================================
+   PRINT
+   ========================================================= */
+
+@media print {
+
+  #page-content > .card {
+    border: 0;
+
+    box-shadow: none;
+  }
+
+
+  #table-wrap > div:first-child,
+  #table-wrap > table + .btn,
+  #save-msg {
+    display: none !important;
+  }
+
+
+  #table-wrap {
+    padding: 0;
+  }
+
+
+  .status-btn {
+    border: 0;
+
+    box-shadow: none;
+  }
+
+}
+
+
+/* =========================================================
+   PAGE ANIMATION
+   ========================================================= */
+
+@keyframes manual-page-in {
+
+  from {
+    opacity: 0;
+
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+
+}

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notices & Announcements</title>
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/notices.css">
+</head>
+<body>
+  <div class="app-shell" id="app-shell"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    const session = getSession();
+    if (!session) window.location.href = '/login.html';
+    renderShell({ role: session.role, activeHref: '/notices.html', title: 'Notices & Announcements', welcomeName: session.role === 'admin' ? 'Admin' : (session.data ? session.data.name : 'User') });
+
+    const isAdmin = session.role === 'admin';
+    const isStaff = session.role === 'staff';
+    const canPost = isAdmin || isStaff;
+
+    async function load() {
+      const allNotices = await apiGet('/notices');
+      // Students see notices for Students/All. Staff see notices for Staff/All. Admin sees everything.
+      const notices = isAdmin ? allNotices : allNotices.filter(n => {
+        const aud = n.audience || 'All';
+        if (aud === 'All') return true;
+        if (isStaff) return aud === 'Staff';
+        return aud === 'Students';
+      });
+      document.getElementById('page-content').innerHTML = `
+        <div class="card">
+          ${canPost ? `<button class="btn btn-primary" style="margin-bottom:16px;" onclick="openForm()">+ Post ${isStaff ? 'Circular' : 'Notice'}</button>` : ''}
+          <div id="form-card"></div>
+          <div id="notice-list"></div>
+        </div>
+      `;
+      document.getElementById('notice-list').innerHTML = notices.map(n => `
+        <div style="padding:16px 0;border-bottom:1px solid #f4f4fa;">
+          <div style="display:flex;justify-content:space-between;align-items:start;">
+            <strong style="font-size:14.5px;">🔔 ${n.title}${n.subject ? ` <span class="badge pending" style="margin-left:6px;">${n.subject}</span>` : ''}${isAdmin && n.audience && n.audience !== 'All' ? ` <span class="badge active" style="margin-left:6px;">${n.audience} only</span>` : ''}</strong>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:11.5px;color:#94a3b8;">${n.date}</span>
+              ${isAdmin || (isStaff && n.postedBy === session.data.name) ? `<button class="icon-btn danger" onclick="removeNotice(${n.id})">🗑️</button>` : ''}
+            </div>
+          </div>
+          <p style="font-size:13px;color:#475569;margin-top:6px;">${n.message}</p>
+          <p style="font-size:11.5px;color:#94a3b8;margin-top:4px;">Posted by ${n.postedBy}${n.department ? ` · ${n.department}` : ''}</p>
+        </div>
+      `).join('') || '<p style="text-align:center;color:#94a3b8;padding:20px;">No notices yet</p>';
+    }
+
+    function openForm() {
+      document.getElementById('form-card').innerHTML = `
+        <div class="card" style="margin-bottom:16px;background:#f8fafc;">
+          <h3>Post New ${isStaff ? 'Circular' : 'Notice'}</h3>
+          <div class="field"><label>Title</label><input id="n-title"></div>
+          ${isStaff ? `<div class="field"><label>Subject (optional)</label><input id="n-subject" placeholder="e.g. Python Programming"></div>` : `
+          <div class="field"><label>Send To</label>
+            <select id="n-audience">
+              <option value="All">Everyone (Staff + Students)</option>
+              <option value="Staff">Staff only</option>
+              <option value="Students">Students only</option>
+            </select>
+          </div>`}
+          <div class="field"><label>Message</label><textarea id="n-message" rows="3"></textarea></div>
+          <button class="btn btn-primary" onclick="submitNotice()">Post</button>
+          <button class="btn btn-outline" onclick="document.getElementById('form-card').innerHTML=''">Cancel</button>
+        </div>
+      `;
+    }
+
+    async function submitNotice() {
+      const body = {
+        title: document.getElementById('n-title').value,
+        message: document.getElementById('n-message').value,
+        postedBy: isStaff ? session.data.name : 'Admin'
+      };
+      if (isStaff) {
+        body.subject = document.getElementById('n-subject').value;
+        body.department = session.data.department;
+        body.audience = 'Students';
+      } else {
+        body.audience = document.getElementById('n-audience').value;
+      }
+      await apiPost('/notices', body);
+      document.getElementById('form-card').innerHTML = '';
+      load();
+    }
+
+    async function removeNotice(id) {
+      if (!confirm('Delete this notice?')) return;
+      await apiDelete('/notices/' + id);
+      load();
+    }
+
+    load();
+  </script>
+</body>
+</html>

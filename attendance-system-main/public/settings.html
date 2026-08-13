@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile & Settings</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-shell" id="app-shell"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    const session = getSession();
+    if (!session) window.location.href = '/login.html';
+    const isStaff = session.role === 'staff';
+    const isAdmin = session.role === 'admin';
+    let pendingPhoto = null;
+
+    async function init() {
+      const name = isAdmin ? 'Admin' : session.data.name;
+      renderShell({ role: session.role, activeHref: '/settings.html', title: 'Profile & Settings', welcomeName: name });
+
+      let profile = session.data;
+      if (isAdmin) profile = await apiGet('/admin/profile');
+
+      document.getElementById('page-content').innerHTML = `
+        <div class="grid-2">
+          <div class="card" style="text-align:center;">
+            <h3 style="text-align:left;">Profile Picture</h3>
+            ${profile.photo
+              ? `<img id="photo-preview" src="${profile.photo}" class="profile-photo-preview" style="width:100px;height:100px;">`
+              : `<div class="avatar-lg" id="avatar-fallback" style="width:100px;height:100px;font-size:36px;margin:20px auto;">${name.charAt(0)}</div>`
+            }
+            <input type="file" id="photo-input" accept="image/*" style="display:none;" onchange="onPhotoChosen(event)">
+            <button class="btn btn-primary" onclick="document.getElementById('photo-input').click()">Change Photo</button>
+          </div>
+          <div class="card">
+            <h3>Account Settings</h3>
+            <div class="field"><label>Full Name</label><input id="s-name" value="${profile.name || ''}"></div>
+            <div class="field"><label>Email</label><input id="s-email" value="${profile.email || ''}"></div>
+            <div class="field"><label>Phone</label><input id="s-phone" value="${profile.phone || ''}"></div>
+            ${isStaff ? `<div class="field"><label>Bio</label><textarea id="s-bio" rows="3" placeholder="A short line about yourself, subjects you teach, etc.">${profile.bio || ''}</textarea></div>` : ''}
+            ${isAdmin ? `
+              <div class="field"><label>Bio / Message</label><textarea id="s-bio" rows="3" placeholder="A short message from the Administration, visible to staff and students">${profile.bio || ''}</textarea></div>
+              <div class="field"><label>Online Platform Link</label><input id="s-link" value="${profile.link || ''}" placeholder="e.g. college website, LinkedIn"></div>
+            ` : ''}
+            ${isStaff || isAdmin ? '' : `
+            <div class="field"><label>Current Password</label>
+              <div style="position:relative;">
+                <input id="cur-pwd" type="password" placeholder="••••••••" style="padding-right:40px;">
+                <button type="button" onclick="toggleSettingsPwd('cur-pwd', this)" style="position:absolute;right:2px;top:2px;bottom:2px;width:38px;background:none;border:none;font-size:16px;color:#64748b;">👁️</button>
+              </div>
+            </div>`}
+            <button class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
+            <span id="save-msg" style="margin-left:10px;font-size:12.5px;color:#16a34a;"></span>
+          </div>
+        </div>
+      `;
+    }
+
+    function onPhotoChosen(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        pendingPhoto = reader.result; // base64 data URL
+        let img = document.getElementById('photo-preview');
+        if (!img) {
+          document.getElementById('avatar-fallback')?.remove();
+          img = document.createElement('img');
+          img.id = 'photo-preview';
+          img.className = 'profile-photo-preview';
+          img.style.width = '100px'; img.style.height = '100px';
+          document.getElementById('photo-input').insertAdjacentElement('beforebegin', img);
+        }
+        img.src = pendingPhoto;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function toggleSettingsPwd(id, btn) {
+      const input = document.getElementById(id);
+      if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+      else { input.type = 'password'; btn.textContent = '👁️'; }
+    }
+
+    async function saveSettings() {
+      const body = {
+        name: document.getElementById('s-name').value,
+        email: document.getElementById('s-email').value,
+        phone: document.getElementById('s-phone').value
+      };
+      if (pendingPhoto) body.photo = pendingPhoto;
+      if (isStaff) {
+        body.bio = document.getElementById('s-bio').value;
+        const updated = await apiPut('/staff/' + session.data.id, body);
+        session.data = updated;
+        sessionStorage.setItem('session', JSON.stringify(session));
+        document.getElementById('save-msg').textContent = '✅ Profile saved!';
+      } else if (isAdmin) {
+        body.bio = document.getElementById('s-bio').value;
+        body.link = document.getElementById('s-link').value;
+        await apiPut('/admin/profile', body);
+        document.getElementById('save-msg').textContent = '✅ Profile saved!';
+      } else {
+        document.getElementById('save-msg').textContent = '✅ Settings saved!';
+      }
+      setTimeout(() => (document.getElementById('save-msg').textContent = ''), 2500);
+    }
+
+    init();
+  </script>
+</body>
+</html>

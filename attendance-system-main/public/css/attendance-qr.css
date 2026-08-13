@@ -1,0 +1,1048 @@
+/* =========================================================
+   QR ATTENDANCE — ADVANCED UI/UX
+   Desktop + Tablet + Mobile
+   ========================================================= */
+
+#page-content {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  animation: qrPageIn .4s ease both;
+}
+
+
+/* =========================================================
+   GLOBAL CARD
+   ========================================================= */
+
+#page-content .card {
+  border: 1px solid #e8ebf0;
+  border-radius: 22px;
+  background: #fff;
+
+  box-shadow:
+    0 10px 30px rgba(15, 23, 42, .045),
+    0 2px 6px rgba(15, 23, 42, .025);
+
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   CARD HEADINGS
+   ========================================================= */
+
+#page-content .card h3 {
+  margin: 0 0 7px;
+
+  color: #172033;
+
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -.015em;
+}
+
+
+/* =========================================================
+   SCANNER + RECENT GRID
+   ========================================================= */
+
+#page-content .grid-2 {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1.05fr)
+    minmax(0, .95fr);
+
+  gap: 20px;
+
+  margin-bottom: 20px;
+}
+
+
+/* =========================================================
+   SCANNER CARD
+   ========================================================= */
+
+#page-content .grid-2 > .card:first-child {
+  padding: 24px;
+}
+
+
+#page-content .grid-2 > .card:first-child > h3 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+
+#page-content .grid-2 > .card:first-child > h3::before {
+  content: "⌁";
+
+  width: 32px;
+  height: 32px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: #eef2ff;
+
+  color: #4f46e5;
+
+  font-size: 20px;
+  font-weight: 900;
+}
+
+
+/* =========================================================
+   QR SCANNER AREA
+   ========================================================= */
+
+.qr-box {
+  position: relative;
+
+  margin-top: 18px;
+
+  padding: 18px;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 18px;
+
+  background:
+    radial-gradient(
+      circle at 50% 30%,
+      rgba(99, 102, 241, .07),
+      transparent 45%
+    ),
+    #f8fafc;
+
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   CAMERA VIEW
+   ========================================================= */
+
+#qr-reader {
+  width: 100% !important;
+
+  min-height: 280px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px dashed #cbd5e1;
+
+  border-radius: 15px;
+
+  background: #0f172a;
+
+  overflow: hidden;
+}
+
+
+/* html5-qrcode generated elements */
+
+#qr-reader video {
+  width: 100% !important;
+
+  height: auto !important;
+
+  min-height: 280px;
+
+  object-fit: cover;
+
+  border-radius: 14px;
+}
+
+
+#qr-reader img {
+  max-width: 100%;
+}
+
+
+/* Hide unnecessary library text/buttons */
+
+#qr-reader__dashboard_section_swaplink {
+  display: none !important;
+}
+
+
+#qr-reader__dashboard_section_csr {
+  display: none !important;
+}
+
+
+/* =========================================================
+   SCAN RESULT
+   ========================================================= */
+
+.scan-result {
+  margin-top: 12px;
+
+  padding: 12px 14px;
+
+  border-radius: 12px;
+
+  font-size: 12px;
+
+  line-height: 1.5;
+
+  font-weight: 700;
+
+  animation: resultIn .25s ease both;
+}
+
+
+.scan-result.ok {
+  border: 1px solid #bbf7d0;
+
+  background: #f0fdf4;
+
+  color: #15803d;
+}
+
+
+.scan-result.err {
+  border: 1px solid #fecaca;
+
+  background: #fef2f2;
+
+  color: #dc2626;
+}
+
+
+/* =========================================================
+   SCAN BUTTON
+   ========================================================= */
+
+#scan-btn {
+  width: 100%;
+
+  min-height: 48px;
+
+  margin-top: 14px !important;
+
+  border: 0;
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #4f46e5,
+      #6366f1
+    );
+
+  color: white;
+
+  font-size: 12.5px;
+
+  font-weight: 800;
+
+  box-shadow:
+    0 8px 18px rgba(79, 70, 229, .18);
+
+  cursor: pointer;
+
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease;
+}
+
+
+#scan-btn:hover {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 11px 22px rgba(79, 70, 229, .25);
+}
+
+
+#scan-btn:active {
+  transform: translateY(0);
+}
+
+
+/* =========================================================
+   CAMERA HELP TEXT
+   ========================================================= */
+
+#page-content .grid-2 > .card:first-child > p {
+  margin-top: 12px !important;
+
+  line-height: 1.55;
+
+  color: #98a2b3 !important;
+
+  font-size: 11px !important;
+}
+
+
+/* =========================================================
+   RECENT SCANS
+   ========================================================= */
+
+#page-content .grid-2 > .card:nth-child(2) {
+  padding: 24px;
+
+  min-width: 0;
+}
+
+
+#page-content .grid-2 > .card:nth-child(2) h3 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  margin-bottom: 18px;
+}
+
+
+#page-content .grid-2 > .card:nth-child(2) h3::before {
+  content: "◷";
+
+  width: 32px;
+  height: 32px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: #f0fdf4;
+
+  color: #16a34a;
+
+  font-size: 16px;
+}
+
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+#page-content table {
+  width: 100%;
+
+  border-collapse: separate;
+
+  border-spacing: 0;
+
+  border: 1px solid #eaecf0;
+
+  border-radius: 14px;
+
+  overflow: hidden;
+
+  font-size: 11.5px;
+}
+
+
+#page-content table thead th {
+  height: 42px;
+
+  padding: 0 12px;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  background: #f8fafc;
+
+  color: #667085;
+
+  font-size: 9.5px;
+
+  font-weight: 800;
+
+  letter-spacing: .055em;
+
+  text-align: left;
+
+  text-transform: uppercase;
+
+  white-space: nowrap;
+}
+
+
+#page-content table tbody td {
+  height: 55px;
+
+  padding: 7px 12px;
+
+  border-bottom: 1px solid #f1f3f5;
+
+  color: #475467;
+
+  font-size: 11.5px;
+
+  font-weight: 550;
+
+  vertical-align: middle;
+}
+
+
+#page-content table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+
+#page-content table tbody tr {
+  transition: background .15s ease;
+}
+
+
+#page-content table tbody tr:hover {
+  background: #fafbff;
+}
+
+
+#page-content table tbody td:first-child {
+  color: #1d2939;
+
+  font-weight: 750;
+}
+
+
+/* =========================================================
+   BADGES
+   ========================================================= */
+
+#page-content .badge {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 25px;
+
+  padding: 0 9px;
+
+  border-radius: 999px;
+
+  font-size: 9.5px;
+
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   STUDENT QR SECTION
+   ========================================================= */
+
+#page-content > .card:last-child {
+  padding: 24px;
+}
+
+
+#page-content > .card:last-child > h3 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+
+#page-content > .card:last-child > h3::before {
+  content: "▦";
+
+  width: 32px;
+  height: 32px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: #fff7ed;
+
+  color: #ea580c;
+
+  font-size: 17px;
+}
+
+
+#page-content > .card:last-child > p {
+  margin-top: 6px;
+
+  max-width: 850px;
+
+  color: #667085 !important;
+
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   QR GRID
+   ========================================================= */
+
+#qr-grid {
+  display: grid !important;
+
+  grid-template-columns:
+    repeat(auto-fill, minmax(145px, 1fr));
+
+  gap: 14px !important;
+
+  margin-top: 18px;
+}
+
+
+/* =========================================================
+   INDIVIDUAL QR CARD
+   ========================================================= */
+
+#qr-grid > div {
+  position: relative;
+
+  box-sizing: border-box;
+
+  min-width: 0;
+
+  padding: 15px 12px 13px;
+
+  border: 1px solid #eaecf0;
+
+  border-radius: 16px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 3px 10px rgba(15, 23, 42, .025);
+
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease;
+}
+
+
+#qr-grid > div:hover {
+  transform: translateY(-3px);
+
+  border-color: #cfd4dc;
+
+  box-shadow:
+    0 10px 22px rgba(15, 23, 42, .07);
+}
+
+
+/* =========================================================
+   QR CANVAS
+   ========================================================= */
+
+#qr-grid canvas {
+  display: block;
+
+  width: 110px !important;
+  height: 110px !important;
+
+  max-width: 100%;
+
+  margin: 0 auto;
+
+  padding: 7px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #eef0f3;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+}
+
+
+/* =========================================================
+   QR STUDENT NAME
+   ========================================================= */
+
+#qr-grid > div > div {
+  margin-top: 8px !important;
+
+  color: #1d2939;
+
+  font-size: 11.5px !important;
+
+  line-height: 1.45;
+
+  font-weight: 750;
+}
+
+
+#qr-grid > div > div span {
+  color: #98a2b3 !important;
+
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    Consolas,
+    monospace;
+
+  font-size: 9.5px;
+}
+
+
+/* =========================================================
+   SIMULATE SCAN
+   ========================================================= */
+
+#qr-grid .btn-outline {
+  min-height: 31px;
+
+  margin-top: 8px !important;
+
+  padding: 0 10px !important;
+
+  border: 1px solid #dfe3ea;
+
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  color: #475467;
+
+  font-size: 9.5px !important;
+
+  font-weight: 750;
+
+  cursor: pointer;
+
+  transition:
+    background .16s ease,
+    border-color .16s ease;
+}
+
+
+#qr-grid .btn-outline:hover {
+  border-color: #c7cdd8;
+
+  background: #f8fafc;
+}
+
+
+/* =========================================================
+   SELF QR MODE
+   ========================================================= */
+
+#page-content > .card[style*="max-width:360px"] {
+  max-width: 410px !important;
+
+  padding: 30px 26px !important;
+
+  border-radius: 24px !important;
+}
+
+
+#page-content > .card[style*="max-width:360px"] h3 {
+  margin-bottom: 8px;
+
+  font-size: 18px;
+}
+
+
+#page-content > .card[style*="max-width:360px"] > p {
+  line-height: 1.55;
+}
+
+
+#my-qr {
+  width: 220px !important;
+  height: 220px !important;
+
+  max-width: 100%;
+
+  margin: 8px auto 0;
+
+  padding: 12px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #eaecf0;
+
+  border-radius: 16px;
+
+  background: #fff;
+
+  box-shadow:
+    0 8px 24px rgba(15, 23, 42, .06);
+}
+
+
+#page-content > .card[style*="max-width:360px"] p[style*="font-weight"] {
+  margin-top: 14px !important;
+
+  margin-bottom: 3px;
+
+  color: #172033 !important;
+
+  font-size: 14px !important;
+}
+
+
+#page-content > .card[style*="max-width:360px"] .btn {
+  width: 100%;
+
+  min-height: 46px;
+
+  border-radius: 11px;
+
+  font-size: 12px;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+#page-content table td[colspan] {
+  height: 100px;
+
+  padding: 20px !important;
+
+  color: #98a2b3 !important;
+
+  text-align: center !important;
+}
+
+
+/* =========================================================
+   LAPTOP
+   ========================================================= */
+
+@media (max-width: 1050px) {
+
+  #page-content .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+
+  #page-content .grid-2 > .card:first-child {
+    min-height: auto;
+  }
+
+
+  #qr-grid {
+    grid-template-columns:
+      repeat(auto-fill, minmax(140px, 1fr));
+  }
+
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  #page-content .card {
+    border-radius: 19px;
+  }
+
+
+  #page-content .grid-2 {
+    gap: 14px;
+
+    margin-bottom: 14px;
+  }
+
+
+  #page-content .grid-2 > .card:first-child,
+  #page-content .grid-2 > .card:nth-child(2),
+  #page-content > .card:last-child {
+    padding: 19px;
+  }
+
+
+  #qr-reader {
+    min-height: 260px;
+  }
+
+
+  #qr-reader video {
+    min-height: 260px;
+  }
+
+
+  #qr-grid {
+    grid-template-columns:
+      repeat(auto-fill, minmax(135px, 1fr));
+
+    gap: 11px !important;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 560px) {
+
+  #page-content .grid-2 {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+  }
+
+
+  #page-content .grid-2 > .card:first-child,
+  #page-content .grid-2 > .card:nth-child(2),
+  #page-content > .card:last-child {
+    padding: 16px;
+
+    border-radius: 17px;
+  }
+
+
+  #page-content .card h3 {
+    font-size: 14px;
+  }
+
+
+  /* -----------------------------
+     Scanner
+     ----------------------------- */
+
+  .qr-box {
+    margin-top: 14px;
+
+    padding: 10px;
+
+    border-radius: 15px;
+  }
+
+
+  #qr-reader {
+    min-height: 245px;
+
+    border-radius: 12px;
+  }
+
+
+  #qr-reader video {
+    min-height: 245px;
+
+    border-radius: 11px;
+  }
+
+
+  #scan-btn {
+    min-height: 47px;
+  }
+
+
+  /* -----------------------------
+     Recent table
+     ----------------------------- */
+
+  #page-content .grid-2 > .card:nth-child(2) {
+    overflow: hidden;
+  }
+
+
+  #page-content .grid-2 > .card:nth-child(2) table {
+    min-width: 500px;
+  }
+
+
+  #page-content .grid-2 > .card:nth-child(2) {
+    overflow-x: auto;
+  }
+
+
+  /* -----------------------------
+     QR section
+     ----------------------------- */
+
+  #page-content > .card:last-child > p {
+    font-size: 11px !important;
+  }
+
+
+  #qr-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 9px !important;
+  }
+
+
+  #qr-grid > div {
+    padding: 11px 7px 10px;
+
+    border-radius: 13px;
+  }
+
+
+  #qr-grid canvas {
+    width: 100px !important;
+    height: 100px !important;
+  }
+
+
+  #qr-grid > div > div {
+    font-size: 10.5px !important;
+  }
+
+
+  #qr-grid .btn-outline {
+    width: 100%;
+
+    min-height: 32px;
+  }
+
+
+  /* -----------------------------
+     Self QR
+     ----------------------------- */
+
+  #page-content > .card[style*="max-width:360px"] {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 22px 16px !important;
+  }
+
+
+  #my-qr {
+    width: 205px !important;
+    height: 205px !important;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+  #page-content .grid-2 > .card:first-child,
+  #page-content .grid-2 > .card:nth-child(2),
+  #page-content > .card:last-child {
+    padding: 13px;
+  }
+
+
+  #qr-grid {
+    gap: 7px !important;
+  }
+
+
+  #qr-grid canvas {
+    width: 90px !important;
+    height: 90px !important;
+  }
+
+
+  #qr-grid > div {
+    padding: 9px 5px;
+  }
+
+
+  #qr-reader {
+    min-height: 220px;
+  }
+
+
+  #qr-reader video {
+    min-height: 220px;
+  }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+  #page-content,
+  .scan-result {
+    animation: none;
+  }
+
+
+  #qr-grid > div,
+  #scan-btn {
+    transition: none;
+  }
+
+}
+
+
+/* =========================================================
+   PRINT
+   ========================================================= */
+
+@media print {
+
+  #page-content .card {
+    box-shadow: none;
+
+    border-color: #ddd;
+  }
+
+
+  #scan-btn,
+  .scan-result,
+  #qr-grid .btn {
+    display: none !important;
+  }
+
+}
+
+
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
+@keyframes qrPageIn {
+
+  from {
+    opacity: 0;
+
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+
+}
+
+
+@keyframes resultIn {
+
+  from {
+    opacity: 0;
+
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+
+}

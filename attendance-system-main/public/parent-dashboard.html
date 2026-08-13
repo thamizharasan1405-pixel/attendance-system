@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parent Dashboard</title>
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/parent-dashboard.css">
+</head>
+<body>
+  <div class="app-shell" id="app-shell"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    const session = requireRole('parent');
+    if (session) {
+      renderShell({ role: 'parent', activeHref: '/parent-dashboard.html', title: 'Parent Dashboard', welcomeName: session.data.name });
+      load();
+    }
+
+    async function load() {
+      const regNo = session.data.regNo;
+      const data = await apiGet('/dashboard/parent/' + regNo);
+      document.getElementById('page-content').innerHTML = `
+        <div class="profile-head">
+          <div class="avatar-lg">${data.parent.name.charAt(0)}</div>
+          <div><h2>Welcome, ${data.parent.name}</h2><p>${data.parent.relation} of ${data.student.name}</p></div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card blue"><div class="label">Attendance</div><div class="value">${data.stats.percent}%</div></div>
+          <div class="stat-card green"><div class="label">Present Days</div><div class="value">${data.stats.present}</div></div>
+          <div class="stat-card red"><div class="label">Absent Days</div><div class="value">${data.stats.absent}</div></div>
+          <div class="stat-card orange"><div class="label">Total Days</div><div class="value">${data.stats.total}</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Recent Attendance</h3>
+            <table>
+              <thead><tr><th>Date</th><th>Status</th></tr></thead>
+              <tbody>${data.recent.map(r => `<tr><td>${r.date}</td><td><span class="badge ${r.status.toLowerCase()}">${r.status}</span></td></tr>`).join('') || '<tr><td colspan="2" style="text-align:center;color:#94a3b8;">No records yet</td></tr>'}</tbody>
+            </table>
+          </div>
+          <div class="card">
+            <h3>Student Info</h3>
+            <p style="font-size:13px;margin-bottom:8px;"><strong>Name:</strong> ${data.student.name}</p>
+            <p style="font-size:13px;margin-bottom:8px;"><strong>Reg No:</strong> ${data.student.regNo}</p>
+            <p style="font-size:13px;margin-bottom:8px;"><strong>Department:</strong> ${data.student.department}</p>
+            <p style="font-size:13px;"><strong>Year:</strong> ${data.student.year}</p>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

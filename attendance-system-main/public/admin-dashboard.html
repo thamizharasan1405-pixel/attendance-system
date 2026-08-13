@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard</title>
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/admin-dashboard.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body>
+  <div class="app-shell" id="app-shell"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    const session = requireRole('admin');
+    if (session) {
+      renderShell({ role: 'admin', activeHref: '/admin-dashboard.html', title: 'Dashboard', welcomeName: 'Admin' });
+      load();
+    }
+
+    async function load() {
+      const data = await apiGet('/dashboard/admin');
+      const summary = await apiGet('/reports/summary');
+
+      document.getElementById('page-content').innerHTML = `
+        <div class="stats-row">
+          <div class="stat-card blue"><div class="label">Total Students</div><div class="value">${data.totalStudents}</div></div>
+          <div class="stat-card green"><div class="label">Total Staff</div><div class="value">${data.totalStaff}</div></div>
+          <div class="stat-card green"><div class="label">Present Today</div><div class="value">${data.presentToday}</div></div>
+          <div class="stat-card red"><div class="label">Absent Today</div><div class="value">${data.absentToday}</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Attendance Overview</h3>
+            <canvas id="overviewChart" height="90"></canvas>
+          </div>
+          <div class="card">
+            <h3>Recent Activities</h3>
+            <div id="activities"></div>
+          </div>
+        </div>
+        <div class="grid-2" style="margin-top:20px;">
+          <div class="card">
+            <h3>👥 Staff Overview</h3>
+            <table>
+              <thead><tr><th>Name</th><th>Department</th><th>Role</th><th>Status</th></tr></thead>
+              <tbody>
+                ${data.staffOverview.map(s => `
+                  <tr>
+                    <td>${titleCase(s.name)}</td><td>${s.department}</td><td>${s.role}</td>
+                    <td><span class="badge ${(s.status || 'Active').toLowerCase()}">${s.status || 'Active'}</span></td>
+                  </tr>
+                `).join('') || `<tr><td colspan="4" style="text-align:center;color:#94a3b8;">No staff yet</td></tr>`}
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <h3>🎓 Recent Student Activity</h3>
+            <div id="student-activity"></div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('student-activity').innerHTML = data.recentStudentActivity.map(a => `
+        <div style="padding:10px 0;border-bottom:1px solid #f4f4fa;display:flex;justify-content:space-between;font-size:13px;">
+          <span>${titleCase(a.name)} — <span class="badge ${a.status.toLowerCase()}" style="padding:2px 8px;font-size:10.5px;">${a.status}</span></span>
+          <span style="color:#94a3b8;font-size:11.5px;">${a.date}${a.period ? ' · P' + a.period : ''}</span>
+        </div>
+      `).join('') || `<p style="text-align:center;color:#94a3b8;padding:16px;">No recent activity</p>`;
+
+      document.getElementById('activities').innerHTML = data.recentActivities.map(a =>
+        `<div style="padding:10px 0;border-bottom:1px solid #f4f4fa;display:flex;justify-content:space-between;font-size:13px;">
+          <span>🔔 ${a.message}</span><span style="color:#94a3b8;font-size:11.5px;">${a.time}</span>
+        </div>`
+      ).join('') || `<p style="text-align:center;color:#94a3b8;padding:16px;">No recent activity</p>`;
+
+      const labels = Object.keys(summary.weekly).sort();
+      const present = labels.map(d => summary.weekly[d].present);
+      const absent = labels.map(d => summary.weekly[d].absent);
+
+      new Chart(document.getElementById('overviewChart'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: 'Present', data: present, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.1)', tension: 0.3, fill: true },
+            { label: 'Absent', data: absent, borderColor: '#dc2626', backgroundColor: 'rgba(220,38,38,0.08)', tension: 0.3, fill: true }
+          ]
+        },
+        options: { plugins: { legend: { position: 'bottom' } }, responsive: true }
+      });
+    }
+  </script>
+</body>
+</html>

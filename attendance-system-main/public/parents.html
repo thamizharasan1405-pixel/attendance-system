@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parent Management</title>
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/parents.css">
+</head>
+<body>
+  <div class="app-shell" id="app-shell"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    const session = requireRole('admin');
+    if (session) {
+      renderShell({ role: 'admin', activeHref: '/parents.html', title: 'Parent Management', welcomeName: 'Admin' });
+      load();
+    }
+
+    async function load() {
+      const parents = await apiGet('/parents');
+      document.getElementById('page-content').innerHTML = `
+        <div class="card">
+          <div class="toolbar">
+            <div class="search-box"><input id="search" placeholder="Search parents..." oninput="filterRows()"></div>
+            <button class="btn btn-primary" onclick="openForm()">+ Add Parent</button>
+          </div>
+          <table>
+            <thead><tr><th>#</th><th>Parent Name</th><th>Student Name</th><th>Relation</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <div id="form-card"></div>
+      `;
+      window._parents = parents;
+      renderRows(parents);
+    }
+
+    function renderRows(list) {
+      document.getElementById('rows').innerHTML = list.map((p, i) => `
+        <tr>
+          <td>${i + 1}</td><td>${p.name}</td><td>${p.studentName}</td><td>${p.relation}</td><td>${p.phone}</td>
+          <td><span class="badge ${p.status.toLowerCase()}">${p.status}</span></td>
+          <td><button class="icon-btn danger" onclick="removeParent(${p.id})">🗑️</button></td>
+        </tr>
+      `).join('') || '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:20px;">No parents found</td></tr>';
+    }
+
+    function filterRows() {
+      const q = document.getElementById('search').value.toLowerCase();
+      renderRows(window._parents.filter(p => p.name.toLowerCase().includes(q) || p.studentName.toLowerCase().includes(q)));
+    }
+
+    function openForm() {
+      document.getElementById('form-card').innerHTML = `
+        <div class="card">
+          <h3>Add Parent</h3>
+          <div class="form-row">
+            <div class="field"><label>Parent Name</label><input id="f-name"></div>
+            <div class="field"><label>Relation</label><input id="f-relation" placeholder="Father / Mother"></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Student Name</label><input id="f-studentName"></div>
+            <div class="field"><label>Student Reg No</label><input id="f-regNo"></div>
+          </div>
+          <div class="field"><label>Phone</label><input id="f-phone"></div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-primary" onclick="saveParent()">Save</button>
+            <button class="btn btn-outline" onclick="document.getElementById('form-card').innerHTML=''">Cancel</button>
+          </div>
+        </div>
+      `;
+    }
+
+    async function saveParent() {
+      const body = {
+        name: document.getElementById('f-name').value,
+        relation: document.getElementById('f-relation').value,
+        studentName: document.getElementById('f-studentName').value,
+        regNo: document.getElementById('f-regNo').value,
+        phone: document.getElementById('f-phone').value
+      };
+      await apiPost('/parents', body);
+      document.getElementById('form-card').innerHTML = '';
+      load();
+    }
+
+    async function removeParent(id) {
+      if (!confirm('Delete this parent?')) return;
+      await apiDelete('/parents/' + id);
+      load();
+    }
+  </script>
+</body>
+</html>

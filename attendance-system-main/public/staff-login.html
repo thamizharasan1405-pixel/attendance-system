@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staff & Admin Login - Cloud Attendance System</title>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  .auth-bg {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #062418 0%, #1c1917 55%, #78350f 130%);
+    padding: 24px; position: relative; overflow: hidden;
+  }
+  .auth-bg::before {
+    content: ''; position: absolute; width: 480px; height: 480px; border-radius: 50%;
+    background: rgba(217,119,6,0.13); bottom: -180px; left: -160px;
+  }
+  .glass-card {
+    position: relative; z-index: 2;
+    background: rgba(255,255,255,0.97);
+    border-radius: 22px;
+    padding: 42px 36px;
+    max-width: 420px; width: 100%;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+  }
+  .back-link { display: inline-block; margin-bottom: 18px; font-size: 13px; color: #766f5f; }
+  .glass-icon {
+    width: 64px; height: 64px; border-radius: 20px;
+    background: linear-gradient(135deg, #d97706, #f59e0b);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; margin: 0 auto 16px; color: #fff;
+    box-shadow: 0 10px 22px rgba(217,119,6,0.35);
+  }
+  .glass-card h2 { text-align: center; font-size: 21px; color: #062418; margin-bottom: 4px; }
+  .glass-card .sub { text-align: center; color: #766f5f; font-size: 13px; margin-bottom: 26px; }
+  .role-tabs { display: flex; background: #f7f3ea; border-radius: 11px; padding: 4px; margin-bottom: 22px; }
+  .role-tab { flex: 1; text-align: center; padding: 9px; border-radius: 9px; font-size: 13.5px; font-weight: 700; color: #a39c8a; cursor: pointer; }
+  .role-tab.active { background: #fff; color: #b45309; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+  .glass-field { margin-bottom: 16px; }
+  .glass-field label { display: block; font-size: 12.5px; font-weight: 700; color: #4b4636; margin-bottom: 6px; }
+  .glass-field input, .glass-field select {
+    width: 100%; padding: 11px 14px; border-radius: 11px; border: 1.5px solid #eae4d6;
+    font-size: 14px; outline: none; transition: border 0.2s;
+  }
+  .glass-field input:focus { border-color: #d97706; }
+  .pwd-wrap { position: relative; }
+  .pwd-wrap .eye { position: absolute; right: 4px; top: 4px; bottom: 4px; width: 38px; background: none; border: none; font-size: 16px; color: #a39c8a; }
+  .glass-btn {
+    width: 100%; padding: 12px; border-radius: 11px; border: none;
+    background: linear-gradient(135deg, #d97706, #b45309);
+    color: #fff; font-weight: 700; font-size: 14.5px; margin-top: 6px;
+    box-shadow: 0 10px 22px rgba(217,119,6,0.28);
+  }
+  .glass-hint { text-align: center; font-size: 11.5px; color: #a39c8a; margin-top: 18px; line-height: 1.6; }
+  .glass-error { text-align: center; font-size: 12.5px; color: #e11d48; margin-top: 10px; min-height: 16px; }
+</style>
+</head>
+<body>
+  <div class="auth-bg">
+    <div class="glass-card">
+      <a href="/login.html" class="back-link">← Back to portal selection</a>
+      <div class="glass-icon" id="role-icon">🏫</div>
+      <h2 id="role-title">Staff Login</h2>
+      <p class="sub">Manage attendance, students &amp; reports</p>
+
+      <div class="role-tabs">
+        <div class="role-tab active" id="tab-staff" onclick="switchRole('staff')">Staff</div>
+        <div class="role-tab" id="tab-admin" onclick="switchRole('admin')">Admin</div>
+      </div>
+
+      <div class="glass-field">
+        <label id="uname-label">Username</label>
+        <input id="username" placeholder="Your username">
+      </div>
+      <div class="glass-field">
+        <label>Password</label>
+        <div class="pwd-wrap">
+          <input id="password" type="password" placeholder="Your password" style="padding-right:40px;">
+          <button type="button" class="eye" onclick="togglePwd()">👁️</button>
+        </div>
+      </div>
+      <button class="glass-btn" onclick="doLogin()" id="login-btn">Login</button>
+      <div class="glass-error" id="err"></div>
+      <p style="text-align:center;margin-top:14px;"><a href="/forgot-password.html" style="font-size:12.5px;color:#d97706;font-weight:700;">Forgot your password?</a></p>
+      <p class="glass-hint" id="hint">Use the username &amp; password given to you by the Admin.<br>Demo Admin: admin / admin123</p>
+    </div>
+  </div>
+
+  <script src="/js/common.js"></script>
+  <script>
+    function togglePwd() {
+      const input = document.getElementById('password');
+      const btn = event.target;
+      if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+      else { input.type = 'password'; btn.textContent = '👁️'; }
+    }
+
+    function switchRole(role) {
+      document.getElementById('tab-staff').classList.toggle('active', role === 'staff');
+      document.getElementById('tab-admin').classList.toggle('active', role === 'admin');
+      document.getElementById('role-icon').textContent = role === 'staff' ? '🏫' : '🛡️';
+      document.getElementById('role-title').textContent = role === 'staff' ? 'Staff Login' : 'Admin Login';
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+      if (role === 'staff') {
+        document.getElementById('hint').innerHTML = 'Use the username &amp; password given to you by the Admin.';
+      } else {
+        document.getElementById('hint').innerHTML = 'Demo Admin: admin / admin123';
+        document.getElementById('username').value = 'admin';
+        document.getElementById('password').value = 'admin123';
+      }
+    }
+
+    async function doLogin() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const err = document.getElementById('err');
+      err.textContent = '';
+      try {
+        const result = await apiPost('/login', { username, password });
+        if (!result.success) {
+          err.textContent = result.message || 'Invalid username or password';
+          return;
+        }
+        if (result.role !== 'staff' && result.role !== 'admin') {
+          err.textContent = 'This looks like a student account — use the Student portal.';
+          return;
+        }
+        sessionStorage.setItem('session', JSON.stringify(result));
+        window.location.href = result.role === 'admin' ? '/admin-dashboard.html' : '/staff-dashboard.html';
+      } catch (e) {
+        err.textContent = 'Server error. Is the server running?';
+      }
+    }
+
+    document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  </script>
+</body>
+</html>

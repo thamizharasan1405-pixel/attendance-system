@@ -1,0 +1,13 @@
+{
+  "name": "cloud-attendance-system",
+  "version": "1.0.0",
+  "description": "Cloud Based Smart Attendance Management System - Final Year Project",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "mongodb": "^6.10.0"
+  }
+}
