@@ -121,7 +121,10 @@ function renderShell({ role, activeHref, title, welcomeName }) {
       <div class="topbar">
         <div style="display:flex;align-items:center;gap:14px;">
           <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
-          <div class="topbar-search"><span>🔍</span><input placeholder="Search..." disabled></div>
+          <div class="topbar-search" style="position:relative;">
+            <span>🔍</span><input id="topbar-search-input" placeholder="Search student name or reg no..." oninput="onTopbarSearch(this.value)" autocomplete="off">
+            <div id="topbar-search-results" class="search-results-dropdown" style="display:none;"></div>
+          </div>
         </div>
         <div class="right">
           <div>
@@ -148,7 +151,68 @@ function renderShell({ role, activeHref, title, welcomeName }) {
     const dd = document.getElementById('notif-dropdown');
     const bell = document.getElementById('notif-bell');
     if (dd && dd.style.display !== 'none' && !dd.contains(e.target) && e.target !== bell) dd.style.display = 'none';
+    const sr = document.getElementById('topbar-search-results');
+    if (sr && sr.style.display !== 'none' && !sr.contains(e.target) && e.target.id !== 'topbar-search-input') sr.style.display = 'none';
   });
+
+  pollNotifications();
+}
+
+// ---------- Notification sound (Web Audio API beep, no external file needed) ----------
+function playNotifSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(880, ctx.currentTime);
+    o.frequency.setValueAtTime(660, ctx.currentTime + 0.1);
+    g.gain.setValueAtTime(0.12, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime + 0.35);
+  } catch (e) { /* audio not available, ignore */ }
+}
+
+function notifQueryFor(session) {
+  if (!session) return null;
+  if (session.role === 'admin') return '/notifications?role=admin';
+  if (session.role === 'staff') return '/notifications?role=staff&staffId=' + encodeURIComponent(session.data.staffId);
+  if (session.role === 'student') return '/notifications?role=student&regNo=' + encodeURIComponent(session.data.regNo);
+  return null;
+}
+
+// Silently checks for new notifications on page load; plays a sound + shows a dot if count grew since last visit.
+async function pollNotifications() {
+  const session = getSession();
+  const q = notifQueryFor(session);
+  if (!q) return;
+  try {
+    const items = await apiGet(q);
+    const lastCount = parseInt(sessionStorage.getItem('notifCount') || '0');
+    if (items.length > lastCount) playNotifSound();
+    sessionStorage.setItem('notifCount', String(items.length));
+  } catch (e) { /* ignore */ }
+}
+
+async function onTopbarSearch(value) {
+  const box = document.getElementById('topbar-search-results');
+  const q = value.trim();
+  if (!q) { box.style.display = 'none'; return; }
+  try {
+    const results = await apiGet('/students/lookup?q=' + encodeURIComponent(q));
+    box.innerHTML = results.length ? results.map(s => `
+      <div class="search-result-row">
+        <div class="search-result-avatar">${titleCase(s.name).charAt(0)}</div>
+        <div style="flex:1;">
+          <div class="search-result-name">${titleCase(s.name)}</div>
+          <div class="search-result-meta">${s.regNo} · ${s.department}-Y${s.year}</div>
+        </div>
+        <div class="search-result-percent ${s.stats.percent >= 75 ? 'good' : 'low'}">${s.stats.percent}%</div>
+      </div>
+    `).join('') : `<div class="notif-empty">No students found</div>`;
+    box.style.display = 'block';
+  } catch (e) { box.style.display = 'none'; }
 }
 
 async function toggleNotifDropdown(e) {
@@ -162,14 +226,12 @@ async function toggleNotifDropdown(e) {
   dd.style.display = 'block';
   try {
     const session = getSession();
-    let items = [];
-    if (session && session.role === 'admin') {
-      const data = await apiGet('/dashboard/admin');
-      items = (data.recentActivities || []).map(a => ({ text: a.message, time: a.time }));
-    }
+    const q = notifQueryFor(session);
+    const items = q ? await apiGet(q) : [];
+    sessionStorage.setItem('notifCount', String(items.length));
     dd.innerHTML = `<div class="notif-header">Notifications</div>` + (
       items.length
-        ? items.map(n => `<div class="notif-item"><span class="notif-dot-sm"></span><div><div class="notif-text">${n.text}</div><div class="notif-time">${n.time}</div></div></div>`).join('')
+        ? items.map(n => `<div class="notif-item"><span class="notif-dot-sm"></span><div><div class="notif-text">${n.message}</div><div class="notif-time">${n.time}</div></div></div>`).join('')
         : `<div class="notif-empty">🔕 No new notifications</div>`
     );
   } catch (err) {

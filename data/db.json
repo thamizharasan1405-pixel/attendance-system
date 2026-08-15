@@ -491,7 +491,9 @@
     "leaveRequests": 7,
     "complaints": 2,
     "notices": 5,
-    "fees": 1
+    "fees": 1,
+    "gatePasses": 1
   },
-  "fees": []
+  "fees": [],
+  "gatePasses": []
 }

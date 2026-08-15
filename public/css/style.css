@@ -373,3 +373,26 @@ label { font-size: 12.5px; color: var(--gray); font-weight: 700; display: block;
 .fee-card-top { display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; }
 .fee-card-amount { font-size: 24px; font-weight: 800; margin: 8px 0 4px; }
 .fee-card-term { font-size: 11.5px; color: var(--gray-light); font-weight: 600; }
+
+/* ---------- Topbar search results dropdown ---------- */
+.search-results-dropdown {
+  position: absolute; top: calc(100% + 8px); left: 0; width: 320px; max-height: 320px; overflow-y: auto;
+  background: var(--white); border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: var(--shadow-lg); z-index: 250;
+}
+.search-result-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid #f4f4fa; }
+.search-result-row:last-child { border-bottom: none; }
+.search-result-avatar { width: 30px; height: 30px; border-radius: 9px; background: var(--indigo-light); color: var(--indigo); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
+.search-result-name { font-size: 12.5px; font-weight: 700; }
+.search-result-meta { font-size: 10.5px; color: var(--gray-light); margin-top: 1px; }
+.search-result-percent { font-size: 12px; font-weight: 800; padding: 3px 9px; border-radius: 20px; flex-shrink: 0; }
+.search-result-percent.good { background: var(--green-light); color: #15803d; }
+.search-result-percent.low { background: var(--rose-light); color: #9f1239; }
+
+/* ---------- Gate Pass ---------- */
+.gp-type-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.gp-type-tab { flex: 1; text-align: center; padding: 10px; border-radius: 10px; border: 1.5px solid var(--border); font-size: 12.5px; font-weight: 700; cursor: pointer; color: var(--gray); }
+.gp-type-tab.active { background: var(--indigo-light); border-color: var(--indigo); color: var(--indigo-dark); }
+.gp-record-btn { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--rose); color: #fff; font-weight: 700; font-size: 13.5px; }
+.gp-record-btn.recording { background: #9f1239; animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }

@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Leave Requests / Notifications</title>
 <link rel="stylesheet" href="/css/style.css">
-<link rel="stylesheet" href="/css/leave-notifications.css">
 </head>
 <body>
   <div class="app-shell" id="app-shell"></div>
@@ -29,6 +28,7 @@
           <div style="display:flex;gap:10px;margin-bottom:16px;border-bottom:1px solid #e2e8f0;padding-bottom:10px;">
             <button class="btn ${tab === 'leave' ? 'btn-primary' : 'btn-outline'}" onclick="switchTab('leave')">Leave Requests</button>
             ${session.role !== 'staff' ? `<button class="btn ${tab === 'complaints' ? 'btn-primary' : 'btn-outline'}" onclick="switchTab('complaints')">Complaints</button>` : ''}
+            ${session.role === 'staff' || session.role === 'admin' ? `<button class="btn ${tab === 'gatepass' ? 'btn-primary' : 'btn-outline'}" onclick="switchTab('gatepass')">🚨 Gate Passes</button>` : ''}
           </div>
           <div id="tab-body"></div>
         </div>
@@ -38,7 +38,43 @@
     function switchTab(t) {
       tab = t;
       renderTabs();
-      if (t === 'leave') loadLeave(); else loadComplaints();
+      if (t === 'leave') loadLeave();
+      else if (t === 'complaints') loadComplaints();
+      else loadGatePasses();
+    }
+
+    async function loadGatePasses() {
+      const isStaff = session.role === 'staff';
+      const query = isStaff ? '?staffId=' + session.data.staffId : '';
+      const list = await apiGet('/gate-passes' + query);
+      document.getElementById('tab-body').innerHTML = `
+        ${list.map(g => `
+          <div style="padding:16px 0;border-bottom:1px solid #f4f4fa;">
+            <div style="display:flex;justify-content:space-between;align-items:start;">
+              <strong style="font-size:14px;">🚨 ${titleCase(g.studentName)} <span style="font-size:11.5px;color:#94a3b8;font-weight:500;">→ ${g.staffName}</span></strong>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:11.5px;color:#94a3b8;">${g.date} ${g.time}</span>
+                <span class="badge ${g.status.toLowerCase()}">${g.status}</span>
+              </div>
+            </div>
+            <p style="font-size:12.5px;color:#64748b;margin-top:4px;">Reason: ${g.reason || '-'}</p>
+            ${g.type === 'voice'
+              ? `<audio controls src="${g.audioData}" style="width:100%;max-width:360px;margin-top:8px;"></audio>`
+              : `<p style="font-size:13px;color:#334155;margin-top:8px;background:#fef1f3;padding:10px;border-radius:8px;">${g.message}</p>`}
+            ${g.status === 'Pending' && (session.role === 'admin' || (session.role === 'staff' && g.staffId === session.data.staffId)) ? `
+              <div style="margin-top:10px;display:flex;gap:8px;">
+                <button class="btn btn-primary" onclick="setGatePassStatus(${g.id}, 'Approved')">✅ Approve</button>
+                <button class="btn btn-outline" onclick="setGatePassStatus(${g.id}, 'Rejected')">❌ Reject</button>
+              </div>
+            ` : ''}
+          </div>
+        `).join('') || `<p style="text-align:center;color:#94a3b8;padding:20px;">No gate pass requests</p>`}
+      `;
+    }
+
+    async function setGatePassStatus(id, status) {
+      await apiPut('/gate-passes/' + id, { status });
+      loadGatePasses();
     }
 
     async function loadLeave() {
