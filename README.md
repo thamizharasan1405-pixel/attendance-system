@@ -1,21 +1,22 @@
-# AeroAttend Design System — Step 1
+# AeroAttend — Step 2 Main Shell
 
-Fresh UI foundation for the Cloud Attendance System.
+This package contains the new global shell for the attendance project.
 
-## Included
-- Responsive sidebar and topbar
-- Light/dark theme
-- KPI cards
-- Attendance analytics
-- Status badges
-- Tables
-- Activity feed
-- Mobile bottom navigation
-- Reusable CSS variables and components
-
-## Run
-Open `index.html` in a browser.
+## Files
+- `public/css/style.css` — complete shell styles, responsive rules, theme variables
+- `public/js/common.js` — reusable role-based sidebar + header + mobile navigation
+- `demo.html` — standalone preview
 
 ## Integration
-This is a UI foundation only. Existing backend/API/database logic is not modified.
-Next step is migrating the project's real pages into this design system.
+On an existing page:
+1. Keep the existing backend/API/page logic.
+2. Link `public/css/style.css`.
+3. Load `public/js/common.js`.
+4. Keep `<div class="app-shell" id="app-shell"></div>`.
+5. Call:
+   `renderShell({ role: "admin", page: "Dashboard", subtitle: "Workspace" });`
+6. Put that page's existing content inside `#page-content`.
+
+Roles supported: `admin`, `staff`, `student`.
+
+Backend, MongoDB, authentication and API logic are not changed by this package.
