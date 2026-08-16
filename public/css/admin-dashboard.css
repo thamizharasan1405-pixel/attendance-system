@@ -1,0 +1,102 @@
+
+/* AeroAttend Step 3 — Admin Dashboard */
+
+.dashboard{display:flex;flex-direction:column;gap:18px}
+.dashboard-welcome{display:flex;justify-content:space-between;align-items:flex-end;gap:20px}
+.dashboard-welcome h2{font-size:25px;line-height:1.2;margin:6px 0 7px;letter-spacing:-.03em}
+.dashboard-welcome p{margin:0;color:var(--muted);font-size:12px}
+.dashboard-eyebrow{font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);font-weight:700}
+.dashboard-actions{display:flex;gap:8px}
+.dash-btn{height:38px;padding:0 13px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:11px;font-weight:600}
+.dash-btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.dash-btn:hover{transform:translateY(-1px)}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.metric-card{padding:18px;min-height:150px;position:relative;overflow:hidden}
+.metric-card:after{content:"";position:absolute;width:95px;height:95px;border-radius:50%;right:-35px;top:-35px;background:rgba(99,102,241,.06)}
+.metric-top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:10px}
+.metric-icon{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:#eef2ff;color:var(--primary);font-size:13px}
+.metric-value{font-size:27px;font-weight:800;letter-spacing:-.04em;margin:15px 0 8px;display:block}
+.metric-meta{font-size:9px;color:var(--muted)}
+.metric-meta b{color:var(--success)}
+.metric-meta.warn b{color:var(--warning)}
+.metric-progress{height:6px;background:var(--surface-2);border-radius:8px;margin:13px 0 7px;overflow:hidden}
+.metric-progress span{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,var(--primary),var(--accent))}
+.dashboard-grid-2{display:grid;grid-template-columns:1.75fr 1fr;gap:14px}
+.dashboard-card{padding:19px}
+.card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.card-head h3{font-size:14px;margin:5px 0 0}
+.card-kicker{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:700}
+.card-link{border:0;background:transparent;color:var(--primary);font-size:10px;font-weight:700;padding:5px}
+.period-select{border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:10px;padding:7px 9px;border-radius:8px}
+.attendance-chart{height:250px;display:flex;margin-top:20px}
+.chart-axis{width:42px;display:flex;flex-direction:column;justify-content:space-between;padding:4px 9px 28px 0;color:var(--muted);font-size:8px;text-align:right}
+.chart-canvas{position:relative;flex:1;margin-bottom:27px;background:repeating-linear-gradient(to bottom,transparent 0,transparent 47px,var(--border) 48px)}
+.chart-area-fill{position:absolute;left:0;right:0;bottom:0;height:80%;background:linear-gradient(to top,rgba(79,70,229,.13),rgba(79,70,229,0));clip-path:polygon(0 52%,8% 46%,16% 51%,24% 38%,32% 44%,40% 31%,48% 36%,56% 24%,64% 29%,72% 16%,80% 24%,88% 12%,100% 18%,100% 100%,0 100%)}
+.chart-line{position:absolute;left:0;right:0;top:0;bottom:0}
+.chart-line svg{width:100%;height:100%;overflow:visible}
+.chart-line polyline{fill:none;stroke:var(--primary);stroke-width:2.5;vector-effect:non-scaling-stroke}
+.chart-points{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:flex-start;justify-content:space-around}
+.chart-point{width:7px;height:7px;margin-top:calc(var(--point) - 3px);background:var(--surface);border:2px solid var(--primary);border-radius:50%}
+.chart-days{position:absolute;left:0;right:0;bottom:-22px;display:flex;justify-content:space-around;color:var(--muted);font-size:8px}
+.health{display:flex;flex-direction:column;align-items:center}
+.health-ring{width:174px;height:174px;margin:22px auto 16px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--primary) 0 92.4%,#e8ebf3 92.4%);position:relative}
+[data-theme=dark] .health-ring{background:conic-gradient(var(--primary) 0 92.4%,#253044 92.4%)}
+.health-ring:before{content:"";position:absolute;inset:14px;border-radius:50%;background:var(--surface)}
+.health-ring-inner{position:relative;text-align:center;z-index:1}
+.health-ring-inner strong{display:block;font-size:27px;letter-spacing:-.04em}
+.health-ring-inner span{font-size:9px;color:var(--muted)}
+.health-grid{width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.health-stat{padding:9px 6px;background:var(--surface-2);border-radius:9px;text-align:center}
+.health-stat b{display:block;font-size:12px}
+.health-stat span{font-size:8px;color:var(--muted)}
+.health-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:3px}
+.green{background:var(--success)}.red{background:var(--danger)}.orange{background:var(--warning)}
+
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:18px}
+.quick-action{border:1px solid var(--border);background:var(--surface-2);border-radius:11px;padding:12px;text-align:left;color:var(--text)}
+.quick-action:hover{border-color:#c7d2fe;background:#f5f7ff}
+[data-theme=dark] .quick-action:hover{background:#1b2540}
+.quick-action-icon{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:#eef2ff;color:var(--primary);font-size:12px;margin-bottom:9px}
+.quick-action b{font-size:10px;display:block}.quick-action span{font-size:8px;color:var(--muted);display:block;margin-top:3px}
+
+.lower-grid{display:grid;grid-template-columns:1.55fr 1fr;gap:14px}
+.dashboard-table{width:100%;border-collapse:collapse;margin-top:15px}
+.dashboard-table th{font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);text-align:left;padding:10px 7px;border-bottom:1px solid var(--border)}
+.dashboard-table td{font-size:9px;color:var(--muted);padding:11px 7px;border-bottom:1px solid var(--border)}
+.student-cell{display:flex;align-items:center;gap:8px;color:var(--text);font-weight:600}
+.mini-avatar{width:27px;height:27px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#6366f1,#06b6d4);color:#fff;font-size:8px;font-weight:800}
+.status-pill{font-size:8px;font-weight:700;padding:4px 7px;border-radius:20px}
+.status-present{background:#ecfdf5;color:#047857}.status-absent{background:#fef2f2;color:#b91c1c}.status-late{background:#fffbeb;color:#b45309}
+
+.activity-list{margin-top:12px}
+.activity-item{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)}
+.activity-item:last-child{border-bottom:0}
+.activity-icon{width:31px;height:31px;border-radius:9px;display:grid;place-items:center;flex:none;font-size:11px}
+.activity-icon.blue{background:#eef2ff;color:#4f46e5}.activity-icon.green{background:#ecfdf5;color:#059669}.activity-icon.orange{background:#fffbeb;color:#d97706}.activity-icon.red{background:#fef2f2;color:#dc2626}
+.activity-copy{min-width:0}.activity-copy b{display:block;font-size:10px}.activity-copy p{font-size:9px;color:var(--muted);margin:3px 0}.activity-copy time{font-size:8px;color:var(--muted)}
+
+.notice-list{margin-top:14px;display:grid;gap:8px}
+.notice{display:flex;gap:9px;padding:10px;border:1px solid var(--border);border-radius:9px}
+.notice-mark{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:#eef2ff;color:var(--primary);font-size:11px;flex:none}
+.notice b{font-size:9px;display:block}.notice p{font-size:8px;color:var(--muted);margin:3px 0}.notice time{font-size:7px;color:var(--muted)}
+
+@media(max-width:1100px){
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .dashboard-grid-2,.lower-grid{grid-template-columns:1fr}
+}
+@media(max-width:700px){
+  .dashboard-welcome{display:block}
+  .dashboard-actions{margin-top:14px}
+  .kpi-row{grid-template-columns:1fr 1fr;gap:9px}
+  .metric-card{padding:14px;min-height:135px}
+  .metric-value{font-size:23px}
+  .quick-grid{grid-template-columns:1fr 1fr}
+  .dashboard-card{padding:15px}
+  .attendance-chart{height:210px}
+}
+@media(max-width:460px){
+  .kpi-row{grid-template-columns:1fr}
+  .quick-grid{grid-template-columns:1fr 1fr}
+  .dashboard-welcome h2{font-size:20px}
+  .dashboard-actions .dash-btn{font-size:10px;padding:0 10px}
+}

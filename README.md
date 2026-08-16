@@ -1,22 +1,25 @@
-# AeroAttend — Step 2 Main Shell
+# AeroAttend — Step 3 Admin Dashboard
 
-This package contains the new global shell for the attendance project.
+This step adds a completely redesigned Admin Dashboard inside the Step 2 Main Shell.
 
-## Files
-- `public/css/style.css` — complete shell styles, responsive rules, theme variables
-- `public/js/common.js` — reusable role-based sidebar + header + mobile navigation
-- `demo.html` — standalone preview
+## Included
+- Admin welcome header
+- Student / attendance / staff / pending request KPI cards
+- Attendance trend visualization
+- Attendance health ring
+- Quick actions
+- Recent attendance table
+- Recent activity
+- Latest notices
+- Pending approvals
+- Responsive desktop/tablet/mobile layout
+- Light/dark theme through the Step 2 shell
+
+## Run
+Open `admin-dashboard.html`.
 
 ## Integration
-On an existing page:
-1. Keep the existing backend/API/page logic.
-2. Link `public/css/style.css`.
-3. Load `public/js/common.js`.
-4. Keep `<div class="app-shell" id="app-shell"></div>`.
-5. Call:
-   `renderShell({ role: "admin", page: "Dashboard", subtitle: "Workspace" });`
-6. Put that page's existing content inside `#page-content`.
+The demo data in `public/js/admin-dashboard.js` is presentation data only. Replace those values with the existing project API/database data without changing the backend contract.
 
-Roles supported: `admin`, `staff`, `student`.
-
-Backend, MongoDB, authentication and API logic are not changed by this package.
+## PPT-aligned scope
+The dashboard focuses on the project's stated admin responsibilities: student and staff management, attendance analytics, fees, leave/complaint approvals, notices, and reports.
