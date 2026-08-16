@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AeroAttend Smart Campus Design System">
+  <title>AeroAttend — Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">A</div>
+        <div>
+          <strong>AeroAttend</strong>
+          <span>Smart Campus</span>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <p class="nav-label">Overview</p>
+        <a class="nav-item active" href="#"><span>⌂</span> Dashboard</a>
+
+        <p class="nav-label">Management</p>
+        <a class="nav-item" href="#"><span>◈</span> Students</a>
+        <a class="nav-item" href="#"><span>◉</span> Staff</a>
+        <a class="nav-item" href="#"><span>✓</span> Attendance</a>
+        <a class="nav-item" href="#"><span>▦</span> Timetable</a>
+
+        <p class="nav-label">Campus</p>
+        <a class="nav-item" href="#"><span>₹</span> Fees</a>
+        <a class="nav-item" href="#"><span>↗</span> Leave Requests</a>
+        <a class="nav-item" href="#"><span>!</span> Complaints</a>
+        <a class="nav-item" href="#"><span>◫</span> Notices</a>
+
+        <p class="nav-label">Analytics</p>
+        <a class="nav-item" href="#"><span>⌁</span> Reports</a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <a class="nav-item" href="#"><span>⚙</span> Settings</a>
+        <a class="nav-item" href="#"><span>?</span> Help Center</a>
+        <div class="user-mini">
+          <div class="avatar">AD</div>
+          <div>
+            <strong>Admin User</strong>
+            <span>Administrator</span>
+          </div>
+          <button class="icon-button" aria-label="User menu">⋮</button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="mobile-menu icon-button" id="menuBtn" aria-label="Open menu">☰</button>
+        <div class="page-heading">
+          <span>Workspace</span>
+          <h1>Dashboard</h1>
+        </div>
+        <div class="top-actions">
+          <label class="search">
+            <span>⌕</span>
+            <input type="search" placeholder="Search anything...">
+            <kbd>⌘ K</kbd>
+          </label>
+          <button class="icon-button notification" aria-label="Notifications">♢<i></i></button>
+          <button class="profile-chip">
+            <span class="avatar small">AD</span>
+            <span class="profile-text">Admin</span>
+            <span>⌄</span>
+          </button>
+          <button class="icon-button" id="themeBtn" aria-label="Toggle theme">☼</button>
+        </div>
+      </header>
+
+      <section class="content">
+        <div class="welcome-row">
+          <div>
+            <p class="eyebrow">Sunday, August 16, 2026</p>
+            <h2>Good evening, Admin <span>👋</span></h2>
+            <p class="muted">Here is what's happening across your campus today.</p>
+          </div>
+          <button class="btn primary">＋ Quick Action</button>
+        </div>
+
+        <div class="kpi-grid">
+          <article class="card kpi">
+            <div class="kpi-top"><span>Total Students</span><span class="trend up">↗ 8.2%</span></div>
+            <strong>1,248</strong>
+            <div class="spark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <small>Compared with last month</small>
+          </article>
+          <article class="card kpi">
+            <div class="kpi-top"><span>Today's Attendance</span><span class="trend up">↗ 2.4%</span></div>
+            <strong>92.4%</strong>
+            <div class="progress"><span style="width:92.4%"></span></div>
+            <small>1,153 present · 95 absent</small>
+          </article>
+          <article class="card kpi">
+            <div class="kpi-top"><span>Active Staff</span><span class="trend neutral">86 total</span></div>
+            <strong>78</strong>
+            <div class="avatar-stack"><span>AR</span><span>PK</span><span>MS</span><span>+75</span></div>
+            <small>Currently active today</small>
+          </article>
+          <article class="card kpi">
+            <div class="kpi-top"><span>Pending Requests</span><span class="trend warn">Needs action</span></div>
+            <strong>23</strong>
+            <div class="mini-bars"><i style="height:35%"></i><i style="height:60%"></i><i style="height:45%"></i><i style="height:80%"></i><i style="height:65%"></i><i style="height:95%"></i></div>
+            <small>Leave & complaints</small>
+          </article>
+        </div>
+
+        <div class="dashboard-grid">
+          <article class="card chart-card">
+            <div class="section-head">
+              <div><span class="eyebrow">Performance</span><h3>Attendance Pulse</h3></div>
+              <select class="select"><option>Last 7 days</option><option>Last 30 days</option></select>
+            </div>
+            <div class="chart-area">
+              <div class="chart-y"><span>100%</span><span>75%</span><span>50%</span><span>25%</span><span>0%</span></div>
+              <div class="chart">
+                <div class="line"></div>
+                <div class="chart-dots"><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div>
+                <div class="chart-x"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card score-card">
+            <div class="section-head"><div><span class="eyebrow">Overall</span><h3>Attendance Health</h3></div><span class="status success">Healthy</span></div>
+            <div class="ring"><div><strong>92.4%</strong><span>overall</span></div></div>
+            <div class="legend">
+              <span><i class="dot present"></i>Present <b>92.4%</b></span>
+              <span><i class="dot absent"></i>Absent <b>5.8%</b></span>
+              <span><i class="dot late"></i>Late <b>1.8%</b></span>
+            </div>
+          </article>
+        </div>
+
+        <div class="lower-grid">
+          <article class="card table-card">
+            <div class="section-head">
+              <div><span class="eyebrow">Live data</span><h3>Recent Attendance</h3></div>
+              <button class="btn ghost">View all →</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Student</th><th>Register No.</th><th>Department</th><th>Period</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td><div class="person"><span class="avatar small">AK</span><b>Arun Kumar</b></div></td><td>23CA001</td><td>BCA</td><td>03</td><td><span class="status success">● Present</span></td></tr>
+                  <tr><td><div class="person"><span class="avatar small">PS</span><b>Priya S</b></div></td><td>23CA002</td><td>BCA</td><td>03</td><td><span class="status success">● Present</span></td></tr>
+                  <tr><td><div class="person"><span class="avatar small">RM</span><b>Rahul M</b></div></td><td>23CS019</td><td>BSc CS</td><td>03</td><td><span class="status danger">● Absent</span></td></tr>
+                  <tr><td><div class="person"><span class="avatar small">SD</span><b>Shalini D</b></div></td><td>23CA014</td><td>BCA</td><td>02</td><td><span class="status warning">● Late</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="card activity-card">
+            <div class="section-head"><div><span class="eyebrow">Campus</span><h3>Recent Activity</h3></div></div>
+            <div class="activity">
+              <div><span class="activity-icon blue">✓</span><div><b>Attendance submitted</b><p>Staff ID ST042 submitted BCA-II attendance.</p><small>8 min ago</small></div></div>
+              <div><span class="activity-icon green">₹</span><div><b>Fee verified</b><p>3 payment records were verified.</p><small>24 min ago</small></div></div>
+              <div><span class="activity-icon orange">!</span><div><b>New leave request</b><p>Two requests are waiting for approval.</p><small>1 hr ago</small></div></div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="mobile-overlay" id="overlay"></div>
+  <nav class="mobile-nav">
+    <a class="active" href="#"><span>⌂</span>Home</a>
+    <a href="#"><span>✓</span>Attendance</a>
+    <a href="#"><span>▦</span>Classes</a>
+    <a href="#"><span>•••</span>More</a>
+  </nav>
+  <script src="js/theme.js"></script>
+  <script src="js/sidebar.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
