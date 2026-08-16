@@ -44,19 +44,6 @@ function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
 
-// Pushes a targeted notification. audience: 'admin' | 'staff' | 'student'
-// targetStaffId / targetRegNo narrow it to one person; omit to broadcast to the whole role.
-function pushNotification(db, { message, audience, targetStaffId, targetRegNo }) {
-  if (!db.notifications) db.notifications = [];
-  db.notifications.unshift({
-    id: Date.now() + Math.random(),
-    message, audience, targetStaffId, targetRegNo,
-    time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }),
-    createdAt: Date.now()
-  });
-  db.notifications = db.notifications.slice(0, 80);
-}
-
 function calcAttendancePercent(db, regNo) {
   const records = db.attendance.filter(a => a.regNo === regNo);
   if (records.length === 0) return { percent: 0, present: 0, absent: 0, total: 0 };
@@ -138,25 +125,6 @@ async function handleApi(req, res, pathname, query) {
   }
 
   // ---- STUDENTS CRUD ----
-  if (pathname === '/api/notifications' && method === 'GET') {
-    const db = await readDB();
-    if (!db.notifications) db.notifications = [];
-    let list = [];
-    if (query.role === 'admin') list = db.notifications.filter(n => n.audience === 'admin');
-    else if (query.role === 'staff') list = db.notifications.filter(n => n.audience === 'staff' && (!n.targetStaffId || n.targetStaffId === query.staffId));
-    else if (query.role === 'student') list = db.notifications.filter(n => n.audience === 'student' && (!n.targetRegNo || n.targetRegNo === query.regNo));
-    return sendJSON(res, 200, list.slice(0, 20));
-  }
-  if (pathname === '/api/students/lookup' && method === 'GET') {
-    const db = await readDB();
-    const q = (query.q || '').toLowerCase().trim();
-    if (!q) return sendJSON(res, 200, []);
-    const matches = db.students.filter(s =>
-      s.name.toLowerCase().includes(q) || s.regNo.toLowerCase().includes(q)
-    ).slice(0, 8);
-    const result = matches.map(s => ({ ...s, stats: calcAttendancePercent(db, s.regNo) }));
-    return sendJSON(res, 200, result);
-  }
   if (pathname === '/api/students' && method === 'GET') {
     const db = await readDB();
     return sendJSON(res, 200, db.students);
@@ -240,15 +208,14 @@ async function handleApi(req, res, pathname, query) {
     if (query.department) students = students.filter(s => s.department === query.department);
     if (query.year) students = students.filter(s => String(s.year) === String(query.year));
     const regSet = new Set(students.map(s => s.regNo));
-    const statusFilter = query.status || 'Absent'; // Absent | Present | All
-    let records = db.attendance.filter(a => regSet.has(a.regNo) && (statusFilter === 'All' || a.status === statusFilter));
+    const statusFilter = query.status || 'Absent'; // Absent | Present
+    let records = db.attendance.filter(a => regSet.has(a.regNo) && a.status === statusFilter);
     if (query.date) records = records.filter(a => a.date === query.date);
     if (query.from && query.to) records = records.filter(a => a.date >= query.from && a.date <= query.to);
-    if (query.month) records = records.filter(a => a.date.startsWith(query.month));
     const result = records.map(a => {
       const s = db.students.find(st => st.regNo === a.regNo);
       return { ...a, name: s ? s.name : '', department: s ? s.department : '', year: s ? s.year : '' };
-    }).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    }).sort((a, b) => (a.date < b.date ? 1 : -1));
     return sendJSON(res, 200, result);
   }
 
@@ -272,18 +239,15 @@ async function handleApi(req, res, pathname, query) {
         db.attendance.push({ id: db.nextId.attendance++, regNo: r.regNo, date, status: r.status, time, method: 'Manual', period, subject });
       }
     });
+    if (!db.notifications) db.notifications = [];
     const absentCount = records.filter(r => r.status === 'Absent').length;
     const markedBy = body.markedBy || 'Staff';
-    pushNotification(db, {
+    db.notifications.unshift({
+      id: Date.now(),
       message: `${markedBy} marked ${records.length} student(s)${period ? ' — Period ' + period : ''}${subject ? ' (' + subject + ')' : ''}${absentCount ? ', ' + absentCount + ' absent' : ''}`,
-      audience: 'admin'
+      time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
     });
-    records.filter(r => r.status === 'Absent').forEach(r => {
-      pushNotification(db, {
-        message: `You were marked Absent${period ? ' — Period ' + period : ''}${subject ? ' (' + subject + ')' : ''} on ${date}`,
-        audience: 'student', targetRegNo: r.regNo
-      });
-    });
+    db.notifications = db.notifications.slice(0, 30);
     await writeDB(db);
     return sendJSON(res, 200, { success: true });
   }
@@ -348,14 +312,6 @@ async function handleApi(req, res, pathname, query) {
     const db = await readDB();
     const newReq = { id: db.nextId.leaveRequests++, status: 'Pending', ...body };
     db.leaveRequests.push(newReq);
-    if (newReq.staffId) {
-      // Staff leave -> notify every HOD
-      db.staff.filter(s => s.role === 'HOD').forEach(h => {
-        pushNotification(db, { message: `${newReq.staffName} requested leave (${newReq.topic})`, audience: 'staff', targetStaffId: h.staffId });
-      });
-    } else {
-      pushNotification(db, { message: `${newReq.studentName} requested leave (${newReq.topic})`, audience: 'admin' });
-    }
     await writeDB(db);
     return sendJSON(res, 201, newReq);
   }
@@ -367,46 +323,8 @@ async function handleApi(req, res, pathname, query) {
     if (idx === -1) return sendJSON(res, 404, { message: 'Not found' });
     if (body.status !== undefined) db.leaveRequests[idx].status = body.status;
     if (body.reply !== undefined) db.leaveRequests[idx].reply = body.reply;
-    if (body.status && db.leaveRequests[idx].regNo) {
-      pushNotification(db, { message: `Your leave request was ${body.status}`, audience: 'student', targetRegNo: db.leaveRequests[idx].regNo });
-    }
     await writeDB(db);
     return sendJSON(res, 200, db.leaveRequests[idx]);
-  }
-
-  // ---- GATE PASSES (emergency requests to a specific staff member) ----
-  if (pathname === '/api/gate-passes' && method === 'GET') {
-    const db = await readDB();
-    if (!db.gatePasses) db.gatePasses = [];
-    let list = db.gatePasses;
-    if (query.regNo) list = list.filter(g => g.regNo === query.regNo);
-    if (query.staffId) list = list.filter(g => g.staffId === query.staffId);
-    return sendJSON(res, 200, list.slice().reverse());
-  }
-  if (pathname === '/api/gate-passes' && method === 'POST') {
-    const body = await getBody(req); // { regNo, studentName, staffId, staffName, type: 'voice'|'text', message, audioData, reason }
-    const db = await readDB();
-    if (!db.gatePasses) db.gatePasses = [];
-    if (!db.nextId.gatePasses) db.nextId.gatePasses = 1;
-    const newGP = { id: db.nextId.gatePasses++, status: 'Pending', date: todayStr(), time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }), ...body };
-    db.gatePasses.push(newGP);
-    pushNotification(db, { message: `🚨 Emergency gate pass request from ${newGP.studentName}`, audience: 'staff', targetStaffId: newGP.staffId });
-    await writeDB(db);
-    return sendJSON(res, 201, newGP);
-  }
-  if (pathname.match(/^\/api\/gate-passes\/\d+$/) && method === 'PUT') {
-    const id = parseInt(pathname.split('/').pop());
-    const body = await getBody(req);
-    const db = await readDB();
-    if (!db.gatePasses) db.gatePasses = [];
-    const idx = db.gatePasses.findIndex(g => g.id === id);
-    if (idx === -1) return sendJSON(res, 404, { message: 'Not found' });
-    db.gatePasses[idx] = { ...db.gatePasses[idx], ...body };
-    if (body.status) {
-      pushNotification(db, { message: `Your gate pass request was ${body.status}`, audience: 'student', targetRegNo: db.gatePasses[idx].regNo });
-    }
-    await writeDB(db);
-    return sendJSON(res, 200, db.gatePasses[idx]);
   }
 
   // ---- COMPLAINTS ----
@@ -421,7 +339,6 @@ async function handleApi(req, res, pathname, query) {
     const db = await readDB();
     const newC = { id: db.nextId.complaints++, status: 'Open', date: todayStr(), ...body };
     db.complaints.push(newC);
-    pushNotification(db, { message: `${newC.studentName} raised a complaint: ${newC.subject}`, audience: 'admin' });
     await writeDB(db);
     return sendJSON(res, 201, newC);
   }
@@ -448,13 +365,6 @@ async function handleApi(req, res, pathname, query) {
     const db = await readDB();
     const newN = { id: db.nextId.notices++, date: todayStr(), postedBy: 'Admin', ...body };
     db.notices.push(newN);
-    const aud = newN.audience || 'All';
-    if (aud === 'All' || aud === 'Students') {
-      pushNotification(db, { message: `New notice: ${newN.title}`, audience: 'student' });
-    }
-    if (aud === 'All' || aud === 'Staff') {
-      pushNotification(db, { message: `New notice: ${newN.title}`, audience: 'staff' });
-    }
     await writeDB(db);
     return sendJSON(res, 201, newN);
   }
@@ -533,21 +443,12 @@ async function handleApi(req, res, pathname, query) {
     return sendJSON(res, 200, withNames);
   }
   if (pathname === '/api/fees' && method === 'POST') {
-    const body = await getBody(req); // { regNo, term, amount, status, sentToStaffId (optional) }
+    const body = await getBody(req); // { regNo, term, amount, status }
     const db = await readDB();
     if (!db.fees) db.fees = [];
     if (!db.nextId.fees) db.nextId.fees = 1;
     const newFee = { id: db.nextId.fees++, status: 'Due', date: todayStr(), ...body };
     db.fees.push(newFee);
-    if (newFee.reportedBy === 'Student') {
-      const student = db.students.find(s => s.regNo === newFee.regNo);
-      const staffLabel = body.sentToStaffId ? (db.staff.find(s => s.staffId === body.sentToStaffId) || {}).name : null;
-      pushNotification(db, {
-        message: `${student ? student.name : newFee.regNo} reported a fee payment (₹${newFee.amount})${staffLabel ? ' — sent to ' + staffLabel : ''}`,
-        audience: 'staff', targetStaffId: body.sentToStaffId || undefined
-      });
-      pushNotification(db, { message: `${student ? student.name : newFee.regNo} reported a fee payment of ₹${newFee.amount}`, audience: 'admin' });
-    }
     await writeDB(db);
     return sendJSON(res, 201, newFee);
   }
@@ -558,12 +459,7 @@ async function handleApi(req, res, pathname, query) {
     if (!db.fees) db.fees = [];
     const idx = db.fees.findIndex(f => f.id === id);
     if (idx === -1) return sendJSON(res, 404, { message: 'Not found' });
-    const wasPaid = db.fees[idx].status === 'Paid';
     db.fees[idx] = { ...db.fees[idx], ...body };
-    if (!wasPaid && db.fees[idx].status === 'Paid') {
-      const student = db.students.find(s => s.regNo === db.fees[idx].regNo);
-      pushNotification(db, { message: `Fee marked Paid for ${student ? student.name : db.fees[idx].regNo} (₹${db.fees[idx].amount})`, audience: 'admin' });
-    }
     await writeDB(db);
     return sendJSON(res, 200, db.fees[idx]);
   }

@@ -1,32 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Page Not Found - Cloud Attendance System</title>
-<link rel="stylesheet" href="/css/style.css">
-<style>
-  .err-shell { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); padding: 24px; }
-  .err-card { text-align: center; max-width: 420px; }
-  .err-badge {
-    width: 84px; height: 84px; border-radius: 24px; margin: 0 auto 22px;
-    background: var(--indigo-light); color: var(--indigo); font-size: 38px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .err-code { font-size: 60px; font-weight: 800; letter-spacing: -0.03em; color: var(--text); }
-  .err-title { font-size: 17px; font-weight: 700; margin: 8px 0 6px; }
-  .err-sub { font-size: 13.5px; color: var(--gray); margin-bottom: 26px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Page Not Found - Cloud Attendance System</title>
+
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="public/css/style.css">
+
+  <!-- Page-specific CSS -->
+  <link rel="stylesheet" href="public/css/404.css">
+<link rel="stylesheet" href="/css/redesign.css">
 </head>
+
 <body>
-  <div class="err-shell">
-    <div class="err-card">
-      <div class="err-badge">🔍</div>
+
+  <main class="err-shell">
+
+    <section class="err-card" aria-labelledby="error-title">
+
+      <div class="err-visual">
+
+        <div class="err-glow"></div>
+
+        <div class="err-badge" aria-hidden="true">
+          <span>404</span>
+        </div>
+
+      </div>
+
       <div class="err-code">404</div>
-      <div class="err-title">Page Not Found</div>
-      <p class="err-sub">The page you're looking for doesn't exist or may have been moved.</p>
-      <a href="/login.html" class="btn btn-primary">← Back to Login</a>
-    </div>
-  </div>
+
+      <h1 id="error-title" class="err-title">
+        Page Not Found
+      </h1>
+
+      <p class="err-sub">
+        The page you're looking for doesn't exist or may have been moved.
+        Let's get you back to your attendance portal.
+      </p>
+
+      <a href="/login.html" class="err-btn">
+        <span class="err-btn-icon">←</span>
+        <span>Back to Login</span>
+      </a>
+
+      <div class="err-footer">
+        <span class="err-dot"></span>
+        Cloud Attendance System
+      </div>
+
+    </section>
+
+  </main>
+
 </body>
 </html>

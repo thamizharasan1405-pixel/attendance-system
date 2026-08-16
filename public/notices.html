@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Notices & Announcements</title>
 <link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/notices.css">
+<link rel="stylesheet" href="/css/redesign.css">
 </head>
 <body>
   <div class="app-shell" id="app-shell"></div>
@@ -44,7 +46,6 @@
             </div>
           </div>
           <p style="font-size:13px;color:#475569;margin-top:6px;">${n.message}</p>
-          ${n.image ? `<img src="${n.image}" style="max-width:280px;border-radius:12px;margin-top:10px;display:block;">` : ''}
           <p style="font-size:11.5px;color:#94a3b8;margin-top:4px;">Posted by ${n.postedBy}${n.department ? ` · ${n.department}` : ''}</p>
         </div>
       `).join('') || '<p style="text-align:center;color:#94a3b8;padding:20px;">No notices yet</p>';
@@ -64,21 +65,10 @@
             </select>
           </div>`}
           <div class="field"><label>Message</label><textarea id="n-message" rows="3"></textarea></div>
-          <div class="field"><label>Attach Image (optional)</label><input type="file" id="n-image" accept="image/*" onchange="onNoticeImage(event)"></div>
           <button class="btn btn-primary" onclick="submitNotice()">Post</button>
           <button class="btn btn-outline" onclick="document.getElementById('form-card').innerHTML=''">Cancel</button>
         </div>
       `;
-      pendingNoticeImage = null;
-    }
-
-    let pendingNoticeImage = null;
-    function onNoticeImage(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => { pendingNoticeImage = reader.result; };
-      reader.readAsDataURL(file);
     }
 
     async function submitNotice() {
@@ -87,7 +77,6 @@
         message: document.getElementById('n-message').value,
         postedBy: isStaff ? session.data.name : 'Admin'
       };
-      if (pendingNoticeImage) body.image = pendingNoticeImage;
       if (isStaff) {
         body.subject = document.getElementById('n-subject').value;
         body.department = session.data.department;
