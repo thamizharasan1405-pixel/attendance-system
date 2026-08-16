@@ -240,14 +240,15 @@ async function handleApi(req, res, pathname, query) {
     if (query.department) students = students.filter(s => s.department === query.department);
     if (query.year) students = students.filter(s => String(s.year) === String(query.year));
     const regSet = new Set(students.map(s => s.regNo));
-    const statusFilter = query.status || 'Absent'; // Absent | Present
-    let records = db.attendance.filter(a => regSet.has(a.regNo) && a.status === statusFilter);
+    const statusFilter = query.status || 'Absent'; // Absent | Present | All
+    let records = db.attendance.filter(a => regSet.has(a.regNo) && (statusFilter === 'All' || a.status === statusFilter));
     if (query.date) records = records.filter(a => a.date === query.date);
     if (query.from && query.to) records = records.filter(a => a.date >= query.from && a.date <= query.to);
+    if (query.month) records = records.filter(a => a.date.startsWith(query.month));
     const result = records.map(a => {
       const s = db.students.find(st => st.regNo === a.regNo);
       return { ...a, name: s ? s.name : '', department: s ? s.department : '', year: s ? s.year : '' };
-    }).sort((a, b) => (a.date < b.date ? 1 : -1));
+    }).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     return sendJSON(res, 200, result);
   }
 
