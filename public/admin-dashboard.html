@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Dashboard</title>
 <link rel="stylesheet" href="/css/style.css">
-<link rel="stylesheet" href="/css/admin-dashboard.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<link rel="stylesheet" href="/css/redesign.css">
 </head>
 <body>
   <div class="app-shell" id="app-shell"></div>
@@ -32,8 +29,8 @@
         </div>
         <div class="grid-2">
           <div class="card">
-            <h3>Attendance Overview</h3>
-            <canvas id="overviewChart" height="90"></canvas>
+            <h3>Attendance Overview — This Week</h3>
+            <div id="rollcallChart"></div>
           </div>
           <div class="card">
             <h3>Recent Activities</h3>
@@ -78,18 +75,37 @@
       const labels = Object.keys(summary.weekly).sort();
       const present = labels.map(d => summary.weekly[d].present);
       const absent = labels.map(d => summary.weekly[d].absent);
+      const chartEl = document.getElementById('rollcallChart');
 
-      new Chart(document.getElementById('overviewChart'), {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [
-            { label: 'Present', data: present, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.1)', tension: 0.3, fill: true },
-            { label: 'Absent', data: absent, borderColor: '#dc2626', backgroundColor: 'rgba(220,38,38,0.08)', tension: 0.3, fill: true }
-          ]
-        },
-        options: { plugins: { legend: { position: 'bottom' } }, responsive: true }
-      });
+      if (!labels.length) {
+        chartEl.innerHTML = `<div class="rollcall-empty">📋 No attendance marked yet this week</div>`;
+      } else {
+        const maxVal = Math.max(1, ...labels.map((d, i) => Math.max(present[i], absent[i])));
+        const dayName = d => new Date(d).toLocaleDateString('en-IN', { weekday: 'short' });
+        const dayNum = d => new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+        chartEl.innerHTML = `
+          <div class="rollcall-chart">
+            ${labels.map((d, i) => `
+              <div class="rollcall-col">
+                <div class="rollcall-bars">
+                  <div class="rollcall-bar present" style="height:${Math.round((present[i] / maxVal) * 140) || 3}px;">
+                    ${present[i] ? `<span class="count">${present[i]}</span>` : ''}
+                  </div>
+                  <div class="rollcall-bar absent" style="height:${Math.round((absent[i] / maxVal) * 140) || 3}px;">
+                    ${absent[i] ? `<span class="count">${absent[i]}</span>` : ''}
+                  </div>
+                </div>
+                <div class="day-label">${dayName(d)}</div>
+                <div class="day-date">${dayNum(d)}</div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="rollcall-legend">
+            <span><i class="dot present"></i>Present</span>
+            <span><i class="dot absent"></i>Absent</span>
+          </div>
+        `;
+      }
     }
   </script>
 </body>

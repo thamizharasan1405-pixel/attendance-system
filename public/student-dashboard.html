@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Student Dashboard</title>
 <link rel="stylesheet" href="/css/style.css">
-<link rel="stylesheet" href="/css/redesign.css">
 </head>
 <body>
   <div class="app-shell" id="app-shell"></div>
@@ -75,6 +74,13 @@
           <div id="fee-report-form"></div>
         </div>
         <div class="card" style="margin-top:20px;">
+          <h3>🚨 Emergency Gate Pass</h3>
+          <p style="font-size:12.5px;color:#94a3b8;margin-bottom:14px;">Need to leave campus urgently? Send a request directly to a staff member — by voice or text.</p>
+          <button class="btn btn-primary" onclick="openGatePassForm()">Request Gate Pass</button>
+          <div id="gate-pass-form"></div>
+          <div id="gate-pass-history" style="margin-top:16px;"></div>
+        </div>
+        <div class="card" style="margin-top:20px;">
           <h3>Quick Links</h3>
           <div style="display:flex;gap:12px;flex-wrap:wrap;">
             <a href="/timetable.html" class="btn btn-outline">🗓️ Timetable</a>
@@ -86,6 +92,7 @@
         <div class="card" style="margin-top:20px;" id="admin-card"></div>
       `;
       loadAdminCard();
+      loadGatePassHistory();
     }
 
     function openFeeReportForm() {
@@ -97,24 +104,151 @@
             <div class="field"><label>Amount (₹)</label><input id="fr-amount" type="number" placeholder="e.g. 20000"></div>
             <div class="field"><label>Term</label><input id="fr-term" placeholder="e.g. Semester 4"></div>
           </div>
+          <div class="field"><label>Send To (Staff)</label><select id="fr-staff"><option value="">Loading staff...</option></select></div>
+          <div class="field"><label>Bill Photo</label><input type="file" id="fr-photo" accept="image/*" onchange="onFeeBillPhoto(event)"></div>
           <div class="field"><label>Note (optional)</label><textarea id="fr-note" rows="2" placeholder="Any extra detail for staff"></textarea></div>
           <button class="btn btn-primary" onclick="submitFeeReport()">Submit</button>
           <button class="btn btn-outline" onclick="document.getElementById('fee-report-form').innerHTML=''">Cancel</button>
         </div>
       `;
+      populateStaffDropdown('fr-staff');
+    }
+
+    let pendingBillPhoto = null;
+    function onFeeBillPhoto(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => { pendingBillPhoto = reader.result; };
+      reader.readAsDataURL(file);
+    }
+
+    async function populateStaffDropdown(selectId) {
+      const staff = await apiGet('/staff');
+      const relevant = staff.filter(s => s.role === 'HOD' || (s.assignments || []).some(a => a.department === session.data.department && String(a.year) === String(session.data.year)));
+      const list = relevant.length ? relevant : staff;
+      document.getElementById(selectId).innerHTML = list.map(s => `<option value="${s.staffId}">${titleCase(s.name)}${s.subject ? ' — ' + s.subject : ''}</option>`).join('');
     }
 
     async function submitFeeReport() {
-      await apiPost('/fees', {
+      const staffId = document.getElementById('fr-staff').value;
+      const body = {
         regNo: session.data.regNo,
         amount: Number(document.getElementById('fr-amount').value) || 0,
         term: document.getElementById('fr-term').value,
         note: document.getElementById('fr-note').value,
         status: 'Reported',
-        reportedBy: 'Student'
-      });
+        reportedBy: 'Student',
+        sentToStaffId: staffId
+      };
+      if (pendingBillPhoto) body.photo = pendingBillPhoto;
+      await apiPost('/fees', body);
       document.getElementById('fee-report-form').innerHTML = '';
+      pendingBillPhoto = null;
       load();
+    }
+
+    // ---------- Emergency Gate Pass ----------
+    let gpType = 'text';
+    let gpAudioData = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+
+    function openGatePassForm() {
+      document.getElementById('gate-pass-form').innerHTML = `
+        <div class="card" style="margin-top:14px;background:#fef1f3;">
+          <h3>Request Emergency Gate Pass</h3>
+          <div class="field"><label>Select Staff to Notify</label><select id="gp-staff"><option value="">Loading staff...</option></select></div>
+          <div class="field"><label>Reason</label><input id="gp-reason" placeholder="e.g. Family emergency, feeling unwell"></div>
+          <div class="gp-type-tabs">
+            <div class="gp-type-tab active" id="gp-tab-text" onclick="switchGpType('text')">✍️ Text Message</div>
+            <div class="gp-type-tab" id="gp-tab-voice" onclick="switchGpType('voice')">🎙️ Voice Message</div>
+          </div>
+          <div id="gp-text-area"><textarea id="gp-message" rows="3" placeholder="Explain your emergency briefly..."></textarea></div>
+          <div id="gp-voice-area" style="display:none;">
+            <button class="gp-record-btn" id="gp-record-btn" onclick="toggleRecording()">🎙️ Start Recording</button>
+            <div id="gp-audio-preview" style="margin-top:10px;"></div>
+          </div>
+          <button class="btn btn-primary" style="margin-top:14px;" onclick="submitGatePass()">Send Request</button>
+          <button class="btn btn-outline" onclick="document.getElementById('gate-pass-form').innerHTML=''">Cancel</button>
+        </div>
+      `;
+      populateStaffDropdown('gp-staff');
+    }
+
+    function switchGpType(type) {
+      gpType = type;
+      document.getElementById('gp-tab-text').classList.toggle('active', type === 'text');
+      document.getElementById('gp-tab-voice').classList.toggle('active', type === 'voice');
+      document.getElementById('gp-text-area').style.display = type === 'text' ? '' : 'none';
+      document.getElementById('gp-voice-area').style.display = type === 'voice' ? '' : 'none';
+    }
+
+    async function toggleRecording() {
+      const btn = document.getElementById('gp-record-btn');
+      if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          audioChunks = [];
+          mediaRecorder = new MediaRecorder(stream);
+          mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+          mediaRecorder.onstop = () => {
+            const blob = new Blob(audioChunks, { type: 'audio/webm' });
+            const reader = new FileReader();
+            reader.onload = () => {
+              gpAudioData = reader.result;
+              document.getElementById('gp-audio-preview').innerHTML = `<audio controls src="${gpAudioData}" style="width:100%;"></audio>`;
+            };
+            reader.readAsDataURL(blob);
+            stream.getTracks().forEach(t => t.stop());
+          };
+          mediaRecorder.start();
+          btn.textContent = '⏹️ Stop Recording';
+          btn.classList.add('recording');
+        } catch (e) {
+          alert('Microphone access denied or not available. Use Text Message instead.');
+        }
+      } else {
+        mediaRecorder.stop();
+        btn.textContent = '🎙️ Record Again';
+        btn.classList.remove('recording');
+      }
+    }
+
+    async function submitGatePass() {
+      const staffId = document.getElementById('gp-staff').value;
+      const staffSelect = document.getElementById('gp-staff');
+      const staffName = staffSelect.options[staffSelect.selectedIndex] ? staffSelect.options[staffSelect.selectedIndex].text : '';
+      if (!staffId) { alert('Please select a staff member.'); return; }
+      const body = {
+        regNo: session.data.regNo,
+        studentName: session.data.name,
+        staffId, staffName,
+        reason: document.getElementById('gp-reason').value,
+        type: gpType
+      };
+      if (gpType === 'text') {
+        body.message = document.getElementById('gp-message').value;
+      } else {
+        if (!gpAudioData) { alert('Please record a voice message first.'); return; }
+        body.audioData = gpAudioData;
+      }
+      await apiPost('/gate-passes', body);
+      document.getElementById('gate-pass-form').innerHTML = '';
+      gpAudioData = null;
+      loadGatePassHistory();
+    }
+
+    async function loadGatePassHistory() {
+      const list = await apiGet('/gate-passes?regNo=' + encodeURIComponent(session.data.regNo));
+      document.getElementById('gate-pass-history').innerHTML = list.length ? `
+        <table>
+          <thead><tr><th>Date</th><th>Staff</th><th>Type</th><th>Status</th></tr></thead>
+          <tbody>
+            ${list.map(g => `<tr><td>${g.date} ${g.time}</td><td>${g.staffName}</td><td>${g.type === 'voice' ? '🎙️ Voice' : '✍️ Text'}</td><td><span class="badge ${g.status.toLowerCase()}">${g.status}</span></td></tr>`).join('')}
+          </tbody>
+        </table>
+      ` : '';
     }
 
     async function loadAdminCard() {
@@ -127,7 +261,7 @@
             ${admin.photo ? `<img src="${admin.photo}" style="width:52px;height:52px;border-radius:16px;object-fit:cover;">` : `<div class="avatar-lg" style="width:52px;height:52px;font-size:18px;">${(admin.name || 'A').charAt(0)}</div>`}
             <div>
               <p style="font-size:13px;color:#475569;">${admin.bio || ''}</p>
-              ${admin.link ? `<a href="${admin.link}" target="_blank" style="font-size:12.5px;color:#6366f1;font-weight:600;">🔗 ${admin.link}</a>` : ''}
+              ${admin.link ? `<a href="${admin.link}" target="_blank" style="font-size:12.5px;color:#1F6E43;font-weight:600;">🔗 ${admin.link}</a>` : ''}
             </div>
           </div>
         `;

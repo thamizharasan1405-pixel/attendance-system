@@ -7,7 +7,8 @@
     "phone": "9876543210",
     "bio": "",
     "link": "",
-    "photo": ""
+    "photo": "",
+    "lastLogin": "2026-08-16T13:28:42.414Z"
   },
   "students": [
     {
@@ -491,7 +492,9 @@
     "leaveRequests": 7,
     "complaints": 2,
     "notices": 5,
-    "fees": 1
+    "fees": 1,
+    "gatePasses": 1
   },
-  "fees": []
+  "fees": [],
+  "gatePasses": []
 }

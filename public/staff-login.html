@@ -8,53 +8,54 @@
 <style>
   .auth-bg {
     min-height: 100vh; display: flex; align-items: center; justify-content: center;
-    background: linear-gradient(135deg, #062418 0%, #1c1917 55%, #78350f 130%);
+    background:
+      radial-gradient(1.5px 1.5px at center, rgba(255,255,255,0.08) 1.5px, transparent 1.5px) 0 0/26px 26px,
+      linear-gradient(150deg, #0E1712 0%, #172420 55%, #6B4A14 130%);
     padding: 24px; position: relative; overflow: hidden;
   }
   .auth-bg::before {
     content: ''; position: absolute; width: 480px; height: 480px; border-radius: 50%;
-    background: rgba(217,119,6,0.13); bottom: -180px; left: -160px;
+    background: rgba(176,122,34,0.16); bottom: -180px; left: -160px;
   }
   .glass-card {
     position: relative; z-index: 2;
-    background: rgba(255,255,255,0.97);
+    background: rgba(255,255,255,0.98);
     border-radius: 22px;
     padding: 42px 36px;
     max-width: 420px; width: 100%;
-    box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+    box-shadow: 0 30px 60px rgba(14,23,18,0.4);
   }
-  .back-link { display: inline-block; margin-bottom: 18px; font-size: 13px; color: #766f5f; }
+  .back-link { display: inline-block; margin-bottom: 18px; font-size: 13px; color: #6B7A70; }
   .glass-icon {
-    width: 64px; height: 64px; border-radius: 20px;
-    background: linear-gradient(135deg, #d97706, #f59e0b);
+    width: 64px; height: 64px; border-radius: 18px;
+    background: linear-gradient(150deg, #C98A2E, #B07A22);
     display: flex; align-items: center; justify-content: center;
     font-size: 26px; margin: 0 auto 16px; color: #fff;
-    box-shadow: 0 10px 22px rgba(217,119,6,0.35);
+    box-shadow: 0 10px 22px rgba(176,122,34,0.35);
   }
-  .glass-card h2 { text-align: center; font-size: 21px; color: #062418; margin-bottom: 4px; }
-  .glass-card .sub { text-align: center; color: #766f5f; font-size: 13px; margin-bottom: 26px; }
-  .role-tabs { display: flex; background: #f7f3ea; border-radius: 11px; padding: 4px; margin-bottom: 22px; }
-  .role-tab { flex: 1; text-align: center; padding: 9px; border-radius: 9px; font-size: 13.5px; font-weight: 700; color: #a39c8a; cursor: pointer; }
-  .role-tab.active { background: #fff; color: #b45309; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+  .glass-card h2 { font-family: 'Fraunces', Georgia, serif; text-align: center; font-size: 22px; font-weight: 700; color: #172420; margin-bottom: 4px; }
+  .glass-card .sub { text-align: center; color: #6B7A70; font-size: 13px; margin-bottom: 26px; }
+  .role-tabs { display: flex; background: #F0F3EA; border-radius: 11px; padding: 4px; margin-bottom: 22px; }
+  .role-tab { flex: 1; text-align: center; padding: 9px; border-radius: 9px; font-size: 13.5px; font-weight: 700; color: #93A28F; cursor: pointer; }
+  .role-tab.active { background: #fff; color: #B07A22; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
   .glass-field { margin-bottom: 16px; }
-  .glass-field label { display: block; font-size: 12.5px; font-weight: 700; color: #4b4636; margin-bottom: 6px; }
+  .glass-field label { display: block; font-size: 12.5px; font-weight: 700; color: #445048; margin-bottom: 6px; }
   .glass-field input, .glass-field select {
-    width: 100%; padding: 11px 14px; border-radius: 11px; border: 1.5px solid #eae4d6;
-    font-size: 14px; outline: none; transition: border 0.2s;
+    width: 100%; padding: 11px 14px; border-radius: 11px; border: 1.5px solid #DFE4D6;
+    font-size: 14px; outline: none; transition: border 0.2s; font-family: 'Inter', sans-serif;
   }
-  .glass-field input:focus { border-color: #d97706; }
+  .glass-field input:focus { border-color: #B07A22; }
   .pwd-wrap { position: relative; }
-  .pwd-wrap .eye { position: absolute; right: 4px; top: 4px; bottom: 4px; width: 38px; background: none; border: none; font-size: 16px; color: #a39c8a; }
+  .pwd-wrap .eye { position: absolute; right: 4px; top: 4px; bottom: 4px; width: 38px; background: none; border: none; font-size: 16px; color: #93A28F; }
   .glass-btn {
     width: 100%; padding: 12px; border-radius: 11px; border: none;
-    background: linear-gradient(135deg, #d97706, #b45309);
+    background: linear-gradient(150deg, #C98A2E, #8A6019);
     color: #fff; font-weight: 700; font-size: 14.5px; margin-top: 6px;
-    box-shadow: 0 10px 22px rgba(217,119,6,0.28);
+    box-shadow: 0 10px 22px rgba(176,122,34,0.28);
   }
-  .glass-hint { text-align: center; font-size: 11.5px; color: #a39c8a; margin-top: 18px; line-height: 1.6; }
-  .glass-error { text-align: center; font-size: 12.5px; color: #e11d48; margin-top: 10px; min-height: 16px; }
+  .glass-hint { text-align: center; font-size: 11.5px; color: #93A28F; margin-top: 18px; line-height: 1.6; }
+  .glass-error { text-align: center; font-size: 12.5px; color: #A8402A; margin-top: 10px; min-height: 16px; }
 </style>
-<link rel="stylesheet" href="/css/redesign.css">
 </head>
 <body>
   <div class="auth-bg">
@@ -82,7 +83,7 @@
       </div>
       <button class="glass-btn" onclick="doLogin()" id="login-btn">Login</button>
       <div class="glass-error" id="err"></div>
-      <p style="text-align:center;margin-top:14px;"><a href="/forgot-password.html" style="font-size:12.5px;color:#d97706;font-weight:700;">Forgot your password?</a></p>
+      <p style="text-align:center;margin-top:14px;"><a href="/forgot-password.html" style="font-size:12.5px;color:#B07A22;font-weight:700;">Forgot your password?</a></p>
       <p class="glass-hint" id="hint">Use the username &amp; password given to you by the Admin.<br>Demo Admin: admin / admin123</p>
     </div>
   </div>

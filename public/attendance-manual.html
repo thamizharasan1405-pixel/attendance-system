@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mark Attendance</title>
 <link rel="stylesheet" href="/css/style.css">
-<link rel="stylesheet" href="/css/attendance-manual.css">
-<link rel="stylesheet" href="/css/redesign.css">
 </head>
 <body>
   <div class="app-shell" id="app-shell"></div>
@@ -114,9 +112,9 @@
 
     function statusBtns(current, regNo) {
       const opts = [
-        { v: 'Present', label: '✅ Present', color: '#16a34a' },
-        { v: 'Absent', label: '❌ Absent', color: '#dc2626' },
-        { v: 'Late', label: '⏳ Waiting/Late', color: '#d97706' }
+        { v: 'Present', label: '✅ Present', color: '#1F6E43' },
+        { v: 'Absent', label: '❌ Absent', color: '#A8402A' },
+        { v: 'Late', label: '⏳ Waiting/Late', color: '#B07A22' }
       ];
       return opts.map(o => `
         <button type="button" class="status-btn ${current === o.v ? 'active' : ''}" style="--sc:${o.color}" onclick="setStatus('${regNo}','${o.v}')">${o.label}</button>

@@ -1,9 +1,98 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Cloud Attendance — Sign in</title>
-<link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/login-portal.css"><link rel="stylesheet" href="/css/redesign.css"><link rel="stylesheet" href="/css/redesign-portal.css"></head>
-<body><div class="portal-bg"><div class="portal-wrap">
-<h1>Welcome to Cloud Attendance</h1><p class="tagline">Choose your workspace to continue</p>
-<div class="portal-cards">
-<a href="/student-login.html" class="portal-card student"><div class="portal-icon">🎓</div><h2>Student Portal</h2><p>View attendance, timetable, notices and manage your leave requests.</p><span class="go-btn">Continue as Student →</span></a>
-<a href="/staff-login.html" class="portal-card staff"><div class="portal-icon">▦</div><h2>Staff & Admin Portal</h2><p>Mark attendance, manage students, timetable, fees and reports.</p><span class="go-btn">Continue as Staff →</span></a>
-</div><p class="portal-footer">Cloud Based Smart Attendance Management System · 2026</p>
-</div></div></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloud Attendance System - Login Portal</title>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  .portal-bg {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    background:
+      radial-gradient(1.5px 1.5px at center, rgba(255,255,255,0.08) 1.5px, transparent 1.5px) 0 0/26px 26px,
+      radial-gradient(circle at 20% 15%, #1F6E43 0%, #172420 55%, #0E1712 100%);
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .portal-bg::before, .portal-bg::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(70px);
+    opacity: 0.28;
+  }
+  .portal-bg::before {
+    width: 440px; height: 440px;
+    background: #2E8B57;
+    top: -130px; left: -110px;
+  }
+  .portal-bg::after {
+    width: 400px; height: 400px;
+    background: #B07A22;
+    bottom: -110px; right: -90px;
+  }
+  .portal-wrap { position: relative; z-index: 2; text-align: center; max-width: 900px; width: 100%; }
+  .portal-wrap h1 { font-family: 'Fraunces', Georgia, serif; color: #fff; font-size: 32px; margin-bottom: 8px; letter-spacing: -0.01em; font-weight: 700; }
+  .portal-wrap .tagline { color: #B7C7BB; font-size: 14.5px; margin-bottom: 40px; }
+  .portal-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 640px) { .portal-cards { grid-template-columns: 1fr; } }
+  .portal-card {
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 22px;
+    padding: 42px 28px;
+    color: #fff;
+    text-align: center;
+    transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+    cursor: pointer;
+    display: block;
+  }
+  .portal-card:hover {
+    transform: translateY(-6px);
+    background: rgba(255,255,255,0.1);
+    box-shadow: 0 22px 44px rgba(0,0,0,0.35);
+  }
+  .portal-icon {
+    width: 76px; height: 76px; border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; margin: 0 auto 18px;
+  }
+  .portal-card.student .portal-icon { background: linear-gradient(150deg, #2E8B57, #1F6E43); }
+  .portal-card.staff .portal-icon { background: linear-gradient(150deg, #C98A2E, #B07A22); }
+  .portal-card h2 { font-family: 'Fraunces', Georgia, serif; font-size: 20px; margin-bottom: 8px; font-weight: 700; }
+  .portal-card p { font-size: 13px; color: #C9D6CC; line-height: 1.5; margin-bottom: 18px; }
+  .portal-card .go-btn {
+    display: inline-block; padding: 10px 26px; border-radius: 10px;
+    font-size: 13.5px; font-weight: 700; color: #172420;
+    background: #fff;
+  }
+  .portal-footer { margin-top: 34px; color: #7E9587; font-size: 12px; }
+</style>
+</head>
+<body>
+  <div class="portal-bg">
+    <div class="portal-wrap">
+      <h1>✓ Roll Call — Cloud Attendance</h1>
+      <p class="tagline">Choose your portal to continue</p>
+      <div class="portal-cards">
+        <a href="/student-login.html" class="portal-card student">
+          <div class="portal-icon">🧑‍🎓</div>
+          <h2>Student Portal</h2>
+          <p>View attendance, timetable, notices, and manage leave requests.</p>
+          <span class="go-btn">Continue →</span>
+        </a>
+        <a href="/staff-login.html" class="portal-card staff">
+          <div class="portal-icon">🏫</div>
+          <h2>Staff &amp; Admin Portal</h2>
+          <p>Mark attendance, manage students, timetable, fees, and reports.</p>
+          <span class="go-btn">Continue →</span>
+        </a>
+      </div>
+      <p class="portal-footer">Cloud Based Smart Attendance Management System</p>
+    </div>
+  </div>
+</body>
+</html>
